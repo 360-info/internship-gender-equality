@@ -6,26 +6,91 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.align = "center")
+
+options(scipen = 999)
 ```
 
 ```{r}
 library(tidyverse)
 library(dplyr)
+library(glue)
 library(ggplot2)
 library(here)
 library(readxl)
+library(stringr)
+library(scales)
+library(plotly)
 ```
 
 
 ```{r}
 gender1 <- read_excel(here("data/API_17_DS2_en_excel_v2_3367037.xls"), sheet = 1, range = "A4:BM41500")
+
+pop <- read.csv(here("data/population_data.csv"))
 ```
 
 
-# Female population VS male population
+# Population
+## Female population VS male population
 
 ```{r}
+# cleaning 
+names(pop) <- tolower(names(pop))
 
+pop_tidy <- pop %>% 
+  select("series.name",
+         "country.name",
+         "country.code",
+         5:14) %>% 
+  pivot_longer(cols = 4:13,
+               names_to = "year",
+               values_to = "population") %>% 
+  rename(sex = "series.name") %>% 
+  mutate(sex = str_remove(sex, "Population,[:blank:]"),
+         year = str_remove(year, "x[0-9]+..yr"),
+         year = str_remove(year, "\\.$"),
+         year = str_trim(year, side = "right"),
+         population = as.numeric(population))
+  
+
+```
+
+```{r}
+# plot it
+
+pop_tidy$tooltip <- 
+  glue_data(pop_tidy,
+            "Sex: {sex}",
+            "\nYear: {year}",
+            "\nPopulation: {comma(population, accuracy = 1)}")
+
+
+ggplotly(
+  
+  pop_tidy %>% 
+  filter(country.name == "World") %>% 
+  ggplot(aes(x = year,
+             y = population,
+             group = sex,
+             color = sex)) +
+    geom_line(aes(text = tooltip)) +
+    scale_y_continuous(labels = comma) +
+    scale_color_brewer(palette = "Set2") +
+    theme_light() +
+    # theme(panel.grid.major.x = element_blank()) +
+    labs(x = NULL,
+         title = "Population by sex and year"),
+  tooltip = "text"
+    
+    
+  
+) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+  
 ```
 
