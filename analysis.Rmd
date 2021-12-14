@@ -25,19 +25,21 @@ library(stringr)
 library(scales)
 library(forcats)
 library(plotly)
+library(tmap)
+library(sf)
+library(leaflet)
+library(shiny)
 ```
 
 
 ```{r}
-gender1 <- read_excel(here("data/API_17_DS2_en_excel_v2_3367037.xls"), sheet = 1, range = "A4:BM41500")
-
 # data from world bank
 pop <- read.csv(here("data/population_data.csv"))
 ```
 
 
 # Population
-## Female population VS male population
+## Female population VS male population over the years
 
 ```{r}
 # cleaning 
@@ -115,13 +117,12 @@ pop_age_long <-
                values_to = "population")
 
 
-# make male population go to the left of x axis, this negative sign
+# make male population go to the left of x axis, thus negative sign
 pop_age_long$population <- ifelse(pop_age_long$sex == "Male", -1*pop_age_long$population, pop_age_long$population)
 ```
 
 ```{r}
 # plot it
-
 pop_age_long_20 <- pop_age_long %>% 
   filter(sex %in% c("Female", "Male"),
          time == "2020")
@@ -130,6 +131,8 @@ pop_age_long_20$tooltip <-
   glue_data(pop_age_long_20,
             "Sex: {sex}",
             "\nPopulation (thousands): {ifelse(pop_age_long_20$sex == 'Male', comma(-(population), accuracy = 1), comma(population, accuracy = 1))}")
+
+
 
 ggplotly(
   
@@ -164,30 +167,246 @@ tooltip = "text"
                             y = -0.1, 
                             text = "Source: United Nations",
                             showarrow = FALSE, 
-                            xref = 'paper', 
-                            yref = 'paper',
-                            xanchor = 'right', 
-                            yanchor =' auto', 
+                            xref = "paper", 
+                            yref = "paper",
+                            xanchor = "right", 
+                            yanchor = "auto", 
                             xshift = 0, 
                             yshift = 0,
-                            font = list(size=8)
+                            font = list(size = 8)
 )) %>% 
   config(displayModeBar = FALSE,
          displaylogo = FALSE) 
 
 ```
 
+# Work
+## Labour force
+
+```{r}
+labor <- read_excel(here("data/labor_force_world_bank.xlsx"))
+
+```
+
+```{r}
+# cleaning 
+names(labor) <- tolower(names(labor))
+
+names(labor) <- gsub(" ", "_", names(labor))
+
+labor_tidy <- labor %>% 
+  select(-c(series_code, `2020_[yr2020]`)) %>% 
+  pivot_longer(cols = 4:33,
+               names_to = "year",
+               values_to = "percentage") %>% 
+  mutate(percentage = as.numeric(percentage),
+         year = str_remove(year, "_\\[yr[0-9]+\\]")) 
+```
+
+```{r}
+# plot it
+labor_tidy_world <- labor_tidy %>% 
+  filter(country_name == "World",
+         series_name == "Labor force, female (% of total labor force)")
 
 
-# Labour force
+labor_tidy_world$tooltip <- 
+  glue_data(labor_tidy_world,
+            "Year: {year}",
+            "\nPercentage: {paste(round(percentage, 2), '%')}")
+
+
+ggplotly(
+  
+labor_tidy_world %>% 
+  ggplot(aes(x = year,
+             y = percentage,
+             group = 1)) +
+  geom_line(aes(text = tooltip),
+            color = "red") +
+  geom_point(color = "red",
+             size = "0.7") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, size = 6)) +
+  labs(x = NULL,
+       y = "Percentage %",
+       title = "Female labor force rate by year"),
+tooltip = "text"
+
+) %>% 
+    layout(annotations = list(x = 0.1, 
+                              y = -0.12, 
+                              text = "Source: United Nations",
+                              showarrow = FALSE, 
+                              xref = "paper", 
+                              yref = "paper",
+                              xanchor = "right", 
+                              yanchor = "auto", 
+                              xshift = 0, 
+                              yshift = 0,
+                              font = list(size = 8)
+)) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+```
+
+```{r}
+# get world map and coordinates for each countries
+data("World")
+
+coords <- World %>% 
+  select("iso_a3",
+         "name",
+         "geometry") %>% 
+  rename(country_code = "iso_a3")
+
+labor_tidy_coords <- labor_tidy %>% 
+  filter(year == "2019",
+         series_name == "Labor force, female (% of total labor force)") %>% 
+  right_join(coords,
+            by = "country_code") %>% 
+  mutate(year = as.numeric(year),
+         percentage = round(percentage, 2)) %>% 
+  slice(1:169)
+
+```
+
+```{r}
+# leaflet map
+palette <- colorBin(palette = "viridis",
+                    domain = labor_tidy_coords$percentage,
+                    bins = 5,
+                    na.color ="transparent",
+                    reverse = TRUE)
+
+content <- paste("Country:", labor_tidy_coords$country_name, 
+                 "<br> Year:", labor_tidy_coords$year, 
+                 "<br> Percentage:", labor_tidy_coords$percentage)
+
+text <- paste("Country: ", labor_tidy_coords$country_name,
+              "<br>",
+              "Female labor force: ", paste(labor_tidy_coords$percentage, "%", sep = "")) %>%
+  lapply(htmltools::HTML)
+
+
+
+labor_tidy_coords %>% 
+  filter(year == "2019") %>% 
+  st_as_sf() %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(
+    fillColor = ~ palette(percentage),
+    weight = 0.5,
+    opacity = 1,
+    color = "white",
+    smoothFactor = 0.2,
+    fillOpacity = 1,
+    label = text,
+    highlight = highlightOptions(
+      color = "#666",
+      weight = 2,
+      bringToFront = TRUE,
+      opacity = 1)
+    ) %>%
+    addLegend(
+      pal = palette,
+      values = labor_tidy_coords$percentage,
+      opacity = 0.9,
+      title = paste("Female labor force 2019",
+                    "<br>",
+                    "%"),
+      position = "bottomleft"
+      )
+
+```
+
+```{r}
+# leaflet shiny app
+# palette <- colorNumeric(palette = "viridis",
+#                         domain = labor_tidy_coords$percentage,
+#                         na.color="transparent",
+#                         reverse = TRUE)
+# 
+# content <- paste("Country:", labor_tidy_coords$country_name, 
+#                  "<br> Year:", labor_tidy_coords$year, 
+#                  "<br> Percentage:", labor_tidy_coords$percentage)
+# 
+# ui <- fluidPage(
+#   sliderInput("range", 
+#               "Year", 
+#               min = min(labor_tidy_coords$year), 
+#               max = max(labor_tidy_coords$year),
+#               value = min(labor_tidy_coords$year),
+#               step = 1),
+#   leafletOutput("labormap")
+# )
+# 
+# 
+# server <- function(input, output, session) {
+# 
+# output$labormap <- renderLeaflet({
+# labor_tidy_coords %>% 
+#     st_as_sf() %>% 
+#     filter(year == input$range) %>%
+#     leaflet() %>%
+#     addTiles() %>%
+#     addPolygons(
+#     fillColor = ~ palette(labor_tidy_coords$percentage),
+#     weight = 0.5,
+#     opacity = 1,
+#     color = "white",
+#     smoothFactor = 0.2,
+#     fillOpacity = 1,
+#     label = text,
+#     highlight = highlightOptions(
+#       color = "#666",
+#       weight = 2,
+#       bringToFront = TRUE,
+#       opacity = 1)
+#     ) %>%
+#     addLegend(
+#       pal = palette,
+#       values = labor_tidy_coords$percentage,
+#       opacity = 0.9,
+#       title = paste("Active cases", "<br>", "per 100,000 population"),
+#       position = "bottomleft"
+#       )
+#     
+# })
+# 
+# }
+# 
+# shinyApp(ui, server)
+  
+```
 
 
 ```{r}
-
-
-
-
-
-
+jy5 <- leaflet(active_vic,
+        height = 400,
+        width = 550) %>%
+  addTiles() %>%
+  addPolygons(
+    fillColor = ~ palette(rate),
+    weight = 0.5,
+    opacity = 1,
+    color = "white",
+    smoothFactor = 0.2,
+    fillOpacity = 1,
+    label = text,
+    highlight = highlightOptions(
+      color = "#666",
+      weight = 2,
+      bringToFront = TRUE,
+      opacity = 1)
+    ) %>%
+    addLegend(
+      pal = palette,
+      values = active_vic$rate,
+      opacity = 0.9,
+      title = paste("Active cases", "<br>", "per 100,000 population"),
+      position = "bottomleft"
+      )
 ```
 
