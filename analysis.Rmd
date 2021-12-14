@@ -23,6 +23,7 @@ library(here)
 library(readxl)
 library(stringr)
 library(scales)
+library(forcats)
 library(plotly)
 ```
 
@@ -30,6 +31,7 @@ library(plotly)
 ```{r}
 gender1 <- read_excel(here("data/API_17_DS2_en_excel_v2_3367037.xls"), sheet = 1, range = "A4:BM41500")
 
+# data from world bank
 pop <- read.csv(here("data/population_data.csv"))
 ```
 
@@ -79,11 +81,12 @@ ggplotly(
              color = sex)) +
     geom_line(aes(text = tooltip)) +
     scale_y_continuous(labels = comma) +
-    scale_color_brewer(palette = "Set2") +
+    scale_color_brewer(palette = "Set1") +
     theme_light() +
     # theme(panel.grid.major.x = element_blank()) +
     labs(x = NULL,
-         title = "Population by sex and year"),
+         title = "Population by sex and year",
+         caption = "Source: World Bank"),
   tooltip = "text"
     
     
@@ -92,5 +95,99 @@ ggplotly(
   config(displayModeBar = FALSE,
          displaylogo = FALSE) 
   
+```
+
+## Population by sex and age
+
+```{r}
+# data from united nations, spreadsheet contains global and regional data by sex and age https://population.un.org/wpp/DataQuery/
+pop_age <- read_excel(here("data/PopulationAgeSex-20211213064029.xlsx"), sheet = 2, range = "B2:Z17")
+```
+
+```{r}
+# cleaning
+names(pop_age) <- tolower(names(pop_age))
+
+pop_age_long <- 
+  pop_age %>% 
+  pivot_longer(cols = 5:25,
+               names_to = "age",
+               values_to = "population")
+
+
+# make male population go to the left of x axis, this negative sign
+pop_age_long$population <- ifelse(pop_age_long$sex == "Male", -1*pop_age_long$population, pop_age_long$population)
+```
+
+```{r}
+# plot it
+
+pop_age_long_20 <- pop_age_long %>% 
+  filter(sex %in% c("Female", "Male"),
+         time == "2020")
+
+pop_age_long_20$tooltip <- 
+  glue_data(pop_age_long_20,
+            "Sex: {sex}",
+            "\nPopulation (thousands): {ifelse(pop_age_long_20$sex == 'Male', comma(-(population), accuracy = 1), comma(population, accuracy = 1))}")
+
+ggplotly(
+  
+pop_age_long_20 %>% 
+  ggplot(aes(x = fct_inorder(age), # maintain order of age
+             y = population,
+             fill = sex)) +
+  geom_bar(data = subset(pop_age_long_20, sex == "Female"), 
+           aes(text = tooltip),
+           stat = "identity") +
+  geom_bar(data = subset(pop_age_long_20, sex == "Male"),
+           aes(text = tooltip),
+           stat = "identity") +
+  scale_y_continuous(breaks = seq(-400000, 400000, 100000),
+                     labels = paste0(as.character(c(seq(400, 0, -100), seq(100, 400, 100))), "m")) +
+  coord_flip() +
+  scale_fill_brewer(palette = "Set1") +
+  theme_light() +
+  labs(x = "Age",
+       y = "Population",
+       fill = "Sex"),
+tooltip = "text"
+
+) %>% 
+  layout(title = list(text = paste0("Population by sex and age",
+                                    "<br>",
+                                    "<sup>",
+                                    "Year: 2020",
+                                    "</sup>"),
+                      font = list(size = 12)),
+         annotations = list(x = 0.1, 
+                            y = -0.1, 
+                            text = "Source: United Nations",
+                            showarrow = FALSE, 
+                            xref = 'paper', 
+                            yref = 'paper',
+                            xanchor = 'right', 
+                            yanchor =' auto', 
+                            xshift = 0, 
+                            yshift = 0,
+                            font = list(size=8)
+)) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+
+```
+
+
+
+# Labour force
+
+
+```{r}
+
+
+
+
+
+
 ```
 
