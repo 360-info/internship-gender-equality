@@ -213,7 +213,7 @@ labor_tidy_world <- labor_tidy %>%
 labor_tidy_world$tooltip <- 
   glue_data(labor_tidy_world,
             "Year: {year}",
-            "\nPercentage: {paste(round(percentage, 2), '%')}")
+            "\nPercentage: {paste(round(percentage, 2), '%', sep = '')}")
 
 
 ggplotly(
@@ -224,13 +224,15 @@ labor_tidy_world %>%
              group = 1)) +
   geom_line(aes(text = tooltip),
             color = "red") +
-  geom_point(color = "red",
-             size = "0.7") +
+  geom_point(aes(text = tooltip),
+             color = "red",
+             size = 0.7) +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 90, size = 6)) +
+  theme(axis.text.x = element_text(angle = 90, size = 6),
+        panel.grid.major.x = element_blank()) +
   labs(x = NULL,
        y = "Percentage %",
-       title = "Female labor force rate by year"),
+       title = "Female labor force percentage by year"),
 tooltip = "text"
 
 ) %>% 
@@ -261,39 +263,43 @@ coords <- World %>%
   rename(country_code = "iso_a3")
 
 labor_tidy_coords <- labor_tidy %>% 
-  filter(year == "2019",
-         series_name == "Labor force, female (% of total labor force)") %>% 
+  filter(series_name == "Labor force, female (% of total labor force)") %>% 
   right_join(coords,
-            by = "country_code") %>% 
+             by = "country_code") %>% 
   mutate(year = as.numeric(year),
-         percentage = round(percentage, 2)) %>% 
-  slice(1:169)
+         percentage = round(percentage, 2)) 
 
 ```
 
 ```{r}
 # leaflet map
+
+labor_leaflet <- labor_tidy_coords %>% 
+  filter(year == "2019") %>% 
+  slice(1:169) %>% 
+  st_as_sf() 
+
+
 palette <- colorBin(palette = "viridis",
-                    domain = labor_tidy_coords$percentage,
+                    domain = labor_leaflet$percentage,
                     bins = 5,
                     na.color ="transparent",
                     reverse = TRUE)
 
-content <- paste("Country:", labor_tidy_coords$country_name, 
-                 "<br> Year:", labor_tidy_coords$year, 
-                 "<br> Percentage:", labor_tidy_coords$percentage)
+content <- paste("Country:", labor_leaflet$country_name, 
+                 "<br> Year:", labor_leaflet$year, 
+                 "<br> Percentage:", labor_leaflet$percentage)
 
-text <- paste("Country: ", labor_tidy_coords$country_name,
+text <- paste("Country: ", labor_leaflet$country_name,
               "<br>",
-              "Female labor force: ", paste(labor_tidy_coords$percentage, "%", sep = "")) %>%
+              "Female labor force: ", paste(labor_leaflet$percentage, "%", sep = "")) %>%
   lapply(htmltools::HTML)
 
 
 
-labor_tidy_coords %>% 
-  filter(year == "2019") %>% 
-  st_as_sf() %>% 
+labor_leaflet %>% 
   leaflet() %>%
+  setView(lat = 0, lng = 0, zoom = 1) %>%
   addTiles() %>%
   addPolygons(
     fillColor = ~ palette(percentage),
@@ -311,84 +317,45 @@ labor_tidy_coords %>%
     ) %>%
     addLegend(
       pal = palette,
-      values = labor_tidy_coords$percentage,
-      opacity = 0.9,
+      values = labor_leaflet$percentage,
+      opacity = 0.7,
       title = paste("Female labor force 2019",
                     "<br>",
                     "%"),
       position = "bottomleft"
-      )
+      ) 
 
 ```
 
 ```{r}
 # leaflet shiny app
-# palette <- colorNumeric(palette = "viridis",
-#                         domain = labor_tidy_coords$percentage,
-#                         na.color="transparent",
-#                         reverse = TRUE)
-# 
-# content <- paste("Country:", labor_tidy_coords$country_name, 
-#                  "<br> Year:", labor_tidy_coords$year, 
-#                  "<br> Percentage:", labor_tidy_coords$percentage)
-# 
-# ui <- fluidPage(
-#   sliderInput("range", 
-#               "Year", 
-#               min = min(labor_tidy_coords$year), 
-#               max = max(labor_tidy_coords$year),
-#               value = min(labor_tidy_coords$year),
-#               step = 1),
-#   leafletOutput("labormap")
-# )
-# 
-# 
-# server <- function(input, output, session) {
-# 
-# output$labormap <- renderLeaflet({
-# labor_tidy_coords %>% 
-#     st_as_sf() %>% 
-#     filter(year == input$range) %>%
-#     leaflet() %>%
-#     addTiles() %>%
-#     addPolygons(
-#     fillColor = ~ palette(labor_tidy_coords$percentage),
-#     weight = 0.5,
-#     opacity = 1,
-#     color = "white",
-#     smoothFactor = 0.2,
-#     fillOpacity = 1,
-#     label = text,
-#     highlight = highlightOptions(
-#       color = "#666",
-#       weight = 2,
-#       bringToFront = TRUE,
-#       opacity = 1)
-#     ) %>%
-#     addLegend(
-#       pal = palette,
-#       values = labor_tidy_coords$percentage,
-#       opacity = 0.9,
-#       title = paste("Active cases", "<br>", "per 100,000 population"),
-#       position = "bottomleft"
-#       )
-#     
-# })
-# 
-# }
-# 
-# shinyApp(ui, server)
-  
-```
+
+labor_shiny <- labor_tidy_coords %>% 
+  slice(1:5070) %>% 
+  st_as_sf() 
 
 
-```{r}
-jy5 <- leaflet(active_vic,
-        height = 400,
-        width = 550) %>%
+ui <- fluidPage(
+  sliderInput("range",
+              "year",
+              min = min(labor_shiny$year),
+              max = max(labor_shiny$year),
+              value = min(labor_shiny$year),
+              step = 1),
+  leafletOutput("labormap")
+)
+
+
+server <- function(input, output, session) {
+
+output$labormap <- renderLeaflet({
+labor_shiny %>% 
+  filter(year == input$range) %>%
+  leaflet() %>%
+  setView(lat = 0, lng = 0, zoom = 1) %>%
   addTiles() %>%
   addPolygons(
-    fillColor = ~ palette(rate),
+    fillColor = ~ palette(percentage),
     weight = 0.5,
     opacity = 1,
     color = "white",
@@ -403,10 +370,26 @@ jy5 <- leaflet(active_vic,
     ) %>%
     addLegend(
       pal = palette,
-      values = active_vic$rate,
-      opacity = 0.9,
-      title = paste("Active cases", "<br>", "per 100,000 population"),
+      values = labor_shiny$percentage,
+      opacity = 0.7,
+      title = paste("Female labor force 2019",
+                    "<br>",
+                    "%"),
       position = "bottomleft"
-      )
+      ) 
+})
+
+}
+
+shinyApp(ui, server)
+
 ```
+
+## Employment
+
+```{r}
+
+```
+
+
 
