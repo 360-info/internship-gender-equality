@@ -185,8 +185,8 @@ tooltip = "text"
 
 ```{r}
 labor <- read_excel(here("data/labor_force_world_bank.xlsx"))
-
 ```
+
 
 ```{r}
 # cleaning 
@@ -388,8 +388,46 @@ shinyApp(ui, server)
 ## Employment
 
 ```{r}
+# world development indicators from world bank https://datacatalog.worldbank.org/search/dataset/0037712
+wdi <- read.csv(here("data/WDIData.csv"))
+```
 
+```{r}
+employment <- wdi %>% 
+  filter(Indicator.Name %in% c("Employment to population ratio, 15+, female (%) (modeled ILO estimate)",
+                               "Employment to population ratio, 15+, male (%) (modeled ILO estimate)",
+                               "Employment to population ratio, ages 15-24, female (%) (modeled ILO estimate)",
+                               "Employment to population ratio, ages 15-24, female (%) (national estimate)"))
 ```
 
 
+
+
+# Women in Law
+
+## Proportion of seats held by women in national parliaments
+
+```{r}
+wdi <- read.csv(here("data/WDIData.csv"))
+```
+
+```{r}
+seats <- wdi %>% 
+  filter(Indicator.Name == "Proportion of seats held by women in national parliaments (%)",
+         Country.Name %in% c("Africa",
+                             "East Asia & Pacific",
+                             "Europe & Central Asia",
+                             "Latin America & the Caribbean",
+                             "Middle East & North Africa",
+                             "South Asia")) %>% 
+  select(-Indicator.Code) %>% 
+  pivot_longer(cols = 4:65,
+               names_to = "year",
+               values_to = "percentage") %>% 
+  mutate(year = str_remove(year, "X")) %>% 
+  filter(!is.na(percentage))
+
+
+
+```
 
