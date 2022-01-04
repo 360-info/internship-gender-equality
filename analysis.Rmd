@@ -8,7 +8,7 @@ link-citations: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
+knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE,
                       message = FALSE,
                       fig.align = "center")
@@ -31,6 +31,7 @@ library(tmap)
 library(sf)
 library(leaflet)
 library(shiny)
+library(ggthemes)
 ```
 
 
@@ -408,22 +409,23 @@ employment <- wdi %>%
 # Women in Law
 
 ```{r}
-wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2)
+wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) # https://wbl.worldbank.org/en/wbl-data
 indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
 ```
 
 
-## WBL index
+## WBL index over time
 
-The WBL (The Women Business and the Law Index) index measures the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as parenthood, equality of pay. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily,]
+The WBL (The Women Business and the Law Index) index measures the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as parenthood, equality of pay. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]
 
 ```{r}
+# faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   select(economy, wbcodev2, reportyr, `WBL INDEX`)
 
 
 
-# get geometry for each country
+## get geometry for each country
 data("World")
 
 coords <- World %>% 
@@ -433,7 +435,7 @@ coords <- World %>%
   rename(wbcodev2 = "iso_a3")
 
 
-# join spatial df with wbl_df
+## join spatial df with wbl_df
 wbl_index_map <- wbl_index_map %>% 
   left_join(coords,
             by = "wbcodev2") %>% 
@@ -441,38 +443,46 @@ wbl_index_map <- wbl_index_map %>%
   st_as_sf() 
 
 
-# create choropleth map
-# ggplotly(
+## add tooltip
+wbl_index_map$tooltip <- 
+  glue_data(wbl_index_map,
+            "Country: {economy}",
+            "\nPercentage: {`WBL INDEX`}")
+
+
+## create choropleth map
+ggplotly(
   
 
 wbl_index_map %>%
-  filter(reportyr == "2021") %>% 
+  filter(reportyr %in% c(2012:2021)) %>% 
   ggplot() +
-  # geom_sf(aes(geometry = geometry),
-  #         colour = "white",
-  #         size = 0.3) +
   geom_sf(aes(geometry = geometry,
               fill = `WBL INDEX`,
-              frame = reportyr)) +
+              text = tooltip),
+          color = "white",
+          size = 0.1) +
+  facet_wrap(vars(reportyr),
+             ncol = 3) +
   scale_fill_viridis_c(direction = -1) +
-  theme_minimal() +
-  theme(axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        panel.grid = element_blank(),
-        plot.caption.position = "panel",
+  theme_map() +
+  theme(strip.text = element_text(colour = "black"),
+        strip.background = element_rect(fill ="white", colour = "white"),
         plot.caption = element_text(hjust = 0)) +
-  labs(fill = "WBL index") 
+  labs(fill = "WBL index"),
+tooltip = "text"
 
-# ) 
-#   animation_slider(
-#     currentvalue = list(prefix = "Year ", font = list(color="red"))
-#   )
+) %>% 
+  layout(legend = list(orientation = "h")) %>% ## not working?????
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+
 
 ```
 
-```{r}
+
+```{r eval = FALSE}
+# shiny app for WBL index
 palette <- colorBin(palette = "viridis",
                     domain = wbl_index_map$`WBL INDEX`,
                     bins = 5,
@@ -485,7 +495,6 @@ text <- paste("Country:", wbl_index_map$economy,
   lapply(htmltools::HTML)
 
 
-# shiny app 
 
 ui <- fluidPage(
   sliderInput("range",
@@ -535,14 +544,104 @@ shinyApp(ui, server)
 
 ```
 
+## Mobility 
+
+### Mobility score by country and year
+
+```{r}
+mob_df <- wbl_df %>% 
+  select("economy",
+         "Region",
+         "Income group",
+         "reportyr",
+         "MOBILITY",
+         "Can a woman apply for a passport in the same way as a man?",
+         "Can a woman travel outside the country in the same way as a man?",
+         "Can a woman travel outside her home in the same way as a man?",
+         "Can a woman choose where to live in the same way as a man?") %>% 
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  filter(reportyr %in% c(2000:2021)) 
+
+```
+
+```{r}
+# calculate mean mobility index by income group and year
+mob_avg <- mob_df %>% 
+  group_by(Region,
+           reportyr) %>% 
+  summarise_at(vars(MOBILITY), list(mobility = mean)) 
+
+
+
+
+mob_avg$tooltip <- 
+  glue_data(mob_avg,
+            "Region: {Region}",
+            "\nYear: {reportyr}",
+            "\nMobility score: {mobility}")
+
+
+
+ggplotly(
+  
+mob_avg %>% 
+  ggplot(aes(x = reportyr,
+             y = mobility,
+             group = Region,
+             color = Region)) +
+  geom_line(aes(text = tooltip)) +
+  geom_point(aes(text = tooltip),
+             size = 0.7) +
+  scale_color_brewer(palette = "Paired") +
+  scale_x_continuous(breaks = seq(2000, 2021, by = 1)) +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, size = 8),
+        panel.grid.major.x = element_blank()) +
+  labs(x = NULL,
+       y = "Average mobility score",
+       title = "Mobility score by regions and year",
+       color = "Regions"),
+  tooltip = "text"
+  
+) %>% 
+  layout(annotations = list(x = 0.1, 
+                            y = -0.15, 
+                            text = "Source: World Bank",
+                            showarrow = FALSE, 
+                            xref = "paper", 
+                            yref = "paper",
+                            xanchor = "right", 
+                            yanchor = "auto", 
+                            xshift = 0, 
+                            yshift = 0,
+                            font = list(size = 8)
+)) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+  
+```
+
+### Mobility score breakdown
+
+```{r}
+mob_df %>% 
+  filter(answer == "No") %>% 
+  group_by(Region, 
+           reportyr,
+           question) %>% 
+  summarise(count = n())
+```
+
+
+
+
+
 
 
 
 ## Proportion of seats held by women in national parliaments
-
-```{r}
-
-```
 
 ```{r}
 # cleaning
