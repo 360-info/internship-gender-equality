@@ -544,70 +544,85 @@ shinyApp(ui, server)
 
 ```
 
-## Mobility 
-
-### Mobility score by country and year
+## Avergae score of WBL indicators by region and year
 
 ```{r}
-mob_df <- wbl_df %>% 
+wbl_indicators <- wbl_df %>% 
   select("economy",
          "Region",
          "Income group",
          "reportyr",
          "MOBILITY",
-         "Can a woman apply for a passport in the same way as a man?",
-         "Can a woman travel outside the country in the same way as a man?",
-         "Can a woman travel outside her home in the same way as a man?",
-         "Can a woman choose where to live in the same way as a man?") %>% 
-  pivot_longer(cols = 6:9,
-               names_to = "question",
-               values_to = "answer") 
-
+         "WORKPLACE",
+         "PAY",
+         "MARRIAGE",
+         "PARENTHOOD",
+         "ENTREPRENEURSHIP",
+         "ASSETS",
+         "PENSION") %>% 
+         # "Can a woman apply for a passport in the same way as a man?",
+         # "Can a woman travel outside the country in the same way as a man?",
+         # "Can a woman travel outside her home in the same way as a man?",
+         # "Can a woman choose where to live in the same way as a man?") %>% 
+  pivot_longer(cols = 5:12,
+               names_to = "indicator",
+               values_to = "score") 
 ```
 
+
 ```{r}
-# calculate mean mobility index by income group and year
-mob_avg <- mob_df %>% 
+wbl_indicators_avg <- wbl_indicators  %>% 
   filter(reportyr %in% c(2000:2021)) %>% 
   group_by(Region,
-           reportyr) %>% 
-  summarise_at(vars(MOBILITY), 
-               list(mobility = mean)) 
+           reportyr,
+           indicator) %>% 
+  summarise_at(vars(score), 
+               list(avg_score = mean)) %>% 
+  mutate(avg_score = round(avg_score, 2))
 
 
 
-mob_avg$tooltip <- 
-  glue_data(mob_avg,
+wbl_indicators_avg$tooltip <- 
+  glue_data(wbl_indicators_avg,
             "Region: {Region}",
             "\nYear: {reportyr}",
-            "\nMobility score: {mobility}")
+            "\nAverage score: {avg_score}")
 
 
 # plot it
 ggplotly(
   
-mob_avg %>% 
+wbl_indicators_avg %>% 
   ggplot(aes(x = reportyr,
-             y = mobility,
+             y = avg_score,
              group = Region,
              color = Region)) +
-  geom_line(aes(text = tooltip)) +
+  geom_line(aes(text = tooltip),
+            size = 0.3) +
   geom_point(aes(text = tooltip),
-             size = 0.7) +
+             size = 0.1) +
+  facet_wrap(vars(indicator),
+             ncol = 4) +
   scale_color_brewer(palette = "Paired") +
   scale_x_continuous(breaks = seq(2000, 2021, by = 1)) +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 90, size = 8),
+  theme(axis.text.x = element_text(angle = 90, size = 6),
+        axis.text.y = element_text(size = 6),
+        # axis.line = element_line(colour = "black"),
+        strip.text.x = element_text(size = 8),
+        strip.text = element_text(colour = "black"),
+        strip.background = element_rect(fill ="white", colour = "white"),
         panel.grid.major.x = element_blank()) +
+        # panel.border = element_blank()) +
   labs(x = NULL,
-       y = "Average mobility score",
-       title = "Mobility score by regions and year",
+       y = NULL,
+       title = "WBL indicators' average scores by regions and year",
        color = NULL),
   tooltip = "text"
   
 ) %>% 
   layout(annotations = list(x = 0.1, 
-                            y = -0.15, 
+                            y = -0.3, 
                             text = "Source: World Bank",
                             showarrow = FALSE, 
                             xref = "paper", 
@@ -616,30 +631,107 @@ mob_avg %>%
                             yanchor = "auto", 
                             xshift = 0, 
                             yshift = 0,
-                            font = list(size = 8)
-)) %>% 
+                            font = list(size = 8)),
+         legend = list(orientation = "h") 
+         ) %>% 
   config(displayModeBar = FALSE,
          displaylogo = FALSE) 
   
 ```
 
-### Mobility scored questions
+```{r}
+# mob_df <- wbl_df %>% 
+#   select("economy",
+#          "Region",
+#          "Income group",
+#          "reportyr",
+#          "MOBILITY",
+#          "Can a woman apply for a passport in the same way as a man?",
+#          "Can a woman travel outside the country in the same way as a man?",
+#          "Can a woman travel outside her home in the same way as a man?",
+#          "Can a woman choose where to live in the same way as a man?") %>% 
+#   pivot_longer(cols = 6:9,
+#                names_to = "question",
+#                values_to = "answer") 
+
+```
+
+```{r}
+# calculate mean mobility index by income group and year
+# mob_avg <- mob_df %>% 
+#   filter(reportyr %in% c(2000:2021)) %>% 
+#   group_by(Region,
+#            reportyr) %>% 
+#   summarise_at(vars(MOBILITY), 
+#                list(mobility = mean)) 
+# 
+# 
+# 
+# mob_avg$tooltip <- 
+#   glue_data(mob_avg,
+#             "Region: {Region}",
+#             "\nYear: {reportyr}",
+#             "\nMobility score: {mobility}")
+# 
+# 
+# # plot it
+# ggplotly(
+#   
+# mob_avg %>% 
+#   ggplot(aes(x = reportyr,
+#              y = mobility,
+#              group = Region,
+#              color = Region)) +
+#   geom_line(aes(text = tooltip)) +
+#   geom_point(aes(text = tooltip),
+#              size = 0.7) +
+#   scale_color_brewer(palette = "Paired") +
+#   scale_x_continuous(breaks = seq(2000, 2021, by = 1)) +
+#   theme_light() +
+#   theme(axis.text.x = element_text(angle = 90, size = 8),
+#         panel.grid.major.x = element_blank()) +
+#   labs(x = NULL,
+#        y = "Average mobility score",
+#        title = "Mobility score by regions and year",
+#        color = NULL),
+#   tooltip = "text"
+#   
+# ) %>% 
+#   layout(annotations = list(x = 0.1, 
+#                             y = -0.15, 
+#                             text = "Source: World Bank",
+#                             showarrow = FALSE, 
+#                             xref = "paper", 
+#                             yref = "paper",
+#                             xanchor = "right", 
+#                             yanchor = "auto", 
+#                             xshift = 0, 
+#                             yshift = 0,
+#                             font = list(size = 8)
+# )) %>% 
+#   config(displayModeBar = FALSE,
+#          displaylogo = FALSE) 
+
+```
+
+## Mobility scored questions
 
 ```{r}
 ggplotly(
 
-mob_df %>% 
+mob_df %>%
   filter(answer == "Yes",
-         reportyr %in% c("1971", "2021")) %>% 
-  group_by(Region, 
+         reportyr %in% c("1971", "2021")) %>%
+  group_by(Region,
            reportyr,
-           question) %>% 
-  summarise(count = n()) %>% 
+           question) %>%
+  summarise(count = n()) %>%
   ggplot(aes(x = reportyr,
              y = count,
              group = Region,
              color =  Region)) +
   geom_line() +
+  geom_point(size = 0.8) +
   facet_wrap(vars(question),
              scales = "free",
              labeller = label_wrap_gen(width = 53)) +
@@ -658,32 +750,26 @@ mob_df %>%
        title = "Mobility scored questions answered with a 'yes' "),
 tooltip = "count"
 
-) %>% 
-    layout(annotations = list(x = 0.1, 
-                              y = -0.15, 
+) %>%
+    layout(annotations = list(x = 0.1,
+                              y = -0.15,
                               text = "Source: World Bank",
-                              showarrow = FALSE, 
-                              xref = "paper", 
+                              showarrow = FALSE,
+                              xref = "paper",
                               yref = "paper",
-                              xanchor = "right", 
-                              yanchor = "auto", 
-                              xshift = 0, 
-                              yshift = 0, 
+                              xanchor = "right",
+                              yanchor = "auto",
+                              xshift = 0,
+                              yshift = 0,
                               font = list(size = 8)
           # title = list(text = "Mobility scored questions answered with a 'yes' ", y = 0.99),
-)) %>% 
+)) %>%
   config(displayModeBar = FALSE,
-         displaylogo = FALSE) 
-  
+         displaylogo = FALSE)
+
 
 
 ```
-
-
-
-
-
-
 
 
 ## Proportion of seats held by women in national parliaments
