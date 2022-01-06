@@ -561,18 +561,18 @@ mob_df <- wbl_df %>%
          "Can a woman choose where to live in the same way as a man?") %>% 
   pivot_longer(cols = 6:9,
                names_to = "question",
-               values_to = "answer") %>% 
-  filter(reportyr %in% c(2000:2021)) 
+               values_to = "answer") 
 
 ```
 
 ```{r}
 # calculate mean mobility index by income group and year
 mob_avg <- mob_df %>% 
+  filter(reportyr %in% c(2000:2021)) %>% 
   group_by(Region,
            reportyr) %>% 
-  summarise_at(vars(MOBILITY), list(mobility = mean)) 
-
+  summarise_at(vars(MOBILITY), 
+               list(mobility = mean)) 
 
 
 
@@ -583,7 +583,7 @@ mob_avg$tooltip <-
             "\nMobility score: {mobility}")
 
 
-
+# plot it
 ggplotly(
   
 mob_avg %>% 
@@ -602,7 +602,7 @@ mob_avg %>%
   labs(x = NULL,
        y = "Average mobility score",
        title = "Mobility score by regions and year",
-       color = "Regions"),
+       color = NULL),
   tooltip = "text"
   
 ) %>% 
@@ -623,15 +623,60 @@ mob_avg %>%
   
 ```
 
-### Mobility score breakdown
+### Mobility scored questions
 
 ```{r}
+ggplotly(
+
 mob_df %>% 
-  filter(answer == "No") %>% 
+  filter(answer == "Yes",
+         reportyr %in% c("1971", "2021")) %>% 
   group_by(Region, 
            reportyr,
            question) %>% 
-  summarise(count = n())
+  summarise(count = n()) %>% 
+  ggplot(aes(x = reportyr,
+             y = count,
+             group = Region,
+             color =  Region)) +
+  geom_line() +
+  facet_wrap(vars(question),
+             scales = "free",
+             labeller = label_wrap_gen(width = 53)) +
+  scale_color_brewer(palette = "Paired") +
+  scale_x_continuous(breaks = seq(1971, 2021,  by = 50)) +
+  theme_light() +
+  theme(panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        strip.text = element_text(colour = "black"),
+        strip.background = element_rect(fill ="white", colour = "white"),
+        strip.text.x = element_text(size = 7),
+        plot.title = element_text(size = 14))+
+  labs(x = NULL,
+       y = "Number of countries",
+       color = NULL,
+       title = "Mobility scored questions answered with a 'yes' "),
+tooltip = "count"
+
+) %>% 
+    layout(annotations = list(x = 0.1, 
+                              y = -0.15, 
+                              text = "Source: World Bank",
+                              showarrow = FALSE, 
+                              xref = "paper", 
+                              yref = "paper",
+                              xanchor = "right", 
+                              yanchor = "auto", 
+                              xshift = 0, 
+                              yshift = 0, 
+                              font = list(size = 8)
+          # title = list(text = "Mobility scored questions answered with a 'yes' ", y = 0.99),
+)) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+  
+
+
 ```
 
 
