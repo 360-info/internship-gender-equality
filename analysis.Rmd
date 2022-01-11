@@ -480,21 +480,60 @@ tooltip = "text"
 
 ```
 
+```{r, eval = FALSE}
+# WIP!!!
+
+# fig <- wbl_index_map %>%
+#   plot_ly(frame = ~reportyr, 
+#           type ='choropleth', 
+#           locations = wbl_index_map$economy,   
+#           z = wbl_index_map$`WBL INDEX`, 
+#             # zmin = 0,
+#             # zmax = 500000,
+#           text = wbl_index_map$economy, 
+#           color = ~`WBL INDEX`,
+#           colorscale = "Electric") %>%
+#   layout(
+#     geo = list(scope = "world"),
+#          title = "Number of confirmed cases of New Coronary Pneumonia in Asia")
+# fig
+
+
+ggplotly(
+  
+
+wbl_index_map %>%
+  ggplot() +
+  geom_sf(aes(geometry = geometry,
+              fill = `WBL INDEX`,
+              text = tooltip,
+              frame = reportyr),
+          color = "white",
+          size = 0.1) +
+  # geom_polygon(aes(frame = reportyr),
+  #              color = "white", 
+  #              size = 0.1) +
+  # facet_wrap(vars(reportyr),
+  #            ncol = 3) +
+  scale_fill_viridis_c(direction = -1) +
+  theme_map() +
+  theme(strip.text = element_text(colour = "black"),
+        strip.background = element_rect(fill ="white", colour = "white"),
+        plot.caption = element_text(hjust = 0)) +
+  labs(fill = "WBL index"),
+tooltip = "text"
+
+) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) %>% 
+  animation_slider(currentvalue = list(prefix = "Year", 
+                                       font = list(color = "orange")))
+
+```
+
 
 ```{r eval = FALSE}
 # shiny app for WBL index
-palette <- colorBin(palette = "viridis",
-                    domain = wbl_index_map$`WBL INDEX`,
-                    bins = 5,
-                    na.color ="transparent",
-                    reverse = TRUE)
-
-text <- paste("Country:", wbl_index_map$economy, 
-              "<br> Year:", wbl_index_map$reportyr, 
-              "<br> WBL index:", wbl_index_map$`WBL INDEX`) %>%
-  lapply(htmltools::HTML)
-
-
 
 ui <- fluidPage(
   sliderInput("range",
@@ -502,27 +541,46 @@ ui <- fluidPage(
               min = min(wbl_index_map$reportyr),
               max = max(wbl_index_map$reportyr),
               value = min(wbl_index_map$reportyr),
-              step = 1),
+              step = 1,
+              sep = ""),
   leafletOutput("wblmap")
 )
 
 
 server <- function(input, output, session) {
+  
+  map_years <- reactive({
+    wbl_index_map_year <- wbl_index_map %>%
+      filter(reportyr == input$range)
+
+  })
 
 output$wblmap <- renderLeaflet({
-  wbl_index_map %>%
-    filter(reportyr == input$range) %>%
+  
+  palette <- colorBin(palette = "viridis",
+                      domain = map_years()$`WBL INDEX`,
+                      bins = 5,
+                      na.color ="transparent",
+                      reverse = TRUE)
+
+  text <- paste("Country:", map_years()$economy, 
+              "<br> Year:", map_years()$reportyr, 
+              "<br> WBL index:", map_years()$`WBL INDEX`) %>%
+  lapply(htmltools::HTML)
+  
+  
+ map_years() %>%
     leaflet() %>%
     setView(lat = 0, lng = 0, zoom = 1) %>%
     addTiles() %>%
     addPolygons(
-    fillColor = ~ palette(wbl_index_map$`WBL INDEX`),
-    weight = 0.5,
-    opacity = 1,
-    color = "white",
-    smoothFactor = 0.2,
-    fillOpacity = 1,
-    label = text,
+      fillColor = ~ palette(map_years()$`WBL INDEX`),
+      weight = 0.5,
+      opacity = 1,
+      color = "white",
+      smoothFactor = 0.2,
+      fillOpacity = 1,
+      label = text,
     highlight = highlightOptions(
       color = "#666",
       weight = 2,
@@ -531,7 +589,7 @@ output$wblmap <- renderLeaflet({
     ) %>%
     addLegend(
       pal = palette,
-      values = labor_shiny$percentage,
+      values = map_years()$`WBL INDEX`,
       opacity = 0.7,
       title = "WBL Index",
       position = "bottomleft"
@@ -609,9 +667,11 @@ wbl_indicators_avg %>%
   theme(axis.text.x = element_text(angle = 90, size = 6),
         axis.text.y = element_text(size = 6),
         # axis.line = element_line(colour = "black"),
-        strip.text.x = element_text(size = 8),
-        strip.text = element_text(colour = "black"),
+        strip.text = element_text(size = 8,
+                                  face = "bold",
+                                  colour = "black"),
         strip.background = element_rect(fill ="white", colour = "white"),
+        legend.text = element_text(size = 8),
         panel.grid.major.x = element_blank()) +
         # panel.border = element_blank()) +
   labs(x = NULL,
