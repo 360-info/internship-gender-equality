@@ -1,8 +1,9 @@
 ---
 title: "analysis"
 author: "Mengyun Yang"
-date: "09/12/2021"
-output: html_document
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_document2
 bibliography: references.bib
 link-citations: true
 ---
@@ -44,7 +45,7 @@ pop <- read.csv(here("data/population_data.csv"))
 # Population
 ## Female population VS male population over the years
 
-```{r}
+```{r, eval = FALSE}
 # cleaning 
 names(pop) <- tolower(names(pop))
 
@@ -66,7 +67,7 @@ pop_tidy <- pop %>%
 
 ```
 
-```{r}
+```{r, eval = FALSE}
 # plot it
 
 pop_tidy$tooltip <- 
@@ -109,7 +110,7 @@ ggplotly(
 pop_age <- read_excel(here("data/PopulationAgeSex-20211213064029.xlsx"), sheet = 2, range = "B2:Z17")
 ```
 
-```{r}
+```{r, eval = FALSE}
 # cleaning
 names(pop_age) <- tolower(names(pop_age))
 
@@ -124,7 +125,7 @@ pop_age_long <-
 pop_age_long$population <- ifelse(pop_age_long$sex == "Male", -1*pop_age_long$population, pop_age_long$population)
 ```
 
-```{r}
+```{r, eval = FALSE}
 # plot it
 pop_age_long_20 <- pop_age_long %>% 
   filter(sex %in% c("Female", "Male"),
@@ -206,7 +207,7 @@ labor_tidy <- labor %>%
          year = str_remove(year, "_\\[yr[0-9]+\\]")) 
 ```
 
-```{r}
+```{r, eval = FALSE}
 # plot it
 labor_tidy_world <- labor_tidy %>% 
   filter(country_name == "World",
@@ -413,10 +414,11 @@ wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet =
 indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
 ```
 
-
-## WBL index over time
+## WBL index
 
 The WBL (The Women Business and the Law Index) index measures the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as parenthood, equality of pay. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]
+
+### WBL index over time
 
 ```{r}
 # faceted choropleth map
@@ -499,42 +501,44 @@ tooltip = "text"
 # fig
 
 
-ggplotly(
-  
-
-wbl_index_map %>%
-  ggplot() +
-  geom_sf(aes(geometry = geometry,
-              fill = `WBL INDEX`,
-              text = tooltip,
-              frame = reportyr),
-          color = "white",
-          size = 0.1) +
-  # geom_polygon(aes(frame = reportyr),
-  #              color = "white", 
-  #              size = 0.1) +
-  # facet_wrap(vars(reportyr),
-  #            ncol = 3) +
-  scale_fill_viridis_c(direction = -1) +
-  theme_map() +
-  theme(strip.text = element_text(colour = "black"),
-        strip.background = element_rect(fill ="white", colour = "white"),
-        plot.caption = element_text(hjust = 0)) +
-  labs(fill = "WBL index"),
-tooltip = "text"
-
-) %>% 
-  config(displayModeBar = FALSE,
-         displaylogo = FALSE) %>% 
-  animation_slider(currentvalue = list(prefix = "Year", 
-                                       font = list(color = "orange")))
+# ggplotly(
+#   
+# 
+# wbl_index_map %>%
+#   ggplot() +
+#   geom_sf(aes(geometry = geometry,
+#               fill = `WBL INDEX`,
+#               text = tooltip,
+#               frame = reportyr),
+#           color = "white",
+#           size = 0.1) +
+#   # geom_polygon(aes(frame = reportyr),
+#   #              color = "white", 
+#   #              size = 0.1) +
+#   # facet_wrap(vars(reportyr),
+#   #            ncol = 3) +
+#   scale_fill_viridis_c(direction = -1) +
+#   theme_map() +
+#   theme(strip.text = element_text(colour = "black"),
+#         strip.background = element_rect(fill ="white", colour = "white"),
+#         plot.caption = element_text(hjust = 0)) +
+#   labs(fill = "WBL index"),
+# tooltip = "text"
+# 
+# ) %>% 
+#   config(displayModeBar = FALSE,
+#          displaylogo = FALSE) %>% 
+#   animation_slider(currentvalue = list(prefix = "Year", 
+#                                        font = list(color = "orange")))
 
 ```
 
 
-```{r eval = FALSE}
+```{r}
 # shiny app for WBL index
 
+shinyApp(
+  
 ui <- fluidPage(
   sliderInput("range",
               "year",
@@ -544,7 +548,7 @@ ui <- fluidPage(
               step = 1,
               sep = ""),
   leafletOutput("wblmap")
-)
+),
 
 
 server <- function(input, output, session) {
@@ -571,7 +575,7 @@ output$wblmap <- renderLeaflet({
   
  map_years() %>%
     leaflet() %>%
-    setView(lat = 0, lng = 0, zoom = 1) %>%
+    setView(lat = 30, lng = 0, zoom = 1) %>%
     addTiles() %>%
     addPolygons(
       fillColor = ~ palette(map_years()$`WBL INDEX`),
@@ -596,13 +600,16 @@ output$wblmap <- renderLeaflet({
       ) 
 })
 
-}
+},
 
-shinyApp(ui, server)
+  options = list(height = 500)
+)
+
+# shinyApp(ui, server)
 
 ```
 
-## Avergae score of WBL indicators by region and year
+### Avergae score of WBL indicators by region and year
 
 ```{r}
 wbl_indicators <- wbl_df %>% 
@@ -628,7 +635,7 @@ wbl_indicators <- wbl_df %>%
 ```
 
 
-```{r}
+```{r, fig.width=8}
 wbl_indicators_avg <- wbl_indicators  %>% 
   filter(reportyr %in% c(2000:2021)) %>% 
   group_by(Region,
@@ -676,7 +683,7 @@ wbl_indicators_avg %>%
         # panel.border = element_blank()) +
   labs(x = NULL,
        y = NULL,
-       title = "WBL indicators' average scores by regions and year",
+       title = "Average score of WBL indicator by regions and year",
        color = NULL),
   tooltip = "text"
   
@@ -700,21 +707,23 @@ wbl_indicators_avg %>%
 ```
 
 ```{r}
-# mob_df <- wbl_df %>% 
-#   select("economy",
-#          "Region",
-#          "Income group",
-#          "reportyr",
-#          "MOBILITY",
-#          "Can a woman apply for a passport in the same way as a man?",
-#          "Can a woman travel outside the country in the same way as a man?",
-#          "Can a woman travel outside her home in the same way as a man?",
-#          "Can a woman choose where to live in the same way as a man?") %>% 
-#   pivot_longer(cols = 6:9,
-#                names_to = "question",
-#                values_to = "answer") 
+mob_df <- wbl_df %>%
+  select("economy",
+         "Region",
+         "Income group",
+         "reportyr",
+         "MOBILITY",
+         "Can a woman apply for a passport in the same way as a man?",
+         "Can a woman travel outside the country in the same way as a man?",
+         "Can a woman travel outside her home in the same way as a man?",
+         "Can a woman choose where to live in the same way as a man?") %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer")
 
 ```
+
+### Mobility scored questions (one example of all indicators)
 
 ```{r}
 # calculate mean mobility index by income group and year
@@ -774,9 +783,9 @@ wbl_indicators_avg %>%
 
 ```
 
-## Mobility scored questions
 
-```{r}
+
+```{r, fig.width=8}
 ggplotly(
 
 mob_df %>%
@@ -855,7 +864,7 @@ seats <- indicators %>%
 ```
 
 
-```{r}
+```{r, fig.width=8}
 # plot it
 
 seats$tooltip <- 
@@ -904,6 +913,7 @@ ggplotly(
 ```
 
 
+# Reference
 
 
 
