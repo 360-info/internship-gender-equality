@@ -33,6 +33,7 @@ library(sf)
 library(leaflet)
 library(shiny)
 library(ggthemes)
+library(kableExtra)
 ```
 
 
@@ -411,6 +412,7 @@ employment <- wdi %>%
 
 ```{r}
 wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) # https://wbl.worldbank.org/en/wbl-data
+
 indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
 ```
 
@@ -424,7 +426,6 @@ The WBL (The Women Business and the Law Index) index measures the economic empow
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   select(economy, wbcodev2, reportyr, `WBL INDEX`)
-
 
 
 ## get geometry for each country
@@ -683,7 +684,7 @@ wbl_indicators_avg %>%
         # panel.border = element_blank()) +
   labs(x = NULL,
        y = NULL,
-       title = "Average score of WBL indicator by regions and year",
+       title = "Average score of WBL indicators by region and year",
        color = NULL),
   tooltip = "text"
   
@@ -705,6 +706,7 @@ wbl_indicators_avg %>%
          displaylogo = FALSE) 
   
 ```
+### Mobility 
 
 ```{r}
 mob_df <- wbl_df %>%
@@ -722,8 +724,6 @@ mob_df <- wbl_df %>%
                values_to = "answer")
 
 ```
-
-### Mobility scored questions (one example of all indicators)
 
 ```{r}
 # calculate mean mobility index by income group and year
@@ -839,6 +839,61 @@ tooltip = "count"
 
 
 ```
+
+### Workplace
+
+```{r read-data}
+workplace <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 5, range = "A2:Q192") 
+```
+
+```{r}
+workplace_long <- workplace %>% 
+  pivot_longer(cols = c(3, 6, 9, 12),
+               names_to = "question",
+               values_to = "answer") 
+
+workplace_long %>% 
+  filter(answer == "No") %>% 
+  select("EconomyName",
+         "question",
+         "answer") %>% 
+  group_by(question) %>% 
+  summarise(count = n()) %>% 
+  mutate(question = fct_reorder(question, count)) %>% 
+  ggplot(aes(x = question,
+             y = count,
+             fill = question)) +
+  geom_col() +
+  coord_flip() +
+  scale_x_discrete(labels = c("Is there legislation on sexual harassment \nin employment",
+                            "Does the law prohibit discrimination \nin employment base on gender",
+                            "Can a woman get a job in \nthe same way as a man",
+                            "Are there criminal penalties or civil \nremidies for sexual harassment \nin employment")) +
+  scale_y_continuous(limits = c(0, 60)) +
+  scale_fill_brewer(palette = "Blues") +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        legend.position = "none") +
+  labs(x = NULL,
+       y = "Number of countries",
+       title = "Workplace scored questions answered with a 'No' in 2021")
+  
+  
+  
+  # theme(panel.grid.minor.y = element_blank(),
+  #       legend.position = "none") 
+  
+
+
+
+
+```
+
+
+
+
+
+
 
 
 ## Proportion of seats held by women in national parliaments
