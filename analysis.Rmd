@@ -34,6 +34,7 @@ library(leaflet)
 library(shiny)
 library(ggthemes)
 library(kableExtra)
+library(gt)
 ```
 
 
@@ -965,6 +966,91 @@ ggplotly(
   config(displayModeBar = FALSE,
          displaylogo = FALSE) 
   
+```
+
+
+
+# V-Dem data
+
+```{r}
+dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
+# https://www.v-dem.net/vdemds.html
+```
+
+
+```{r, eval = FALSE}
+wbl_region <- wbl_df %>% 
+  select(economy, Region) %>% 
+  distinct() %>% 
+  rename("country_name" = "economy")
+
+
+suffrage_restricted <- dem %>% 
+  select(country_name,
+         year,
+         v2elfemrst) %>% 
+  filter(year %in% c(1990:2020),
+         v2elfemrst %in% c(0, 1)) %>% 
+  drop_na() %>% 
+  left_join(wbl_region,
+            by = "country_name") 
+  
+```
+
+```{r}
+# no suffrage
+suffrage_restricted %>% 
+  pivot_wider(names_from = v2elfemrst,
+              values_from = v2elfemrst) %>% 
+  select(country_name,
+         year, 
+         Region, 
+         "0") %>% 
+  rename("No female suffrage" = "0",
+         Country = country_name,
+         Year = year) %>% 
+  drop_na("No female suffrage") %>%
+  arrange(Year) %>% 
+  select(Country,
+         Year,
+         Region) %>% 
+  relocate(Year, .before = Country) %>% 
+  gt() %>% 
+  cols_width(Country ~ px(80),
+             Region ~ px(250)) %>% 
+  tab_header(title = md("**Countries with no female suffrage**"))
+
+
+
+
+# restricted suffrage 
+suffrage_restricted %>% 
+  pivot_wider(names_from = v2elfemrst,
+              values_from = v2elfemrst) %>% 
+  select(country_name,
+         year, 
+         Region, 
+         "1") %>% 
+  rename("Restriced female suffrage" = "1",
+         Country = country_name,
+         Year = year) %>% 
+  drop_na() %>% 
+  arrange(Year) %>% 
+  select(Country,
+         Year,
+         Region) %>% 
+  gt() %>% 
+  cols_width(Country ~ px(250),
+             Region ~ px(250)) %>% 
+  tab_header(title = md("**Restricted female suffrage**"))
+  
+
+```
+
+  
+
+
+
 ```
 
 
