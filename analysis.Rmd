@@ -536,7 +536,7 @@ tooltip = "text"
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 # shiny app for WBL index
 
 shinyApp(
@@ -890,7 +890,16 @@ workplace_long %>%
 
 ```
 
+### ### GDP VS WBL index
 
+```{r}
+gdp <- read_csv(here("data/GDP_worldbank.csv"), skip = 4)
+# https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?view=chart
+```
+
+```{r}
+
+```
 
 
 
@@ -970,7 +979,11 @@ ggplotly(
 
 
 
-# V-Dem data
+`
+
+
+
+## Suffrage (V-Dem data)
 
 ```{r}
 dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
@@ -979,12 +992,13 @@ dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 
 ```{r, eval = FALSE}
+# extract regions from wbl workbank data
 wbl_region <- wbl_df %>% 
   select(economy, Region) %>% 
   distinct() %>% 
   rename("country_name" = "economy")
 
-
+# jonin region data with v-dem data
 suffrage_restricted <- dem %>% 
   select(country_name,
          year,
@@ -1039,15 +1053,16 @@ suffrage_restricted %>%
   select(Country,
          Year,
          Region) %>% 
+  relocate(Year, .before = Country) %>% 
   gt() %>% 
   cols_width(Country ~ px(250),
              Region ~ px(250)) %>% 
-  tab_header(title = md("**Restricted female suffrage**"))
+  tab_header(title = md("**Countries with restricted female suffrage**"))
   
 
 ```
 
-  
+
 
 
 
