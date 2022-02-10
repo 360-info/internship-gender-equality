@@ -35,6 +35,7 @@ library(shiny)
 library(ggthemes)
 library(kableExtra)
 library(gt)
+library(ggpubr)
 ```
 
 
@@ -890,15 +891,71 @@ workplace_long %>%
 
 ```
 
-### ### GDP VS WBL index
+### Gender gap index VS WBL index
 
 ```{r}
-gdp <- read_csv(here("data/GDP_worldbank.csv"), skip = 4)
-# https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?view=chart
+gap <- read_csv(here("data/gender_gap_index.csv"))
+# https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
 ```
 
 ```{r}
+gap %>% 
+  filter(Indicator == "Overall Global Gender Gap Index",
+         `Subindicator Type` == "Index") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = `Country Name`) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = gender_gap_index)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light()
+  
+```
 
+
+
+
+
+
+
+
+```{r}
+# pivot longer world bank gdp data 
+# gdp_region <- gdp %>% 
+#   select(-c(`Country Code`,
+#             `Indicator Name`,
+#             `Indicator Code`,
+#             `...66`)) %>% 
+#   pivot_longer(cols = 2:62,
+#                names_to = "year",
+#                values_to = "gdp_per_capita") %>% 
+#   rename(country_name = `Country Name`) %>% 
+#   left_join(wbl_region,
+#             by = "country_name") %>% 
+#   filter(!is.na(Region))
+#   
+#   
+# wbl_df %>% 
+#   select(economy,
+#          Region,
+#          reportyr,
+#          `WBL INDEX`) %>% 
+#   pivot_wider(names_from = reportyr,
+#               values_from = `WBL INDEX`)
 ```
 
 
