@@ -996,9 +996,41 @@ gap %>%
          
 ```
 
+### Global Gender Gap Political Empowerment subindex VS WBL index
+
+Political Empowerment is the area where women are severely under-represented.
 
 ```{r}
-
+gap %>% 
+  filter(Indicator == "Global Gender Gap Political Empowerment subindex",
+         `Subindicator Type` == "Index") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(political_empowerment = "2021",
+         economy = `Country Name`) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         political_empowerment) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = political_empowerment)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Gender gap political empowerment subindex",
+       title = "Scatter plot of WBL index and gender gap political empowerment ",
+       subtitle = "Year: 2021")
+         
 ```
 
 
