@@ -895,11 +895,13 @@ workplace_long %>%
 
 ```{r}
 gap <- read_csv(here("data/gender_gap_index.csv"))
-# https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
+# download from: https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
 ```
 
 ```{r}
-gap %>% 
+
+  
+  gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
   select(`Country Name`,
@@ -918,20 +920,19 @@ gap %>%
   filter(!is.na(gender_gap_index)) %>% 
   ggplot(aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
   geom_point() +
-  geom_smooth(method = lm) +
   scale_x_continuous(limits = c(25, 100)) +
   stat_cor(aes(label = ..r.label..)) +
-  theme_light()
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Gender gap index",
+       title = "Scatter plot of WBL index and gender gap index",
+       subtitle = "Year: 2021")
+
   
 ```
-
-
-
-
-
-
-
 
 ```{r}
 # pivot longer world bank gdp data 
@@ -958,8 +959,47 @@ gap %>%
 #               values_from = `WBL INDEX`)
 ```
 
+### Wage equality VS WBL index
+
+```{r}
+gap %>% 
+  # filter indicator to `Wage equality between women and men for similar work (survey data, normalized on a 0-to-1 scale)`
+  filter(`Subindicator Type` == "Normalized Score") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(wage_equality_score = "2021",
+         economy = `Country Name`) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         wage_equality_score) %>% 
+  # there are so many NAs in wage equality socre
+  filter(!is.na(wage_equality_score)) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = wage_equality_score)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Wage equality score",
+       title = "Scatter plot of WBL index and wage equality score",
+       subtitle = "Year: 2021")
+         
+```
 
 
+```{r}
+
+```
 
 
 
@@ -1056,13 +1096,12 @@ wbl_region <- wbl_df %>%
   rename("country_name" = "economy")
 
 # jonin region data with v-dem data
-suffrage_restricted <- dem %>% 
+suffrage <- dem %>% 
   select(country_name,
          year,
          v2elfemrst) %>% 
   filter(year %in% c(1990:2020),
          v2elfemrst %in% c(0, 1)) %>% 
-  drop_na() %>% 
   left_join(wbl_region,
             by = "country_name") 
   
@@ -1070,7 +1109,7 @@ suffrage_restricted <- dem %>%
 
 ```{r}
 # no suffrage
-suffrage_restricted %>% 
+suffrage %>% 
   pivot_wider(names_from = v2elfemrst,
               values_from = v2elfemrst) %>% 
   select(country_name,
@@ -1080,7 +1119,7 @@ suffrage_restricted %>%
   rename("No female suffrage" = "0",
          Country = country_name,
          Year = year) %>% 
-  drop_na("No female suffrage") %>%
+  filter(!is.na (`No female suffrage`)) %>% 
   arrange(Year) %>% 
   select(Country,
          Year,
@@ -1095,17 +1134,17 @@ suffrage_restricted %>%
 
 
 # restricted suffrage 
-suffrage_restricted %>% 
+suffrage %>% 
   pivot_wider(names_from = v2elfemrst,
               values_from = v2elfemrst) %>% 
   select(country_name,
          year, 
          Region, 
          "1") %>% 
-  rename("Restriced female suffrage" = "1",
+  rename("Restricted female suffrage" = "1",
          Country = country_name,
          Year = year) %>% 
-  drop_na() %>% 
+  filter(!is.na (`Restricted female suffrage`)) %>% 
   arrange(Year) %>% 
   select(Country,
          Year,
