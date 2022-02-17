@@ -996,7 +996,7 @@ gap %>%
          
 ```
 
-### Global Gender Gap Political Empowerment subindex VS WBL index
+### Political Empowerment subindex VS WBL index
 
 Political Empowerment is the area where women are severely under-represented.
 
@@ -1033,7 +1033,7 @@ gap %>%
          
 ```
 
-### Global Gender Gap Economic Participation and Opportunity Subindex VS WBL index
+### Economic Participation and Opportunity Subindex VS WBL index
 
 
 ```{r}
@@ -1068,6 +1068,96 @@ gap %>%
        subtitle = "Year: 2021")
          
 ```
+
+### Educational Attainment and Opportunity Subindex VS WBL index
+
+
+```{r}
+gap %>% 
+  filter(Indicator == "Global Gender Gap Educational Attainment Subindex",
+         `Subindicator Type` == "Index") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(education_attainment = "2021",
+         economy = `Country Name`) %>% 
+  filter(!is.na(education_attainment)) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         education_attainment) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = education_attainment)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Gender gap education_attainment and opportunity subindex",
+       title = "Scatter plot of WBL index and gender gap education attainment ",
+       subtitle = "Year: 2021")
+         
+```
+
+
+### Health and survival  Subindex VS WBL index
+
+
+```{r}
+gap %>% 
+  filter(Indicator == "Global Gender Gap Health and Survival Subindex",
+         `Subindicator Type` == "Index") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(health_survival = "2021",
+         economy = `Country Name`) %>% 
+  filter(!is.na(health_survival)) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         health_survival) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = health_survival)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Gender gap health and survival subindex",
+       title = "Scatter plot of WBL index and gender gap health and survival ",
+       subtitle = "Year: 2021")
+         
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Proportion of seats held by women in national parliaments
 
