@@ -1033,7 +1033,41 @@ gap %>%
          
 ```
 
+### Global Gender Gap Economic Participation and Opportunity Subindex VS WBL index
 
+
+```{r}
+gap %>% 
+  filter(Indicator == "Global Gender Gap Economic Participation and Opportunity Subindex",
+         `Subindicator Type` == "Index") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(economic_participation = "2021",
+         economy = `Country Name`) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         economic_participation) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = economic_participation)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Gender Gap Economic Participation and Opportunity subindex",
+       title = "Scatter plot of WBL index and Gender Gap Economic Participation and Opportunity ",
+       subtitle = "Year: 2021")
+         
+```
 
 ## Proportion of seats held by women in national parliaments
 
