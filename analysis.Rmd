@@ -959,44 +959,7 @@ gap <- read_csv(here("data/gender_gap_index.csv"))
 #               values_from = `WBL INDEX`)
 ```
 
-### Wage equality VS WBL index
-
-```{r}
-gap %>% 
-  # filter indicator to `Wage equality between women and men for similar work (survey data, normalized on a 0-to-1 scale)`
-  filter(`Subindicator Type` == "Normalized Score") %>% 
-  select(`Country Name`,
-         "2021") %>% 
-  rename(wage_equality_score = "2021",
-         economy = `Country Name`) %>% 
-  # join wbl_df to get wbl index
-  right_join(wbl_df,
-             by = "economy") %>% 
-  filter(reportyr == "2021") %>% 
-  select(economy,
-         reportyr,
-         Region,
-         `Income group`,
-         `WBL INDEX`,
-         wage_equality_score) %>% 
-  # there are so many NAs in wage equality socre
-  filter(!is.na(wage_equality_score)) %>% 
-  ggplot(aes(x = `WBL INDEX`,
-             y = wage_equality_score)) +
-  geom_smooth(method = lm, 
-              se = FALSE) +
-  geom_point() +
-  scale_x_continuous(limits = c(25, 100)) +
-  stat_cor(aes(label = ..r.label..)) +
-  theme_light() +
-  labs(x = "WBL index",
-       y = "Wage equality score",
-       title = "Scatter plot of WBL index and wage equality score",
-       subtitle = "Year: 2021")
-         
-```
-
-### Political Empowerment subindex VS WBL index
+#### Political Empowerment subindex VS WBL index
 
 Political Empowerment is the area where women are severely under-represented.
 
@@ -1033,7 +996,7 @@ gap %>%
          
 ```
 
-### Economic Participation and Opportunity Subindex VS WBL index
+#### Economic Participation and Opportunity Subindex VS WBL index
 
 
 ```{r}
@@ -1069,7 +1032,7 @@ gap %>%
          
 ```
 
-### Educational Attainment and Opportunity Subindex VS WBL index
+#### Educational Attainment and Opportunity Subindex VS WBL index
 
 
 ```{r}
@@ -1107,7 +1070,7 @@ gap %>%
 ```
 
 
-### Health and survival  Subindex VS WBL index
+#### Health and survival  Subindex VS WBL index
 
 
 ```{r}
@@ -1144,7 +1107,42 @@ gap %>%
          
 ```
 
+### Wage equality VS WBL index
 
+```{r}
+gap %>% 
+  # filter indicator to `Wage equality between women and men for similar work (survey data, normalized on a 0-to-1 scale)`
+  filter(`Subindicator Type` == "Normalized Score") %>% 
+  select(`Country Name`,
+         "2021") %>% 
+  rename(wage_equality_score = "2021",
+         economy = `Country Name`) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         wage_equality_score) %>% 
+  # there are so many NAs in wage equality socre
+  filter(!is.na(wage_equality_score)) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = wage_equality_score)) +
+  geom_smooth(method = lm, 
+              se = FALSE) +
+  geom_point() +
+  scale_x_continuous(limits = c(25, 100)) +
+  stat_cor(aes(label = ..r.label..)) +
+  theme_light() +
+  labs(x = "WBL index",
+       y = "Wage equality score",
+       title = "Scatter plot of WBL index and wage equality score",
+       subtitle = "Year: 2021")
+         
+```
 
 
 
