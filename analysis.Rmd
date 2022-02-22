@@ -36,6 +36,8 @@ library(ggthemes)
 library(kableExtra)
 library(gt)
 library(ggpubr)
+library(ggflags)
+library(countrycode)
 ```
 
 
@@ -708,6 +710,59 @@ wbl_indicators_avg %>%
          displaylogo = FALSE) 
   
 ```
+
+
+### WBL indicator by regions
+
+
+```{r}
+wbl_df %>% 
+  filter(reportyr == "2021") %>% 
+  select(economy,
+         Region,
+         MOBILITY,
+         WORKPLACE,
+         PAY,
+         MARRIAGE,
+         PARENTHOOD,
+         ENTREPRENEURSHIP,
+         ASSETS,
+         PENSION) %>% 
+  pivot_longer(cols = 3:10,
+               names_to = "indicator",
+               values_to = "score") %>% 
+  group_by(Region,
+           indicator) %>% 
+  summarise_at(vars(score), 
+               list(avg_score = mean)) %>% 
+  ggplot(aes(x = indicator,
+             y = avg_score,
+             fill = Region)) +
+  geom_col(width = 0.5,
+           position = position_dodge(0.7)) +
+  scale_fill_brewer(palette = "Set1") +
+  theme_light() +
+  theme(axis.text.x = element_text(size = 6),
+        legend.position = "bottom",
+        panel.grid.major.x = element_blank()) +
+  labs(x = NULL,
+      y = "Score (0-100)",
+      fill =NULL,
+      title = "WBL indicator by regions",
+      subtitle = "2021")
+  
+
+```
+
+
+
+
+
+
+
+
+
+
 ### Mobility 
 
 ```{r}
@@ -899,19 +954,23 @@ gap <- read_csv(here("data/gender_gap_index.csv"))
 ```
 
 ```{r}
+# add column code for iso2 country code
+gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
 
-  
-  gap %>% 
+
+gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
-  select(`Country Name`,
+  select(code,
+         `Country Name`,
          "2021") %>% 
   rename(gender_gap_index = "2021",
          economy = `Country Name`) %>% 
   right_join(wbl_df,
              by = "economy") %>% 
   filter(reportyr == "2021") %>% 
-  select(economy,
+  select(code,
+         economy,
          reportyr,
          Region,
          `Income group`,
@@ -920,9 +979,10 @@ gap <- read_csv(here("data/gender_gap_index.csv"))
   filter(!is.na(gender_gap_index)) %>% 
   ggplot(aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
-  geom_smooth(method = lm, 
-              se = FALSE) +
-  geom_point() +
+  geom_smooth(method = lm,
+              se = FALSE) + 
+  geom_point(aes(color = Region)) +
+    # geom_flag(aes(country = code)) + 
   scale_x_continuous(limits = c(25, 100)) +
   stat_cor(aes(label = ..r.label..)) +
   theme_light() +
