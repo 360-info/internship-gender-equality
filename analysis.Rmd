@@ -1079,6 +1079,8 @@ gap %>%
 
 ```{r flag-plot}
 # countries with flag
+gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
+
 gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
@@ -1098,45 +1100,33 @@ gap %>%
          `WBL INDEX`,
          gender_gap_index) %>% 
   filter(!is.na(gender_gap_index),
-         economy %in% c("Iceland",
-                               "United Kingdom",
-                               "United States",
-                               "Mauritius",
-                               "Serbia",
-                               "Nepal",
-                               "China",
-                               "Namibia",
-                               "Rwanda",
-                               "Turkey",
-                               "Saudi Arabia",
-                               "Dominican Republic",
-                               "Congo",
-                               "Jamaica",
-                               "Malaysia",
-                               "Vanuata",
-                               "Pakistan",
-                               "Afghanistan",
-                               "Iraq",
-                               "Yemen",
-                               "Bangladesh",
-                               "Qatar")) %>% 
+         economy %in% c("Iceland", "United Kingdom", "United States","Mauritius",
+                        "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                        "Saudi Arabia", "Dominican Republic", "Congo", "Jamaica",
+                        "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                        "Yemen, Rep.", "Bangladesh", "Qatar")) %>% 
   mutate(code = tolower(code)) %>% 
   ggplot(aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
   geom_smooth(method = lm,
-              se = FALSE) + 
-  geom_point(aes(color = Region),
-             alpha = 0.7) +
-  annotate("text", x = 26.9, y = 0.48, label = "Yeman, Rep", size = 2) +
-  annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
-  annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
-  annotate("text", x = 97.5, y = 0.875, label = "Finland", size = 2) +
+              se = FALSE,
+              size = 0.6) + 
+  geom_point() +
+  geom_text(aes(label = economy),
+            size = 2,
+            hjust = "centre",
+            nudge_y = 0.023,
+            # nudge_x = 0.25,
+            check_overlap = TRUE) +
+  # annotate("text", x = 26.9, y = 0.48, label = "Yeman, Rep", size = 2) +
+  # annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
+  # annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
   geom_flag(aes(country = code)) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
-  theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "both", type = "closed"))) +
   theme_light() +
+  theme(panel.grid.minor = element_blank()) +
   labs(x = "less law",
        y = "More equality",
        title = "Scatter plot of WBL index and gender gap index",
