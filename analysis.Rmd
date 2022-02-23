@@ -983,7 +983,7 @@ gap %>%
   geom_point(aes(color = Region,
                  text = tooltip),
              alpha = 0.7) +
-  annotate("text", x = 30, y = 0.87, label = "R = 0.74") +
+  # annotate("text", x = 30, y = 0.87, label = "R = 0.74") +
   # annotate("segment", x =-Inf, xend = Inf, y = 0, yend = 0, arrow=arrow()) +
   # annotate("segment", x = 90, xend = 95, y = .1, yend = .1,
   #          colour = "blue", size = 0.5, arrow = arrow()) +
@@ -992,7 +992,7 @@ gap %>%
   scale_color_brewer(palette = "Set1") +
   # stat_cor(aes(label = ..r.label..)) +
   theme_light() +
-  # theme(axis.line.x = element_line(arrow = arrow(length = unit(0.3, "cm"), ends = "both")) +
+  # theme(axis.line.x = element_line(arrow = arrow(length = unit(0.3, "cm"), ends = "last", type = "closed"))) +
   labs(x = "WBL index",
        y = "Gender gap index",
        color = NULL,
@@ -1001,23 +1001,24 @@ gap %>%
 tooltip = "text"
 
 ) %>% 
-  layout(xaxis = list(title = list(font = list(size = 10),
+  layout(xaxis = list(title = list(font = list(size = 12),
                                    standoff = 10)),
-         yaxis = list(title = list(font = list(size = 10),
+         yaxis = list(title = list(font = list(size = 12),
                                    stabdoff = 10)),
          legend = list(orientation = "h",
-                       font = list(size = 8))) %>% 
-    add_annotations(text = "1111",
-                    xref = "paper",
-                    yref = "paper",
-                    x = 0.9,
-                    y = -0.08,
-                    showarrow = TRUE,
-                    arrowcolor = "black",
-                    axref = "paper",
-                    ayref = "paper",
-                    ax = 0.9,
-                    ay = -0.08)
+                       font = list(size = 8))) 
+    # add_annotations(text = "1111",
+    #                 xref = "paper",
+    #                 yref = "y",
+    #                 x = 0.9,
+    #                 y = -0.08,
+    #                 showarrow = TRUE,
+    #                 arrowcolor = "black",
+    #                 arrowhead = 2,
+    #                 axref = "paper",
+    #                 ayref = "y",
+    #                 ax = 0.9,
+    #                 ay = -0.08)
 
   
 
@@ -1061,10 +1062,12 @@ gap %>%
   annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
   annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
   annotate("text", x = 97.5, y = 0.875, label = "Finland", size = 2) +
+  
     # geom_flag(aes(country = code)) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
+  theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "both", type = "closed"))) +
   theme_light() +
   labs(x = "less law",
        y = "More equality",
@@ -1074,6 +1077,72 @@ gap %>%
 
 ```
 
+```{r flag-plot}
+# countries with flag
+gap %>% 
+  filter(Indicator == "Overall Global Gender Gap Index",
+         `Subindicator Type` == "Index") %>% 
+  select(code,
+         `Country Name`,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = `Country Name`) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(code,
+         economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index),
+         economy %in% c("Iceland",
+                               "United Kingdom",
+                               "United States",
+                               "Mauritius",
+                               "Serbia",
+                               "Nepal",
+                               "China",
+                               "Namibia",
+                               "Rwanda",
+                               "Turkey",
+                               "Saudi Arabia",
+                               "Dominican Republic",
+                               "Congo",
+                               "Jamaica",
+                               "Malaysia",
+                               "Vanuata",
+                               "Pakistan",
+                               "Afghanistan",
+                               "Iraq",
+                               "Yemen",
+                               "Bangladesh",
+                               "Qatar")) %>% 
+  mutate(code = tolower(code)) %>% 
+  ggplot(aes(x = `WBL INDEX`,
+             y = gender_gap_index)) +
+  geom_smooth(method = lm,
+              se = FALSE) + 
+  geom_point(aes(color = Region),
+             alpha = 0.7) +
+  annotate("text", x = 26.9, y = 0.48, label = "Yeman, Rep", size = 2) +
+  annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
+  annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
+  annotate("text", x = 97.5, y = 0.875, label = "Finland", size = 2) +
+  geom_flag(aes(country = code)) +
+  scale_x_continuous(limits = c(25, 100)) +
+  scale_color_brewer(palette = "Set1") +
+  stat_cor(aes(label = ..r.label..)) +
+  theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "both", type = "closed"))) +
+  theme_light() +
+  labs(x = "less law",
+       y = "More equality",
+       title = "Scatter plot of WBL index and gender gap index",
+       subtitle = "Year: 2021")
+
+```
 
 
 
@@ -1398,7 +1467,7 @@ dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 ```
 
 
-```{r, eval = FALSE}
+```{r}
 # extract regions from wbl workbank data
 wbl_region <- wbl_df %>% 
   select(economy, Region) %>% 
