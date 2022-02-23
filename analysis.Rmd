@@ -1079,7 +1079,32 @@ gap %>%
 
 ```{r flag-plot}
 # countries with flag
-gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
+flag_data <- gap %>% 
+  filter(`Country Name` %in% c("Iceland", "United Kingdom", "United States","Mauritius",
+                                             "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                                             "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                                             "Yemen, Rep.", "Bangladesh", "Qatar"),
+         Indicator == "Overall Global Gender Gap Index",
+         `Subindicator Type` == "Index") %>% 
+  select(code,
+         `Country Name`,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = `Country Name`) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(code,
+         economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(code = tolower(code)) 
+  
+
 
 gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
@@ -1099,25 +1124,23 @@ gap %>%
          `Income group`,
          `WBL INDEX`,
          gender_gap_index) %>% 
-  filter(!is.na(gender_gap_index),
-         economy %in% c("Iceland", "United Kingdom", "United States","Mauritius",
-                        "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
-                        "Saudi Arabia", "Dominican Republic", "Congo", "Jamaica",
-                        "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
-                        "Yemen, Rep.", "Bangladesh", "Qatar")) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
   mutate(code = tolower(code)) %>% 
   ggplot(aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
   geom_smooth(method = lm,
               se = FALSE,
               size = 0.6) + 
-  geom_point() +
-  geom_text(aes(label = economy),
+  geom_point(color = "grey",
+             size = 0.7) +
+  geom_flag(data = flag_data,
+            aes(country = code)) +
+  geom_text(data = flag_data,
+            aes(label = economy),
             size = 2,
             hjust = "centre",
             nudge_y = 0.023,
             check_overlap = TRUE) +
-  geom_flag(aes(country = code)) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
@@ -1126,9 +1149,9 @@ gap %>%
         axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         axis.title.y = element_text(angle = 0, size = 8)) +
-  annotate(geom = "text", x = 28, y = 0.32, label = "More Laws", size = 3) +
-  annotate(geom = "text", x = 98, y = 0.32, label = "Less Laws", size = 3) +
-  coord_cartesian(ylim = c(0.4, 1), # This focuses the y-axis on the range of interest
+  annotate(geom = "text", x = 28, y = 0.328, label = "More Laws", size = 3) +
+  annotate(geom = "text", x = 98, y = 0.328, label = "Less Laws", size = 3) +
+  coord_cartesian(ylim = c(0.4, 0.9), # This focuses the y-axis on the range of interest
                       clip = 'off') +
   labs(x = "",
        y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
