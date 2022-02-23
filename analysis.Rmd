@@ -1116,19 +1116,22 @@ gap %>%
             size = 2,
             hjust = "centre",
             nudge_y = 0.023,
-            # nudge_x = 0.25,
             check_overlap = TRUE) +
-  # annotate("text", x = 26.9, y = 0.48, label = "Yeman, Rep", size = 2) +
-  # annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
-  # annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
   geom_flag(aes(country = code)) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
   theme_light() +
-  theme(panel.grid.minor = element_blank()) +
-  labs(x = "less law",
-       y = "More equality",
+  theme(panel.grid.minor = element_blank(),
+        axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.title.y = element_text(angle = 0, size = 8)) +
+  annotate(geom = "text", x = 28, y = 0.32, label = "More Laws", size = 3) +
+  annotate(geom = "text", x = 98, y = 0.32, label = "Less Laws", size = 3) +
+  coord_cartesian(ylim = c(0.4, 1), # This focuses the y-axis on the range of interest
+                      clip = 'off') +
+  labs(x = "",
+       y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
        title = "Scatter plot of WBL index and gender gap index",
        subtitle = "Year: 2021")
 
