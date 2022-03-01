@@ -38,6 +38,7 @@ library(gt)
 library(ggpubr)
 library(ggflags)
 library(countrycode)
+library(themes360info)
 ```
 
 
@@ -415,8 +416,11 @@ employment <- wdi %>%
 # Women in Law
 
 ```{r}
-wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) # https://wbl.worldbank.org/en/wbl-data
+# https://wbl.worldbank.org/en/wbl-data
+wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
 
+
+# download from https://data.worldbank.org/topic/gender
 indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
 ```
 
@@ -1028,8 +1032,39 @@ tooltip = "text"
 ```
 
 ```{r}
+options(themes360info.loadfonts = TRUE)
+
 # add column code for iso2 country code
 gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
+
+
+# countries with flag
+flag_data <- gap %>% 
+  # countries of interest
+  filter(`Country Name` %in% c("Iceland", "United Kingdom", "United States","Mauritius",
+                               "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                               "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                                "Yemen, Rep.", "Bangladesh", "Qatar"),
+         Indicator == "Overall Global Gender Gap Index",
+         `Subindicator Type` == "Index") %>% 
+  select(code,
+         `Country Name`,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = `Country Name`) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(code,
+         economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(code = tolower(code)) 
+
 
 
 gap %>% 
@@ -1051,39 +1086,66 @@ gap %>%
          `WBL INDEX`,
          gender_gap_index) %>% 
   filter(!is.na(gender_gap_index)) %>% 
-  mutate(code = tolower(code)) %>% 
+  mutate(tooltip = glue_data(gap,
+                             "Country : {economy}",
+                             "\nWBL Index: {`WBL INDEX`}",
+                             "\nGender Gap Index: {gender_gap_index}")) %>%  
   ggplot(aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
   geom_smooth(method = lm,
-              se = FALSE) + 
+              se = FALSE,
+              size = 0.6) +
   geom_point(aes(color = Region),
+             size = 0.7,
              alpha = 0.7) +
-  annotate("text", x = 26.9, y = 0.48, label = "Yeman, Rep", size = 2) +
-  annotate("text", x = 38.1, y = 0.46, label = "Afghanistan", size = 2) +
-  annotate("text", x = 100, y = 0.91, label = "Iceland", size = 2) +
-  annotate("text", x = 97.5, y = 0.875, label = "Finland", size = 2) +
-  
-    # geom_flag(aes(country = code)) +
+  geom_point(data = flag_data,
+             aes(color = Region),
+             size = 7,
+             alpha = 0.7,
+             show.legend = F) +
+  geom_flag(data = flag_data,
+            aes(country = code)) +
+  geom_text(data = flag_data,
+            aes(label = economy),
+            size = 2,
+            hjust = "centre",
+            nudge_y = 0.035,
+            check_overlap = TRUE) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
-  theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "both", type = "closed"))) +
-  theme_light() +
-  labs(x = "less law",
-       y = "More equality",
+  theme(panel.grid.minor = element_blank(),
+        axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.title.y = element_text(angle = 0, size = 8),
+        legend.position = "top",
+        legend.text = element_text(size = 6)) +
+  # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
+  coord_cartesian(ylim = c(0.4, 0.9),
+                  clip = "off") +
+  annotate_360(text_colour = "light", x = 28, y = 0.329, label = "More Laws", size = 3) +
+  annotate_360(text_colour = "light", x = 98, y = 0.329, label = "Less Laws", size = 3) +
+  theme_360() +
+  labs(x = "National laws which discriminate against women",
+       y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
+       color = NULL,
        title = "Scatter plot of WBL index and gender gap index",
-       subtitle = "Year: 2021")
+       subtitle = "Year: 2021",
+       caption = "**CHART:** James Goldie, 360info")
 
+save_360plot(myplot, "figures/gender.png")
+knitr::include_graphics("figures/gender.png")
 
 ```
 
 ```{r flag-plot}
 # countries with flag
 flag_data <- gap %>% 
+  # countries of interest
   filter(`Country Name` %in% c("Iceland", "United Kingdom", "United States","Mauritius",
-                                             "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
-                                             "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
-                                             "Yemen, Rep.", "Bangladesh", "Qatar"),
+                               "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                               "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                                "Yemen, Rep.", "Bangladesh", "Qatar"),
          Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
   select(code,
@@ -1105,7 +1167,7 @@ flag_data <- gap %>%
   mutate(code = tolower(code)) 
   
 
-
+# scatter plot 
 gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
@@ -1131,73 +1193,43 @@ gap %>%
   geom_smooth(method = lm,
               se = FALSE,
               size = 0.6) + 
+  # add points for rest of the countries without flag
   geom_point(color = "grey",
              size = 0.7) +
+  # flag for countries of interest
+  geom_point(data = flag_data,
+             aes(color = Region),
+             size = 7,
+             alpha = 0.7) +
   geom_flag(data = flag_data,
             aes(country = code)) +
   geom_text(data = flag_data,
             aes(label = economy),
             size = 2,
             hjust = "centre",
-            nudge_y = 0.023,
+            nudge_y = 0.035,
             check_overlap = TRUE) +
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
-  theme_light() +
+  theme_minimal() +
   theme(panel.grid.minor = element_blank(),
         axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
-        axis.title.y = element_text(angle = 0, size = 8)) +
+        axis.title.y = element_text(angle = 0, size = 8),
+        legend.position = "bottom",
+        legend.text = element_text(size = 6)) +
+  # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
+  coord_cartesian(ylim = c(0.4, 0.9), 
+                      clip = 'off') +
   annotate(geom = "text", x = 28, y = 0.328, label = "More Laws", size = 3) +
   annotate(geom = "text", x = 98, y = 0.328, label = "Less Laws", size = 3) +
-  coord_cartesian(ylim = c(0.4, 0.9), # This focuses the y-axis on the range of interest
-                      clip = 'off') +
   labs(x = "",
-       y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
+       y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
+       color = NULL,
        title = "Scatter plot of WBL index and gender gap index",
        subtitle = "Year: 2021")
 
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-# pivot longer world bank gdp data 
-# gdp_region <- gdp %>% 
-#   select(-c(`Country Code`,
-#             `Indicator Name`,
-#             `Indicator Code`,
-#             `...66`)) %>% 
-#   pivot_longer(cols = 2:62,
-#                names_to = "year",
-#                values_to = "gdp_per_capita") %>% 
-#   rename(country_name = `Country Name`) %>% 
-#   left_join(wbl_region,
-#             by = "country_name") %>% 
-#   filter(!is.na(Region))
-#   
-#   
-# wbl_df %>% 
-#   select(economy,
-#          Region,
-#          reportyr,
-#          `WBL INDEX`) %>% 
-#   pivot_wider(names_from = reportyr,
-#               values_from = `WBL INDEX`)
 ```
 
 #### Political Empowerment subindex VS WBL index
