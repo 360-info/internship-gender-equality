@@ -39,6 +39,7 @@ library(ggpubr)
 library(ggflags)
 library(countrycode)
 library(themes360info)
+library(grid)
 ```
 
 
@@ -1032,8 +1033,6 @@ tooltip = "text"
 ```
 
 ```{r}
-options(themes360info.loadfonts = TRUE)
-
 # add column code for iso2 country code
 gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
 
@@ -1114,27 +1113,39 @@ gap %>%
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   stat_cor(aes(label = ..r.label..)) +
+  theme_minimal() +
+  # theme_360() +
   theme(panel.grid.minor = element_blank(),
         axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
-        axis.title.y = element_text(angle = 0, size = 8),
+        axis.title.y = element_text(size = 10),
+        axis.title.x = element_text(size = 10),
         legend.position = "top",
-        legend.text = element_text(size = 6)) +
+        legend.text = element_text(size = 6),
+        # legend.spacing = unit(0.05, 'cm'),
+        legend.box.margin = margin(t = 0, unit = 'cm'),
+        plot.caption = element_text(hjust = 0),
+        plot.caption.position =  "plot") +
   # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
-  coord_cartesian(ylim = c(0.4, 0.9),
+  coord_cartesian(xlim = c(20, 100),
+                  ylim = c(0.4, 0.9),
                   clip = "off") +
-  annotate_360(text_colour = "light", x = 28, y = 0.329, label = "More Laws", size = 3) +
-  annotate_360(text_colour = "light", x = 98, y = 0.329, label = "Less Laws", size = 3) +
-  theme_360() +
+  annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
+  annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
+  annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
+  annotate(geom = "text", x = 20, y = 0.45, label = "Less", size = 3) +
+  # annotate_360(text_colour = "light", x = 28, y = 0.329, label = "More", size = 3) +
+  # annotate_360(text_colour = "light", x = 98, y = 0.329, label = "Less", size = 3) +
   labs(x = "National laws which discriminate against women",
-       y = "More equality\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLess equality",
+       # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
+       y = "Gender equality \n Access to resources \n and opportunities",
        color = NULL,
        title = "Scatter plot of WBL index and gender gap index",
        subtitle = "Year: 2021",
-       caption = "**CHART:** James Goldie, 360info")
+       caption = "SOURCE: World Bank")
 
-save_360plot(myplot, "figures/gender.png")
-knitr::include_graphics("figures/gender.png")
+# save_360plot(myplot, "figures/gender.png")
+# knitr::include_graphics("figures/gender.png")
 
 ```
 
