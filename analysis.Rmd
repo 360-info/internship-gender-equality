@@ -1098,7 +1098,7 @@ gap %>%
               se = FALSE,
               size = 0.6) +
   geom_point(aes(color = Region),
-             size = 0.7,
+             size = 1.5,
              alpha = 0.7) +
   geom_point(data = flag_data,
              aes(color = Region),
@@ -1125,10 +1125,10 @@ gap %>%
         axis.line.y = element_blank(
           # arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")
           ),
-        axis.title.y = element_text(size = 10),
-        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
         legend.position = "top",
-        legend.text = element_text(size = 10),
+        legend.text = element_text(size = 12),
         legend.justification = "left",
         # legend.spacing = unit(0.05, 'cm'),
         # legend.box.margin = margin(t = 0, unit = 'cm'),
@@ -1143,10 +1143,10 @@ gap %>%
   # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
   # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
   # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
-  annotate_360_glasslight(x = 28, y = 0.329, label = "More", size = 3) +
-  annotate_360_glasslight(x = 98, y = 0.329, label = "Less", size = 3) +
-  annotate_360_glasslight(x = 25, y = 0.85, label = "More", size = 3) +
-  annotate_360_glasslight(x = 25, y = 0.38, label = "Less", size = 3) +
+  annotate_360_glasslight(x = 30, y = 0.329, label = "**More**", size = 4) +
+  annotate_360_glasslight(x = 98, y = 0.329, label = "**Less**", size = 4) +
+  annotate_360_glasslight(x = 25, y = 0.85, label = "**More**", size = 4) +
+  annotate_360_glasslight(x = 25, y = 0.38, label = "**Less**", size = 4) +
   labs(x = "National laws which discriminate against women",
        # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
        y = "Gender equality \n Access to resources \n and opportunities",
