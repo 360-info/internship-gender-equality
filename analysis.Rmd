@@ -40,6 +40,7 @@ library(ggflags)
 library(countrycode)
 library(themes360info)
 library(grid)
+library(ggrepel)
 ```
 
 
@@ -1034,7 +1035,8 @@ tooltip = "text"
 
 ```{r}
 library(rsvg)
-# add column code for iso2 country code
+
+# add a column for iso2 country code
 gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
 
 
@@ -1107,13 +1109,16 @@ gap %>%
              show.legend = F) +
   geom_flag(data = flag_data,
             aes(country = code)) +
-  geom_text(data = flag_data,
-            aes(label = economy),
-            size = 4,
-            hjust = "centre",
-            nudge_y = 0.035,
-            check_overlap = TRUE) + #ggrepel!!!!
-  scale_x_continuous(limits = c(25, 100)) +
+  # geom_text(data = flag_data,
+  #           aes(label = economy),
+  #           size = 4,
+  #           hjust = "centre",
+  #           nudge_y = 0.035,
+  #           check_overlap = TRUE) + #ggrepel!!!!
+  geom_text_repel(data = flag_data,
+                  aes(label = economy),
+                  point.padding = 7) +
+  # scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
   # stat_cor(aes(label = ..r.label..)) +
   # theme_minimal() +
@@ -1128,8 +1133,11 @@ gap %>%
         axis.title.y = element_text(size = 12),
         axis.title.x = element_text(size = 12),
         legend.position = "top",
-        legend.text = element_text(size = 12),
+        # legend.position = c(-0.15, 1.05),
         legend.justification = "left",
+        # legend.box = "horizontal",
+        legend.box.margin = margin(-0.5, 0, 0, -3, "cm"),
+        legend.text = element_text(size = 12),
         # legend.spacing = unit(0.05, 'cm'),
         # legend.box.margin = margin(t = 0, unit = 'cm'),
         plot.caption = element_text(hjust = 0),
@@ -1145,7 +1153,7 @@ gap %>%
   # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
   annotate_360_glasslight(x = 30, y = 0.329, label = "**More**", size = 4) +
   annotate_360_glasslight(x = 98, y = 0.329, label = "**Less**", size = 4) +
-  annotate_360_glasslight(x = 25, y = 0.85, label = "**More**", size = 4) +
+  annotate_360_glasslight(x = 25, y = 0.88, label = "**More**", size = 4) +
   annotate_360_glasslight(x = 25, y = 0.38, label = "**Less**", size = 4) +
   labs(x = "National laws which discriminate against women",
        # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
@@ -1158,7 +1166,7 @@ gap %>%
 
 save_360plot("figures/gender.png") 
 
-knitr::include_graphics("figures/gender.png") # include graphic in my report 
+knitr::include_graphics("figures/gender.png") #include graphic in my report 
 
 ```
 ```{r}
