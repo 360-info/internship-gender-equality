@@ -1033,6 +1033,7 @@ tooltip = "text"
 ```
 
 ```{r}
+library(rsvg)
 # add column code for iso2 country code
 gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
 
@@ -1089,7 +1090,9 @@ gap %>%
                              "Country : {economy}",
                              "\nWBL Index: {`WBL INDEX`}",
                              "\nGender Gap Index: {gender_gap_index}")) %>%  
-  ggplot(aes(x = `WBL INDEX`,
+  {
+    ggplot(., 
+           aes(x = `WBL INDEX`,
              y = gender_gap_index)) +
   geom_smooth(method = lm,
               se = FALSE,
@@ -1106,48 +1109,80 @@ gap %>%
             aes(country = code)) +
   geom_text(data = flag_data,
             aes(label = economy),
-            size = 2,
+            size = 4,
             hjust = "centre",
             nudge_y = 0.035,
-            check_overlap = TRUE) +
+            check_overlap = TRUE) + #ggrepel!!!!
   scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Set1") +
-  stat_cor(aes(label = ..r.label..)) +
-  theme_minimal() +
-  # theme_360() +
+  # stat_cor(aes(label = ..r.label..)) +
+  # theme_minimal() +
+  theme_360() +
   theme(panel.grid.minor = element_blank(),
-        axis.line.x = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
-        axis.line.y = element_line(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.line.x = element_blank(
+          # arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")
+          ),
+        axis.line.y = element_blank(
+          # arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")
+          ),
         axis.title.y = element_text(size = 10),
         axis.title.x = element_text(size = 10),
         legend.position = "top",
-        legend.text = element_text(size = 6),
+        legend.text = element_text(size = 10),
+        legend.justification = "left",
         # legend.spacing = unit(0.05, 'cm'),
-        legend.box.margin = margin(t = 0, unit = 'cm'),
+        # legend.box.margin = margin(t = 0, unit = 'cm'),
         plot.caption = element_text(hjust = 0),
         plot.caption.position =  "plot") +
   # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
-  coord_cartesian(xlim = c(20, 100),
-                  ylim = c(0.4, 0.9),
+  coord_cartesian(
+    # xlim = c(20, 100),
+                  # ylim = c(0.4, 0.9),
                   clip = "off") +
-  annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
-  annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
-  annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
-  annotate(geom = "text", x = 20, y = 0.45, label = "Less", size = 3) +
-  # annotate_360(text_colour = "light", x = 28, y = 0.329, label = "More", size = 3) +
-  # annotate_360(text_colour = "light", x = 98, y = 0.329, label = "Less", size = 3) +
+  # annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
+  # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
+  annotate_360_glasslight(x = 28, y = 0.329, label = "More", size = 3) +
+  annotate_360_glasslight(x = 98, y = 0.329, label = "Less", size = 3) +
+  annotate_360_glasslight(x = 25, y = 0.85, label = "More", size = 3) +
+  annotate_360_glasslight(x = 25, y = 0.38, label = "Less", size = 3) +
   labs(x = "National laws which discriminate against women",
        # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
        y = "Gender equality \n Access to resources \n and opportunities",
        color = NULL,
        title = "Scatter plot of WBL index and gender gap index",
        subtitle = "Year: 2021",
-       caption = "SOURCE: World Bank")
+       caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
+  } %>% 
 
-# save_360plot(myplot, "figures/gender.png")
-# knitr::include_graphics("figures/gender.png")
+save_360plot("figures/gender.png") 
+
+knitr::include_graphics("figures/gender.png") # include graphic in my report 
 
 ```
+```{r}
+# 
+# library(tidyverse)
+# library(themes360info)
+# mtcars %>%
+# {
+#   ggplot(.) +
+#   aes(mpg, disp) +
+#   geom_point() +
+#   theme_360() +
+#   annotate_360_lightblue(label = "Oh hello!",
+#     x = Inf,
+#     y = Inf)
+# } %>%
+# save_360plot("test.png")
+
+```
+
+# 
+
+
+
 
 ```{r flag-plot}
 # countries with flag
