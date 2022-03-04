@@ -40,6 +40,7 @@ library(ggflags)
 library(countrycode)
 library(themes360info)
 library(grid)
+library(rsvg)
 library(ggrepel)
 ```
 
@@ -1034,8 +1035,6 @@ tooltip = "text"
 ```
 
 ```{r}
-library(rsvg)
-
 # add a column for iso2 country code
 gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
 
@@ -1066,9 +1065,9 @@ flag_data <- gap %>%
          gender_gap_index) %>% 
   filter(!is.na(gender_gap_index)) %>% 
   mutate(code = tolower(code)) 
+```
 
-
-
+```{r}
 gap %>% 
   filter(Indicator == "Overall Global Gender Gap Index",
          `Subindicator Type` == "Index") %>% 
@@ -1098,15 +1097,16 @@ gap %>%
              y = gender_gap_index)) +
   geom_smooth(method = lm,
               se = FALSE,
-              size = 0.6) +
-  geom_point(aes(color = Region),
+              colour = "#36a7e9") +
+  geom_point(aes(color = Region,
+                 shape = Region),
              size = 1.5,
              alpha = 0.7) +
   geom_point(data = flag_data,
              aes(color = Region),
              size = 7,
              alpha = 0.7,
-             show.legend = F) +
+             show.legend = FALSE) +
   geom_flag(data = flag_data,
             aes(country = code)) +
   # geom_text(data = flag_data,
@@ -1114,53 +1114,52 @@ gap %>%
   #           size = 4,
   #           hjust = "centre",
   #           nudge_y = 0.035,
-  #           check_overlap = TRUE) + #ggrepel!!!!
-  geom_text_repel(data = flag_data,
+  #           check_overlap = TRUE) + 
+  geom_label_repel(data = flag_data,
                   aes(label = economy),
-                  point.padding = 7) +
+                  label.size = NA,
+                  point.padding = 7,
+                  alpha = 0.5) +
   # scale_x_continuous(limits = c(25, 100)) +
-  scale_color_brewer(palette = "Set1") +
-  # stat_cor(aes(label = ..r.label..)) +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(15:18, 15:17)) +
+  # stat_cor(aes(label = ..r.label..)) + #add R value
   # theme_minimal() +
   theme_360() +
   theme(panel.grid.minor = element_blank(),
-        axis.line.x = element_blank(
-          # arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")
-          ),
-        axis.line.y = element_blank(
-          # arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")
-          ),
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_text(size = 12),
+        # axis.line.x = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        # axis.line.y = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 19, b = 0, l = 0)),
+        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = 0, l = 0)),
         legend.position = "top",
         # legend.position = c(-0.15, 1.05),
         legend.justification = "left",
         # legend.box = "horizontal",
-        legend.box.margin = margin(-0.5, 0, 0, -3, "cm"),
+        legend.box.margin = margin(-0.5, 0, 0, -2.7, "cm"), # align legend with title and subtitle
         legend.text = element_text(size = 12),
+        plot.margin = margin(t = 5.5, r = 10, b = 5.5, l = 12)) + #increase plot margin to allow text placed on y axis outside of plot 
         # legend.spacing = unit(0.05, 'cm'),
-        # legend.box.margin = margin(t = 0, unit = 'cm'),
-        plot.caption = element_text(hjust = 0),
-        plot.caption.position =  "plot") +
+        # plot.caption = element_text(hjust = 0),
+        # plot.caption.position =  "plot") +
   # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
-  coord_cartesian(
-    # xlim = c(20, 100),
-                  # ylim = c(0.4, 0.9),
+  coord_cartesian(xlim = c(20, 100),
+                  ylim = c(0.4, 0.9),
                   clip = "off") +
   # annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
   # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
   # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
   # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
-  annotate_360_glasslight(x = 30, y = 0.329, label = "**More**", size = 4) +
-  annotate_360_glasslight(x = 98, y = 0.329, label = "**Less**", size = 4) +
-  annotate_360_glasslight(x = 25, y = 0.88, label = "**More**", size = 4) +
-  annotate_360_glasslight(x = 25, y = 0.38, label = "**Less**", size = 4) +
-  labs(x = "National laws which discriminate against women",
+  annotate_360(x = 22, y = 0.318, label = "**More laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 98, y = 0.318, label = "**Less laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 8, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue") +
+  annotate_360(x = 8, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue") +
+  labs(x = "Women, business and the law index (2021)",
        # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
-       y = "Gender equality \n Access to resources \n and opportunities",
+       y = "Overall global gender gap index (2021)",
        color = NULL,
-       title = "Scatter plot of WBL index and gender gap index",
-       subtitle = "Year: 2021",
+       shape = NULL,
+       title = "LAWS AND GENDER EQUALITY",
+       subtitle = "NATIONS WTIH FEWER LAWS TARGETING WOMEN TEND TO HAVE BETTER ACCESS TO \nRESOURCES AND OPPORTUNITIES ACROSS GENDERS",
        caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
   } %>% 
 
@@ -1168,7 +1167,14 @@ save_360plot("figures/gender.png")
 
 knitr::include_graphics("figures/gender.png") #include graphic in my report 
 
+
+
+# nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders
 ```
+
+
+
+
 ```{r}
 # 
 # library(tidyverse)
@@ -1187,7 +1193,7 @@ knitr::include_graphics("figures/gender.png") #include graphic in my report
 
 ```
 
-# 
+
 
 
 
