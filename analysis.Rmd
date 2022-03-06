@@ -1115,11 +1115,16 @@ gap %>%
   #           hjust = "centre",
   #           nudge_y = 0.035,
   #           check_overlap = TRUE) + 
-  geom_label_repel(data = flag_data,
+  geom_label_repel(
                   aes(label = economy),
+                  data = flag_data,
                   label.size = NA,
                   point.padding = 7,
-                  alpha = 0.5) +
+                  # alpha = 0.5,
+                  fill = "#FFFFFF88",
+                  family = "Body 360info",
+                  fontface = "bold",
+                  colour = "black") +
   # scale_x_continuous(limits = c(25, 100)) +
   scale_color_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(15:18, 15:17)) +
@@ -1129,15 +1134,15 @@ gap %>%
   theme(panel.grid.minor = element_blank(),
         # axis.line.x = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         # axis.line.y = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
-        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 19, b = 0, l = 0)),
-        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = 0, l = 0)),
+        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 20, b = 0, l = 10)),
+        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = , l = 0)),
         legend.position = "top",
         # legend.position = c(-0.15, 1.05),
         legend.justification = "left",
         # legend.box = "horizontal",
-        legend.box.margin = margin(-0.5, 0, 0, -2.7, "cm"), # align legend with title and subtitle
+        legend.box.margin = margin(-0.5, 0, 0, -3.8, "cm"), # align legend with title and subtitle
         legend.text = element_text(size = 12),
-        plot.margin = margin(t = 5.5, r = 10, b = 5.5, l = 12)) + #increase plot margin to allow text placed on y axis outside of plot 
+        plot.margin = margin(t = 5.5, r = 18, b = 5.5, l = 28)) + #increase plot margin to allow text placed on y axis outside of plot 
         # legend.spacing = unit(0.05, 'cm'),
         # plot.caption = element_text(hjust = 0),
         # plot.caption.position =  "plot") +
@@ -1151,8 +1156,8 @@ gap %>%
   # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
   annotate_360(x = 22, y = 0.318, label = "**More laws**", size = 4, text_colour = "blue") +
   annotate_360(x = 98, y = 0.318, label = "**Less laws**", size = 4, text_colour = "blue") +
-  annotate_360(x = 8, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue") +
-  annotate_360(x = 8, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue") +
+  annotate_360(x = 9.5, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
+  annotate_360(x = 9.5, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
   labs(x = "Women, business and the law index (2021)",
        # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
        y = "Overall global gender gap index (2021)",
@@ -1163,7 +1168,9 @@ gap %>%
        caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
   } %>% 
 
-save_360plot("figures/gender.png") 
+save_360plot("figures/gender.png") %>% 
+
+save_360plot("figures/gender.svg") 
 
 knitr::include_graphics("figures/gender.png") #include graphic in my report 
 
@@ -1171,9 +1178,6 @@ knitr::include_graphics("figures/gender.png") #include graphic in my report
 
 # nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders
 ```
-
-
-
 
 ```{r}
 # 
@@ -1193,6 +1197,83 @@ knitr::include_graphics("figures/gender.png") #include graphic in my report
 
 ```
 
+
+```{r}
+
+library(ggiraph)
+library(htmlwidgets)
+
+iraph_plot <- gap %>% 
+  filter(Indicator == "Overall Global Gender Gap Index",
+         `Subindicator Type` == "Index") %>% 
+  select(code,
+         `Country Name`,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = `Country Name`) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(reportyr == "2021") %>% 
+  select(code,
+         economy,
+         reportyr,
+         Region,
+         `Income group`,
+         `WBL INDEX`,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(tooltip = glue_data(gap,
+                             "Country : {economy}",
+                             "\nWBL Index: {`WBL INDEX`}",
+                             "\nGender Gap Index: {gender_gap_index}")) %>%  
+  ggplot(
+         aes(x = `WBL INDEX`,
+             y = gender_gap_index)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              colour = "#36a7e9") +
+  # geom_point(aes(color = Region,
+  #                shape = Region),
+  #            size = 1.5,
+  #            alpha = 0.7) +
+  # geom_point(data = flag_data,
+  #            aes(color = Region),
+  #            size = 7,
+  #            alpha = 0.7,
+  #            show.legend = FALSE) +
+  geom_point(data = flag_data,
+             aes(shape = Region),
+             size = 3,
+             colour = "grey") +
+  geom_point_interactive(
+    aes(tooltip = economy, 
+        data_id = economy,
+        colour = Region,
+        shape = Region),
+    alpha = 0.7) +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(15:18, 15:17)) +
+  labs(x = "Women, business and the law index (2021)",
+       # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
+       y = "Overall global gender gap index (2021)",
+       color = NULL,
+       shape = NULL,
+       title = "LAWS AND GENDER EQUALITY",
+       subtitle = "NATIONS WTIH FEWER LAWS TARGETING WOMEN TEND TO HAVE BETTER ACCESS TO \nRESOURCES AND OPPORTUNITIES ACROSS GENDERS",
+       caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") +
+  theme_minimal() +
+  theme(legend.position = "top",
+        plot.title = element_text(face = "bold", size = rel(2)))
+
+
+girafe(code = print(iraph_plot)) %>%
+  saveWidget("test.html")
+
+
+# x <- girafe(ggobj = iraph_plot)
+# if( interactive() ) print(x)
+  
+```
 
 
 
