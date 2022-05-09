@@ -1,5 +1,5 @@
 ---
-title: "**International Women's Day - Women's Legal Rights**"
+title: "**International Women's Day Special Report - Women's Legal Rights**"
 author: "Mengyun Yang"
 date: "16/12/2021"
 output: 
@@ -7,8 +7,6 @@ output:
     css: "style.css"
     includes:
       before_body: women.html
-    fig_height: 5
-    fig_width: 8
     toc: yes
     toc_depth: 1
     toc_float:
@@ -19,9 +17,71 @@ output:
 bibliography: references.bib  
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE, 
+  collapse = TRUE,
+  comment = "#",
+  fig.height = 4,
+  fig.width = 8,
+  fig.align = "center",
+  cache = FALSE
+  )
 ```
 
-# Women in power and decision-making
-# Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
+```{r}
+library(tidyverse)
+library(dplyr)
+library(glue)
+library(ggplot2)
+library(here)
+library(readxl)
+library(stringr)
+library(scales)
+library(forcats)
+library(plotly)
+library(tmap)
+library(sf)
+library(leaflet)
+library(shiny)
+library(ggthemes)
+library(kableExtra)
+library(gt)
+library(ggpubr)
+library(ggflags)
+library(countrycode)
+library(themes360info)
+library(grid)
+library(rsvg)
+library(ggrepel)
+```
+
+
+
+
+
+# Summary
+Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
+
+# Background
+
+
+# Objectives 
+
+
+# Methodology
+
+
+# Analysis and Findings
+
+
+# Conclusion
+
+
+# Reference
+
+
+
