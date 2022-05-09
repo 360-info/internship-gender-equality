@@ -1,0 +1,6 @@
+li.tocify-item.list-group-item.active {
+    z-index: 2;
+    color: #ffffff;
+    background-color: #C0C0C0;
+    border-color: #dddddd;
+}

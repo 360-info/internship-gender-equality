@@ -1,8 +1,21 @@
 ---
-title: "report"
+title: "**International Women's Day - Women's Legal Rights**"
 author: "Mengyun Yang"
 date: "16/12/2021"
-output: html_document
+output: 
+  bookdown::html_document2:
+    css: "style.css"
+    includes:
+      before_body: women.html
+    fig_height: 5
+    fig_width: 8
+    toc: yes
+    toc_depth: 1
+    toc_float:
+      collapsed: false
+    number_sections: false
+    code_folding: show
+    theme: cosmo
 bibliography: references.bib  
 ---
 
@@ -11,4 +24,4 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Women in power and decision-making
-## Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
+# Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
