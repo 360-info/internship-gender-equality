@@ -6,7 +6,7 @@ output:
   bookdown::html_document2:
     css: "style.css"
     includes:
-      before_body: women.html
+      before_body: women.html #image: The Commonwealth Club of California https://www.commonwealthclub.org/events/2020-05-21/empowering-women-climate-solution-we-dont-talk-about
     toc: yes
     toc_depth: 1
     toc_float:
@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
   )
 ```
 
-```{r}
+```{r include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(dplyr)
 library(glue)
@@ -60,13 +60,11 @@ library(ggrepel)
 ```
 
 
-
-
-
-# Summary
+# Abstract
 Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
 
 # Background
+For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress [@UnitedNations]. This analysis aims to identify the bias in the creation of laws which can disadvantage women - both socially and economically.
 
 
 # Objectives 
