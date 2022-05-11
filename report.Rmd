@@ -1,18 +1,21 @@
 ---
-title: "**International Women's Day Special Report - Women's Legal Rights**"
-author: "Mengyun Yang"
+title: |
+  <br>**International Women's Day Special Report - Women's Legal Rights**
+author: |
+  | Author: Mengyun Yang 
+  | Supervisor: James Goldie at 360info
 date: "16/12/2021"
 output: 
   bookdown::html_document2:
     css: "style.css"
     includes:
-      before_body: women.html #image: The Commonwealth Club of California https://www.commonwealthclub.org/events/2020-05-21/empowering-women-climate-solution-we-dont-talk-about
+      before_body: women.html #https://www.commonwealthclub.org/events/2020-05-21/empowering-women-climate-solution-we-dont-talk-about
     toc: yes
     toc_depth: 1
     toc_float:
       collapsed: false
     number_sections: false
-    code_folding: show
+    # code_folding: show
     theme: cosmo
 bibliography: references.bib  
 ---
@@ -34,7 +37,7 @@ knitr::opts_chunk$set(
 
 ```{r include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
-library(dplyr)
+library(skimr)
 library(glue)
 library(ggplot2)
 library(here)
@@ -60,8 +63,22 @@ library(ggrepel)
 ```
 
 
+```{r read-data}
+# downloaded from https://wbl.worldbank.org/en/wbl-data
+wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
+
+
+# downloaded from https://data.worldbank.org/topic/gender
+indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
+
+# downloaded from https://www.v-dem.net/vdemds.html
+dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
+
+```
+
+
 # Abstract
-Identifying the bias in the creation of laws which can disadvantage women - both socially and economically
+
 
 # Background
 For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress [@UnitedNations]. This analysis aims to identify the bias in the creation of laws which can disadvantage women - both socially and economically.
@@ -70,10 +87,57 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 # Objectives 
 
 
+
 # Methodology
 
 
-# Analysis and Findings
+
+# Data sources
+The data used in this project consists of 3 separate data set, the women, business and the law data and gender indicator data were both obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data) and [Gender Portal](https://data.worldbank.org/topic/gender), the democracy ratings data was also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
+
+## The women, business and the law data
+The women, business and the law data set contains 10 sheets of data. The first two sheets are overall WBL index scores, individual indicator scores and 35 questions for 190 economies from years 1971 to 2021. The WBL index scores are calculated by averaging the scores of each economy for the eight topics included in 2021's aggregate score [@WBL]. It assesses the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]. A higher score suggests that there are more laws promoting gender equality. The subsequent sheets present answer for the scored questions by 8 indicators (see Table \@ref(tab:t1) for scoring and rating system). 
+
+it assesses women's economic empowerment. It is based on formal laws and regulations in each country that affect women's economic involvement, and it covers eight indicators. It examines how laws affect women at various phases of their careers, with a focus on legislation that apply in the main business city.[@civilsdaily]
+
+```{r t1}
+tribble(
+  ~Score, ~Range,
+  "WBL Index",   "0 - 100",
+  "Indicator Score",   "0 - 100",
+  "Answer to Scored Question",    "Yes/No",
+  "Answer Score", "1(Yes)/0(No)"
+) %>% 
+  kable(caption = "Scoring and rating system") %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+## The gender indicator data
+
+There are `r nrow(indicators)` observations and `r ncol(indicators)` columns in the gender indicator data set. It contains collection of data on significant gender issues such as education, employment, health, population etc.
+
+
+```{r}
+skim(indicators) %>% 
+  kable() %>% 
+  kable_styling(full_width = TRUE) %>% 
+  scroll_box(width = "500px", height = "200px")
+```
+
+
+
+## The democracy ratings data 
+
+
+
+# Result
+
+
+
+# Discussion
+
+
 
 
 # Conclusion
