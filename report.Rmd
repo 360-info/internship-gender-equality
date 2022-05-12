@@ -69,10 +69,10 @@ wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet =
 
 
 # downloaded from https://data.worldbank.org/topic/gender
-indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) #skip the first 4 rows
+gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) #skip the first 4 rows
 
 # downloaded from https://www.v-dem.net/vdemds.html
-dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
+vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 ```
 
@@ -96,7 +96,7 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 The data used in this project consists of 3 separate data set, the women, business and the law data and gender indicator data were both obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively, the democracy ratings data was also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
 
 ## The women, business and the law data
-The women, business and the law data set contains 10 sheets of data. It assesses the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]. The first two sheets are overall WBL index scores, individual indicator scores go evaluate 35 parts of the law from 190 economies from years 1971 to 2021. The subsequent sheets present answer for the scored questions by 8 indicators. Indicator-level scores are obtained by calculating the unweighted average of the questions within that indicator and scaling the result to 100. Overall scores are then calculated by taking the average of each indicator, with 100 representing the highest possible score, a higher score suggests that there are more laws promoting gender equality [@WBL] (see Table \@ref(tab:wbl-data) for scoring method for WBL data). There are no missing values presented in this data set.
+The women, business and the law data set contains 10 sheets of data. It assesses the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]. The first two sheets are overall WBL index scores, individual indicator scores go evaluate 35 parts of the law from 190 economies from years 1971 to 2021. The subsequent sheets present answer for the scored questions by 8 indicators. Indicator-level scores are obtained by calculating the unweighed average of the questions within that indicator and scaling the result to 100. Overall scores are then calculated by taking the average of each indicator, with 100 representing the highest possible score, a higher score suggests that there are more laws promoting gender equality [@WBL] (see Table \@ref(tab:wbl-data) for scoring method for WBL data). There are no missing values presented in this data set.
 
 
 
@@ -109,18 +109,21 @@ tribble(
   "Answer Score", "1(Yes)/0(No)"
 ) %>% 
   kable(caption = "Scoring method for WBL data") %>% 
-  kable_styling(full_width = FALSE)
+  kable_styling(full_width = FALSE) %>% 
+  footnote(general = "The World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 
 ```
 
 
 ## The gender indicator data
 
-There are `r nrow(indicators)` observations and `r ncol(indicators)` columns in the gender indicator data set. It contains collection of data on `r nrow(read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_en_csv_v2_4040307.csv")))-1` significant gender issues such as education, employment, health, population etc. for period from 1960 to 2021 (see Table \@ref(tab:gender-metadata) for metadata of the gender indicator). As it can be seen from Table \@ref(tab:gender-data), there are a lot of missing values in this data set, not all the indicators have data for the whole period of 1960 to 2021. However, there were only one indicator used in this analysis for period from 1997 - 2021, therefore, missing values can be omitted.
+There are `r nrow(gender)` observations and `r ncol(gender)` columns in the gender indicator data set. It contains collection of data on `r nrow(read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_en_csv_v2_4040307.csv")))-1` significant gender issues such as education, employment, health, population etc. for period from 1960 to 2021 (see Table \@ref(tab:gender-metadata) for metadata of the gender indicator). As it can be seen from Table \@ref(tab:gender-data), there are a lot of missing values in this data set, not all the indicators have data for the whole period of 1960 to 2021. However, there were only one indicator used in this analysis for period from 1997 - 2021, therefore, missing values can be omitted.
 
 ```{r gender-data}
-skim(indicators %>% select(-X)) %>% 
-  kable(caption = "Summary of the gender indicator data frame (scrollable)") %>% 
+skim(gender %>% select(-X)) %>% 
+  kable(caption = "Summary of missing value of gender indicator data frame (scrollable)") %>% 
   kable_styling(full_width = TRUE) %>% 
   scroll_box(height = "200px")
 ```
@@ -128,18 +131,48 @@ skim(indicators %>% select(-X)) %>%
 
 ```{r gender-metadata}
 read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_en_csv_v2_4040307.csv")) %>% 
-  select(INDICATOR_NAME,
-         SOURCE_NOTE) %>% 
-  kable(caption = "Metadata of gender indicator (scrollable)") %>% 
-  kable_styling() %>% 
-  scroll_box(height = "400px")
+  select(-...5) %>%
+  kable(caption = "Codebook of gender indicator (scrollable)") %>% 
+  kable_styling(full_width = TRUE) %>% 
+  scroll_box(height = "400px") %>% 
+  footnote(general = "The World Bank",
+           general_title = "Source:",
+          footnote_as_chunk = TRUE)
 ```
 
 
 ## The democracy ratings data 
+This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections [@vdem]. Only a indicator  was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem_missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
 
 
+```{r vdem-metadata}
+tribble(
+  ~INDICATOR, ~QUESTION, ~CLARIFICATION, ~RESPONSES, 
+  "v2elfemrst",   "Are women eligible to vote in national elections", "If there are no (direct) national elections, observations are not coded (missing)", "0: No female suffrage. No women are allowed to vote, but some or all males vote. \n1: Restricted female suffrage. Some women are allowed to vote, and face more or different restrictions than men. \n2: Universal female suffrage. All women are allowed to vote.") %>% 
+#   "v2clacjstw", "Do women enjoy equal, secure, and effective access to justice?", "This question specifies the extent to which women can bring cases before the courts without risk to their personal safety, trials are fair, and women have effective ability to seek redress if public authorities violate their rights, including the rights to counsel, defense, and
+# appeal.", "0: Secure and effective access to justice for women is non-existent.
+# 1: Secure and effective access to justice for women is usually not established or widely respected.
+# 2: Secure and effective access to justice for women is inconsistently observed. Minor problems
+# characterize most cases or occur rather unevenly across different parts of the country.
+# 3: Secure and effective access to justice for women is usually observed.
+# 4: Secure and effective access to justice for women is almost always observed.") %>% 
+  kable(caption = "Codebook for the democracy ratings data") %>% 
+  kable_styling() %>% 
+    footnote(general = "V-Dem",
+             general_title = "Source:",
+             footnote_as_chunk = TRUE)
+```
 
+<br>
+
+```{r vdem-missing}
+vdem %>% 
+  select(v2elfemrst) %>% 
+         #v2clacjstw) %>% 
+  skim() %>% 
+  kable(caption = "Summary of missing values of the subset of democracy ratings data") %>% 
+  kable_styling()
+```
 # Result
 
 
