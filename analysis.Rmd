@@ -424,12 +424,14 @@ wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet =
 
 
 # download from https://data.worldbank.org/topic/gender
-indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4)
+# indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4) old version
+
+indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) # updated version
 ```
 
 ## WBL index
 
-The WBL (The Women Business and the Law Index) index measures the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as parenthood, equality of pay. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]
+
 
 ### WBL index over time
 
@@ -1274,10 +1276,6 @@ girafe(code = print(iraph_plot)) %>%
 # if( interactive() ) print(x)
   
 ```
-
-
-
-
 
 ```{r flag-plot}
 # countries with flag
