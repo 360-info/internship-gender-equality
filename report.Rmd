@@ -71,7 +71,8 @@ wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet =
 
 ```{r gender}
 # downloaded from https://data.worldbank.org/topic/gender
-gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) #skip the first 4 rows
+## skip the first 4 rows
+gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) 
 
 
 ```
@@ -110,7 +111,6 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 
 
 # Data sources
-
 
 The data used in this project consists of 4 separate data set. The women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
 
@@ -210,11 +210,7 @@ vdem %>%
   kable_styling()
 ```
 
-# Result
-
-
-
-# Discussion
+# Result and discussion
 
 
 
