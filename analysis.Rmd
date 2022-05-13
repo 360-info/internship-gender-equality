@@ -48,13 +48,7 @@ library(ggrepel)
 ```{r}
 # data from world bank
 pop <- read.csv(here("data/population_data.csv"))
-```
 
-
-# Population
-## Female population VS male population over the years
-
-```{r, eval = FALSE}
 # cleaning 
 names(pop) <- tolower(names(pop))
 
@@ -73,8 +67,75 @@ pop_tidy <- pop %>%
          year = str_trim(year, side = "right"),
          population = as.numeric(population))
   
-
 ```
+
+
+```{r}
+# data from united nations, spreadsheet contains global and regional data by sex and age https://population.un.org/wpp/DataQuery/
+pop_age <- read_excel(here("data/PopulationAgeSex-20211213064029.xlsx"), sheet = 2, range = "B2:Z17")
+
+
+# cleaning
+names(pop_age) <- tolower(names(pop_age))
+
+pop_age_long <- 
+  pop_age %>% 
+  pivot_longer(cols = 5:25,
+               names_to = "age",
+               values_to = "population")
+
+
+# make male population go to the left of x axis, thus negative sign
+pop_age_long$population <- ifelse(pop_age_long$sex == "Male", -1*pop_age_long$population, pop_age_long$population)
+```
+
+
+```{r}
+labor <- read_excel(here("data/labor_force_world_bank.xlsx"))
+
+# cleaning 
+names(labor) <- tolower(names(labor))
+
+names(labor) <- gsub(" ", "_", names(labor))
+
+labor_tidy <- labor %>% 
+  select(-c(series_code, `2020_[yr2020]`)) %>% 
+  pivot_longer(cols = 4:33,
+               names_to = "year",
+               values_to = "percentage") %>% 
+  mutate(percentage = as.numeric(percentage),
+         year = str_remove(year, "_\\[yr[0-9]+\\]")) 
+```
+
+```{r, eval = FALSE}
+# world development indicators from world bank https://datacatalog.worldbank.org/search/dataset/0037712
+wdi <- read.csv(here("data/WDIData.csv"))
+```
+
+
+```{r gender-gap-index}
+# download from: https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
+gap <- read_csv(here("data/gender_gap_index.csv"))
+
+# cleaning 
+gap <- clean_names(gap) 
+
+names(gap) <- sub("x", "", names(gap))
+```
+
+
+
+```{r wbl}
+# https://wbl.worldbank.org/en/wbl-data
+wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
+
+# download from https://data.worldbank.org/topic/gender
+## indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4) old version
+indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) # updated version
+```
+
+# Population
+## Female population VS male population over the years
 
 ```{r, eval = FALSE}
 # plot it
@@ -113,26 +174,6 @@ ggplotly(
 ```
 
 ## Population by sex and age
-
-```{r}
-# data from united nations, spreadsheet contains global and regional data by sex and age https://population.un.org/wpp/DataQuery/
-pop_age <- read_excel(here("data/PopulationAgeSex-20211213064029.xlsx"), sheet = 2, range = "B2:Z17")
-```
-
-```{r, eval = FALSE}
-# cleaning
-names(pop_age) <- tolower(names(pop_age))
-
-pop_age_long <- 
-  pop_age %>% 
-  pivot_longer(cols = 5:25,
-               names_to = "age",
-               values_to = "population")
-
-
-# make male population go to the left of x axis, thus negative sign
-pop_age_long$population <- ifelse(pop_age_long$sex == "Male", -1*pop_age_long$population, pop_age_long$population)
-```
 
 ```{r, eval = FALSE}
 # plot it
@@ -195,27 +236,6 @@ tooltip = "text"
 
 # Work
 ## Labour force
-
-```{r}
-labor <- read_excel(here("data/labor_force_world_bank.xlsx"))
-```
-
-
-```{r}
-# cleaning 
-names(labor) <- tolower(names(labor))
-
-names(labor) <- gsub(" ", "_", names(labor))
-
-labor_tidy <- labor %>% 
-  select(-c(series_code, `2020_[yr2020]`)) %>% 
-  pivot_longer(cols = 4:33,
-               names_to = "year",
-               values_to = "percentage") %>% 
-  mutate(percentage = as.numeric(percentage),
-         year = str_remove(year, "_\\[yr[0-9]+\\]")) 
-```
-
 ```{r, eval = FALSE}
 # plot it
 labor_tidy_world <- labor_tidy %>% 
@@ -399,12 +419,6 @@ shinyApp(ui, server)
 ```
 
 ## Employment
-
-```{r, eval = FALSE}
-# world development indicators from world bank https://datacatalog.worldbank.org/search/dataset/0037712
-wdi <- read.csv(here("data/WDIData.csv"))
-```
-
 ```{r, eval = FALSE}
 employment <- wdi %>% 
   filter(Indicator.Name %in% c("Employment to population ratio, 15+, female (%) (modeled ILO estimate)",
@@ -416,24 +430,13 @@ employment <- wdi %>%
 
 
 
-# Women in Law
-
-```{r}
-# https://wbl.worldbank.org/en/wbl-data
-wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
-
-
-# download from https://data.worldbank.org/topic/gender
-# indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4) old version
-
-indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) # updated version
-```
-
-## WBL index
 
 
 
-### WBL index over time
+
+
+# Women's legal rights
+## WBL index over time
 
 ```{r}
 # faceted choropleth map
@@ -949,10 +952,6 @@ workplace_long %>%
 
 ### Gender gap index VS WBL index
 
-```{r}
-gap <- read_csv(here("data/gender_gap_index.csv"))
-# download from: https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
-```
 
 ```{r}
 # add column code for iso2 country code

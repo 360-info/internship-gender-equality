@@ -38,6 +38,7 @@ knitr::opts_chunk$set(
 ```{r packages, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(skimr)
+library(janitor)
 library(glue)
 library(ggplot2)
 library(here)
@@ -63,19 +64,35 @@ library(ggrepel)
 ```
 
 
-```{r read-data}
+```{r wbl}
 # downloaded from https://wbl.worldbank.org/en/wbl-data
 wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
+```
 
-
+```{r gender}
 # downloaded from https://data.worldbank.org/topic/gender
 gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) #skip the first 4 rows
 
+
+```
+
+```{r gender-gap-index}
+# downloaded from: https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021
+gap <- read_csv(here("data/gender_gap_index.csv"))
+
+# cleaning 
+gap <- clean_names(gap) 
+
+names(gap) <- sub("x", "", names(gap))
+
+```
+
+
+```{r vdem}
 # downloaded from https://www.v-dem.net/vdemds.html
 vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 ```
-
 
 # Abstract
 
@@ -93,12 +110,12 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 
 
 # Data sources
-The data used in this project consists of 3 separate data set, the women, business and the law data and gender indicator data were both obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively, the democracy ratings data was also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
+
+
+The data used in this project consists of 4 separate data set. The women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
 
 ## The women, business and the law data
 The women, business and the law data set contains 10 sheets of data. It assesses the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]. The first two sheets are overall WBL index scores, individual indicator scores go evaluate 35 parts of the law from 190 economies from years 1971 to 2021. The subsequent sheets present answer for the scored questions by 8 indicators. Indicator-level scores are obtained by calculating the unweighed average of the questions within that indicator and scaling the result to 100. Overall scores are then calculated by taking the average of each indicator, with 100 representing the highest possible score, a higher score suggests that there are more laws promoting gender equality [@WBL] (see Table \@ref(tab:wbl-data) for scoring method for WBL data). There are no missing values presented in this data set.
-
-
 
 ```{r wbl-data}
 tribble(
@@ -115,6 +132,25 @@ tribble(
            footnote_as_chunk = TRUE)
 
 ```
+
+## The gender index data
+Gender equality is critical to the success of economies and communities. Ensuring the full development and effective deployment of half of the world's entire talent pool has a significant impact on global economic growth, competitiveness, and future-readiness. The Index is more concerned with measuring gaps than with assessing levels. Second, rather than gaps in input data, it captures gaps in outcome variables. Third, rather than focusing on women's empowerment, it rates countries based on gender equality. Economic Participation and Opportunity, Educational Attainment, Health and Survival and Political Empowerment are the four core categories (sub-indexes) that the Global Gender Gap Index covers [@gap]. This data set contains `r length(unique(gap$indicator))` indicators under this four core categories for measuring gender gap across `r length(unique(gap$country_name))` countries from 2006 - 2021, see Table \@ref(tab:gender-index) for explanation of the variable used in this analysis.
+
+```{r gender-index}
+tribble(
+  ~INDICATOR, ~TYPE, ~RANGE, ~CLARIFICATION, 
+  "Overall Global Gender Gap Index", "Index", "0 - 1", "The highest possible score is 1 (equality) and the lowest possible score is 0 (inequality)."
+) %>% 
+  kable(caption = "Codebook for gender gap index data") %>% 
+  kable_styling(full_width = FALSE) %>% 
+  footnote(general = "The World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
+```
+
+
+
+
 
 
 ## The gender indicator data
@@ -173,6 +209,7 @@ vdem %>%
   kable(caption = "Summary of missing values of the subset of democracy ratings data") %>% 
   kable_styling()
 ```
+
 # Result
 
 
