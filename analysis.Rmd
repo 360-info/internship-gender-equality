@@ -131,7 +131,7 @@ wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet =
 
 # download from https://data.worldbank.org/topic/gender
 ## indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4) old version
-indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) # updated version
+gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4)  # updated version
 ```
 
 # Population

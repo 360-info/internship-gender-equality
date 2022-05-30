@@ -28,8 +28,8 @@ knitr::opts_chunk$set(
   error = FALSE, 
   collapse = TRUE,
   comment = "#",
-  fig.height = 4,
-  fig.width = 8,
+  # fig.height = 4,
+  # fig.width = 8,
   fig.align = "center",
   cache = FALSE
   )
@@ -40,7 +40,7 @@ library(tidyverse)
 library(skimr)
 library(janitor)
 library(glue)
-library(ggplot2)
+library(ggplot2); ggplot2::theme_set(theme_minimal())
 library(here)
 library(readxl)
 library(stringr)
@@ -66,7 +66,10 @@ library(ggrepel)
 
 ```{r wbl}
 # downloaded from https://wbl.worldbank.org/en/wbl-data
-wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
+wbl_df <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 2) 
+
+# cleaning 
+wbl_df <- clean_names(wbl_df) 
 ```
 
 ```{r gender}
@@ -212,6 +215,160 @@ vdem %>%
 
 # Result and discussion
 
+## The Women, Business and the Law index
+
+The Women, Business, and the Law Index assesses global progress towards gender equality in 190 economies by identifying laws and regulations that limit and encourage women's economic participation [@WBL]. As it can be seen from Figure \@ref(fig:wbl-average), there has been continuous progress being made on the laws that help improve women's legal rights. Over the 5 decades, the WBL index has increased substantially, from 45.6 to 76.5. Despite these gains, there is still room for improvement. Women are still far from being equal with men and many challenges remain, such as discriminatory laws and social norms remain pervasive, women continue to be underrepresented at all levels of political leadership, 1 in 5 women and girls between the ages of 15 and 49 report experiencing physical or sexual violence by an intimate partner within a 12-month period or underpaid compared to males in part-time occupations or informal labour sector with minimal security and limited rights [@UnitedNations2]. 
+
+```{r wbl-average, fig.cap="The trend of the global average Women, Business and the Law score of 190 economics."}
+wbl_average <- wbl_df %>% 
+  select(report_year, wbl_index) %>% 
+  group_by(report_year) %>% 
+  summarise(wbl = mean(wbl_index)) %>% 
+  ungroup() 
+  
+  
+wbl_average$tooltip <- 
+  glue_data(wbl_average,
+            "Year: {report_year}",
+            "\nWBL index: {round(wbl, 1)}")
+
+ggplotly(
+  
+wbl_average %>% 
+  ggplot(aes(x = report_year,
+             y = wbl,
+             group = 1)) + 
+  geom_line(aes(text = tooltip),
+            size = 0.8,
+            color = "Salmon2") +
+  geom_point(aes(text = tooltip),
+             size = 1.2,
+             color = "Salmon2") +
+  labs(x = "Year",
+       y = "WBL index",
+       title = "The global average Women, Business and the Law score"),
+tooltip = "text"
+
+) %>% 
+    layout(annotations = list(x = 0.1, 
+                              y = -0.1, 
+                              text = "Source: The World Bank",
+                              showarrow = FALSE, 
+                              xref = "paper", 
+                              yref = "paper",
+                              xanchor = "right", 
+                              yanchor = "auto", 
+                              xshift = 0, 
+                              yshift = 0,
+                              font = list(size = 8)
+)) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+```
+
+
+```{r wbl-shiny}
+# faceted choropleth map
+wbl_index_map <- wbl_df %>% 
+  select(economy, iso_code, report_year, wbl_index)
+
+
+## get geometry for each country
+data("World")
+
+coords <- World %>% 
+  select("iso_a3",
+         "name",
+         "geometry") %>% 
+  rename(iso_code = "iso_a3")
+
+
+## join spatial df with wbl_df
+wbl_index_map <- wbl_index_map %>% 
+  left_join(coords,
+            by = "iso_code") %>% 
+  drop_na() %>% 
+  st_as_sf() 
+
+
+## add tooltip
+wbl_index_map$tooltip <- 
+  glue_data(wbl_index_map,
+            "Country: {economy}",
+            "\nPercentage: {wbl_index}")
+
+
+
+## shiny app
+shinyApp(
+  
+ui <- fluidPage(
+  sliderInput("range",
+              "year",
+              min = min(wbl_index_map$report_year),
+              max = max(wbl_index_map$report_year),
+              value = min(wbl_index_map$report_year),
+              step = 1,
+              sep = ""),
+  leafletOutput("wblmap")
+),
+
+
+server <- function(input, output, session) {
+  
+  map_years <- reactive({
+    wbl_index_map_year <- wbl_index_map %>%
+      filter(report_year == input$range)
+
+  })
+
+output$wblmap <- renderLeaflet({
+  
+  palette <- colorBin(palette = "viridis",
+                      domain = map_years()$wbl_index,
+                      bins = 5,
+                      na.color ="transparent",
+                      reverse = TRUE)
+
+  text <- paste("Country:", map_years()$economy, 
+              "<br> Year:", map_years()$report_year, 
+              "<br> WBL index:", map_years()$wbl_index) %>%
+  lapply(htmltools::HTML)
+  
+  
+ map_years() %>%
+    leaflet() %>%
+    setView(lat = 30, lng = 0, zoom = 1) %>%
+    addTiles() %>%
+    addPolygons(
+      fillColor = ~ palette(map_years()$wbl_index),
+      weight = 0.5,
+      opacity = 1,
+      color = "white",
+      smoothFactor = 0.2,
+      fillOpacity = 1,
+      label = text,
+    highlight = highlightOptions(
+      color = "#666",
+      weight = 2,
+      bringToFront = TRUE,
+      opacity = 1)
+    ) %>%
+    addLegend(
+      pal = palette,
+      values = map_years()$wbl_index,
+      opacity = 0.7,
+      title = "WBL Index",
+      position = "bottomleft",
+      labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE))
+      ) 
+})
+
+},
+
+  options = list(height = 500)
+)
+```
 
 
 
