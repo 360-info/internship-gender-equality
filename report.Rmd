@@ -18,6 +18,7 @@ output:
     # code_folding: show
     theme: cosmo
 bibliography: references.bib  
+runtime: shiny
 ---
 
 ```{r setup, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
@@ -37,6 +38,7 @@ knitr::opts_chunk$set(
 
 ```{r packages, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(tidytext)
 library(skimr)
 library(janitor)
 library(glue)
@@ -61,6 +63,7 @@ library(themes360info)
 library(grid)
 library(rsvg)
 library(ggrepel)
+library(forcats)
 ```
 
 
@@ -70,6 +73,32 @@ wbl_df <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 2)
 
 # cleaning 
 wbl_df <- clean_names(wbl_df) 
+
+# WBL indicators
+wbl_mob <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 3) 
+wbl_mob  <- clean_names(wbl_mob) 
+
+wbl_work <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 4) 
+wbl_work  <- clean_names(wbl_work) 
+
+wbl_pay <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 5) 
+wbl_pay  <- clean_names(wbl_pay) 
+
+wbl_marriage <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 6) 
+wbl_marriage  <- clean_names(wbl_marriage) 
+
+wbl_parenth <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 7) 
+wbl_parenth  <- clean_names(wbl_parenth) 
+
+wbl_entrep <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 8) 
+wbl_entrep <- clean_names(wbl_entrep) 
+
+wbl_assets <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 9) 
+wbl_assets  <- clean_names(wbl_assets) 
+
+wbl_pension <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 10) 
+wbl_pension  <- clean_names(wbl_pension) 
+
 ```
 
 ```{r gender}
@@ -97,6 +126,7 @@ names(gap) <- sub("x", "", names(gap))
 vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 ```
+
 
 # Abstract
 
@@ -181,7 +211,7 @@ read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_e
 
 
 ## The democracy ratings data 
-This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections [@vdem]. Only a indicator  was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem_missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
+This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections [@vdem]. Only a indicator  was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem-missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
 
 
 ```{r vdem-metadata}
@@ -212,46 +242,96 @@ vdem %>%
   kable(caption = "Summary of missing values of the subset of democracy ratings data") %>% 
   kable_styling()
 ```
+<br>
 
 # Result and discussion
 
-## The Women, Business and the Law index
+## Overview of The Women, Business and the Law index
 
-The Women, Business, and the Law Index assesses global progress towards gender equality in 190 economies by identifying laws and regulations that limit and encourage women's economic participation [@WBL]. As it can be seen from Figure \@ref(fig:wbl-average), there has been continuous progress being made on the laws that help improve women's legal rights. Over the 5 decades, the WBL index has increased substantially, from 45.6 to 76.5. Despite these gains, there is still room for improvement. Women are still far from being equal with men and many challenges remain, such as discriminatory laws and social norms remain pervasive, women continue to be underrepresented at all levels of political leadership, 1 in 5 women and girls between the ages of 15 and 49 report experiencing physical or sexual violence by an intimate partner within a 12-month period or underpaid compared to males in part-time occupations or informal labour sector with minimal security and limited rights [@UnitedNations2]. 
+The Women, Business, and the Law Index assesses global progress towards gender equality in 190 economies by identifying laws and regulations that limit and encourage women's economic participation [@WBL]. As it can be seen from Figure \@ref(fig:wbl-average), there has been continuous progress being made on the laws that help improve women's legal rights. Over the 5 decades, the global average WBL index has increased substantially, from 45.6 to 76. However, the progress has varied across regions. Europe and Central Asia, OECD High income and Latin America and Caribbean are the three regions than above the global average. Middle East and North Africa made the least progress. Another noteworthy finding is that high-income and Sub-Saharan Africa areas have made the most progress on reforming the laws towards women. Despite these gains, there is still room for improvement. Women are still far from being equal with men and many challenges remain, such as discriminatory laws and social norms remain pervasive, women continue to be underrepresented at all levels of political leadership, 1 in 5 women and girls between the ages of 15 and 49 report experiencing physical or sexual violence by an intimate partner within a 12-month period or underpaid compared to males in part-time occupations or informal labour sector with minimal security and limited rights [@UnitedNations2]. 
 
-```{r wbl-average, fig.cap="The trend of the global average Women, Business and the Law score of 190 economics."}
+
+<div class = "center">
+```{r wbl-average, fig.cap="The trend of the global average Women, Business and the Law score for different regions and world average"}
+# 
+# cols <- c("South Asia" = "#f9beb9", 
+#           "Europe & Central Asia" = "#f37046", 
+#           "Middle East & North Africa" = "#2a1212", 
+#           "Sub-Saharan Africa" = "#00b4bb",
+#           "Latin America & Caribbean" = "#057e93",
+#           "High income: OECD" = "#7c3c1c",
+#           "East Asia & Pacific" = "#eb553c",
+#           "WBL World" = "#c4662c")
+
+
 wbl_average <- wbl_df %>% 
-  select(report_year, wbl_index) %>% 
+  filter(report_year < 2022) %>% 
+  select(region, 
+         report_year, 
+         wbl_index) %>% 
+  group_by(region,
+           report_year) %>% 
+  summarise(wbl = mean(wbl_index)) %>% 
+  ungroup() 
+  
+wbl_world <- wbl_df %>% 
+  filter(report_year < 2022) %>% 
+  select(report_year, 
+         wbl_index) %>% 
   group_by(report_year) %>% 
   summarise(wbl = mean(wbl_index)) %>% 
   ungroup() 
   
-  
+
 wbl_average$tooltip <- 
   glue_data(wbl_average,
+            "Region: {region}",
             "Year: {report_year}",
             "\nWBL index: {round(wbl, 1)}")
+
+wbl_world$tooltip <- 
+  glue_data(wbl_world,
+            "Year: {report_year}",
+            "\nWBL index: {round(wbl, 1)}")
+
 
 ggplotly(
   
 wbl_average %>% 
   ggplot(aes(x = report_year,
-             y = wbl,
-             group = 1)) + 
-  geom_line(aes(text = tooltip),
-            size = 0.8,
-            color = "Salmon2") +
-  geom_point(aes(text = tooltip),
-             size = 1.2,
-             color = "Salmon2") +
-  labs(x = "Year",
+             y = wbl)) + 
+  geom_line(aes(color = region,
+                group = region,
+                text = tooltip),
+            size = 0.8) +
+  geom_point(aes(color = region,
+                 text = tooltip),
+             size = 1) +
+  geom_line(data = wbl_world,
+            aes(x = report_year,
+                y = wbl,
+                group = 1,
+                text = tooltip,
+                color = "WBL World"),
+            size = 0.8) +
+  geom_point(data = wbl_world,
+             aes(x = report_year,
+                 y = wbl,
+                 text = tooltip,
+                 color = "WBL World"),
+             size = 1) +
+  scale_color_brewer(palette = "Paired") +
+  scale_x_continuous(breaks = seq(1971, 2021, by =10)) +
+  theme(legend.text = element_text(size = 6)) +
+  labs(x = NULL,
        y = "WBL index",
-       title = "The global average Women, Business and the Law score"),
+       color = NULL,
+       title = "The Women, Business and the Law score by regions"),
 tooltip = "text"
 
 ) %>% 
     layout(annotations = list(x = 0.1, 
-                              y = -0.1, 
+                              y = -0.3, 
                               text = "Source: The World Bank",
                               showarrow = FALSE, 
                               xref = "paper", 
@@ -260,16 +340,20 @@ tooltip = "text"
                               yanchor = "auto", 
                               xshift = 0, 
                               yshift = 0,
-                              font = list(size = 8)
-)) %>% 
-  config(displayModeBar = FALSE,
-         displaylogo = FALSE) 
+                              font = list(size = 8)),
+           legend = list(orientation = "h")) 
+# %>%
+#   config(displayModeBar = FALSE,
+#          displaylogo = FALSE)
 ```
+</div>
 
+The below shiny application shows how the WBL index for 190 countries changes over the years. Regions like Latin America and Caribbean, Sub-Saharan Africa, South Asia and South-east Asia had very low WBL score in the 70s and 80s, but most of the countries in these regions have made improvements over the years, especially countries like Brazil, Chile, Bolivia, Saudi Arabia, South Africa, Namibia, Zimbabwe stole the spotlight with the greatest improvement and Belgium, Denmark, France, Latvia, Luxembourg and Sweden have a perfect score of 100 in 2021.
 
-```{r wbl-shiny}
+```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = FALSE}
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
+  filter(report_year < 2022) %>% 
   select(economy, iso_code, report_year, wbl_index)
 
 
@@ -324,11 +408,11 @@ server <- function(input, output, session) {
 
 output$wblmap <- renderLeaflet({
   
-  palette <- colorBin(palette = "viridis",
+  palette <- colorBin(palette = "OrRd",
                       domain = map_years()$wbl_index,
                       bins = 5,
                       na.color ="transparent",
-                      reverse = TRUE)
+                      reverse = FALSE)
 
   text <- paste("Country:", map_years()$economy, 
               "<br> Year:", map_years()$report_year, 
@@ -359,8 +443,8 @@ output$wblmap <- renderLeaflet({
       values = map_years()$wbl_index,
       opacity = 0.7,
       title = "WBL Index",
-      position = "bottomleft",
-      labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE))
+      position = "bottomleft"
+      # labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE))
       ) 
 })
 
@@ -370,6 +454,662 @@ output$wblmap <- renderLeaflet({
 )
 ```
 
+
+<br>
+
+## Law reforms enacted by regions
+
+Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asian (see Figure \@ref(fig:reforms)). Furthermore, the drill-down analysis in Figure \@ref(fig:reforms-indi) shows that Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
+
+<br>
+```{r}
+## calculate total reforms for each indicator by region
+# mobility reforms
+wbl_mob1 <- wbl_mob %>%
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_mob2 <- wbl_mob1 %>% 
+  group_by(region) %>% 
+  summarise(mobility_count = n_distinct(count) - 1)
+
+# workplace reforms
+wbl_work1 <- wbl_work %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_work2 <- wbl_work1 %>% 
+  group_by(region) %>% 
+  summarise(workplace_count = n_distinct(count) - 1)
+
+# pay reforms
+wbl_pay1 <- wbl_pay %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_pay2 <- wbl_pay1 %>% 
+  group_by(region) %>% 
+  summarise(pay_count = n_distinct(count) - 1)
+
+
+# marriage reforms
+wbl_marriage1 <- wbl_marriage %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_marriage2 <- wbl_marriage1 %>% 
+  group_by(region) %>% 
+  summarise(marriage_count = n_distinct(count) - 1)
+
+
+# parenthood reforms
+wbl_parenth1 <- wbl_parenth %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_parenth2 <- wbl_parenth1 %>% 
+  group_by(region) %>% 
+  summarise(parenthood_count = n_distinct(count) - 1)
+
+# entrepreneurship reforms
+wbl_entrep1 <- wbl_entrep %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_entrep2 <- wbl_entrep1 %>% 
+  group_by(region) %>% 
+  summarise(entrepreneurship_count = n_distinct(count) - 1)
+
+
+# assets reforms
+wbl_assets1 <- wbl_assets %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_assets2 <- wbl_assets1 %>% 
+  group_by(region) %>% 
+  summarise(assets_count = n_distinct(count) - 1)
+
+
+# pension reforms
+wbl_pension1 <- wbl_pension %>% 
+  filter(report_year < 2022) %>% 
+  select(region,
+         report_year,
+         starts_with("score")) %>% 
+  pivot_longer(3:6,
+               names_to = "score",
+               values_to = "value") %>% 
+  filter(value == 0) %>%
+  group_by(region, report_year) %>% 
+  summarise(count = n()) %>% 
+  ungroup() 
+
+
+wbl_pension2 <- wbl_pension1 %>% 
+  group_by(region) %>% 
+  summarise(pension_count = n_distinct(count) - 1)
+
+```
+
+```{r reforms, fig.cap="Total reforms recorded between 1971 and 2021 by region. Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most"}
+# join all indicators' reforms count and plot it
+wbl_mob2 %>% 
+  left_join(wbl_work2, 
+            by = "region") %>% 
+  left_join(wbl_pay2,
+            by = "region") %>% 
+  left_join(wbl_marriage2,
+            by = "region") %>% 
+  left_join(wbl_parenth2,
+            by = "region") %>% 
+  left_join(wbl_entrep2,
+            by = "region") %>% 
+  left_join(wbl_assets2,
+            by = "region") %>% 
+  left_join(wbl_pension2,
+            by = "region") %>% 
+  pivot_longer(2:9,
+               names_to = "indicator",
+               values_to = "count"
+               ) %>%
+  group_by(region) %>% 
+  summarise(total_reforms = sum(count, na.rm = TRUE)) %>% 
+  mutate(region = fct_reorder(region, total_reforms)) %>% 
+  ggplot() +
+  geom_col(aes(x = region,
+               y = total_reforms,
+               fill = region)) +
+  geom_text(aes(x = region,
+               y = total_reforms,
+               label = total_reforms, 
+                fill = NULL, 
+                hjust = 0.01),
+            size = 3,
+            colour = "black") +
+  coord_flip() +
+  scale_fill_brewer(palette = "Paired") +
+  theme(legend.position = "bottom",
+        legend.text=element_text(size = 6),
+        plot.caption = element_text(hjust = 0)) +
+  labs(x = NULL,
+       y = "Number of reforms",
+       fill = NULL,
+       title = "Total reforms recorded between 1971 and 2021",
+       caption = "Source: The World Bank")
+  
+  
+  
+```
+<br>
+
+```{r reforms-indi, fig.width=12, fig.cap="Total reforms enacted in the top 3 countries by indicators" }
+wbl_mob2 %>% 
+  left_join(wbl_work2,
+            by = "region") %>% 
+  left_join(wbl_pay2,
+            by = "region") %>% 
+  left_join(wbl_marriage2,
+            by = "region") %>% 
+  left_join(wbl_parenth2,
+            by = "region") %>% 
+  left_join(wbl_entrep2,
+            by = "region") %>% 
+  left_join(wbl_assets2,
+            by = "region") %>% 
+  left_join(wbl_pension2,
+            by = "region") %>% 
+  pivot_longer(2:9,
+               names_to = "indicator",
+               values_to = "count"
+               ) %>%
+  mutate(indicator = str_remove(indicator, "\\_count")) %>% 
+  filter(region %in% c("Latin America & Caribbean",
+                       "High income: OECD",
+                       "Sub-Saharan Africa")) %>% 
+  mutate(region = reorder_within(region, count, indicator)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = region,
+             y = count,
+             fill = indicator)) +
+  geom_col() +
+  geom_text(aes(x = region,
+                y = count,
+                label = count, 
+                fill = NULL, 
+                hjust = -0.05),
+            size = 3,
+            colour = "black") +  
+  facet_wrap(vars(indicator),
+             scale = "free_y") +
+  coord_flip() +
+  scale_x_reordered() +
+  scale_fill_brewer(palette = "Paired") +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        strip.text.x = element_text(size = 14),
+        plot.caption = element_text(hjust = 0),
+        plot.title = element_text(size = 16)) +
+  labs(x = NULL,
+       y = "Number of reforms",
+       title = "Total reforms enacted in the top 3 countries between 1971 -2021",
+       caption = "Source: The World Bank")
+```
+
+
+<br>
+
+When looking at the overall score for these 8 indicators, the progress has also been uneven across these domains. The majority of law reforms were made in the areas of workplace and pay protections and regulations affecting working parents, see Figure \@ref(fig:indi-average). One noticeable finding is that, in comparison to other regions, the Middle East and North Africa has made substantially slower progress in enacting reforms in areas such as marriage and mobility. Although Sub-Saharan was the region that has made significant progress in changing their gendered laws over the years, it's overall score is still relatively low compared to other regions, this indicates that it still has a long way to go to achieve gender equality. The following are some approaches that some of the countries have taken to tackle gender inequity [@Melling_2018]:
+
+- **Germany’s Wage Transparency Act**<br>
+"As of January 6, 2018, German law allows workers at companies with more than 200 employees to find out the median remuneration of a colleague of the opposite sex in the same or a comparable role. The median remuneration is based on that of at least six opposite-sex colleagues."
+
+- **Iceland’s Equal Pay Law**<br>
+"Gender-based pay discrimination has been illegal in Iceland since 1961. But in the face of a gender wage gap of nearly 6 percent, Iceland adopted a new law in 2018 that requires companies to demonstrate that their wages are fair. By 2022, any public or private body in Iceland employing more than 25 people that has not been independently certified as paying equal wages for work of equal value will face daily fines."
+
+- **Sweden’s Parental Leave**<br>
+"Sweden provides 480 days of paid parental leave, to be used before a child is eight. Two-parent households get the full benefit only if each parent takes ninety, non-transferable days off, an effort to ensure that no one parent or gender is seen as the sole caregiver.
+
+- **Morocco’s Law on Domestic Workers**<br>
+"In 2016, Morocco passed a law that requires proper labour contracts for domestic workers, limits their daily working hours, guarantees days off and paid vacations, and sets a minimum wage. The law also provides financial penalties for employers who violate these provisions and even prison sentences for repeat offenders."
+
+```{r}
+wbl_indicators <- wbl_df %>% 
+  filter(report_year < 2022) %>% 
+  select(economy,
+         region,
+         income_group,
+         report_year,
+         mobility,
+         workplace,
+         pay,
+         marriage,
+         parenthood,
+         entrepreneurship,
+         assets,
+         pension) %>% 
+         # "Can a woman apply for a passport in the same way as a man?",
+         # "Can a woman travel outside the country in the same way as a man?",
+         # "Can a woman travel outside her home in the same way as a man?",
+         # "Can a woman choose where to live in the same way as a man?") %>% 
+  pivot_longer(cols = 5:12,
+               names_to = "indicator",
+               values_to = "score") 
+```
+
+<div class = "center">
+```{r indi-average, fig.cap="Average score of eight WBL indicators by region and year"}
+wbl_indicators_avg <- wbl_indicators  %>% 
+  # filter(report_year %in% c(2000:2021)) %>% 
+  group_by(region,
+           report_year,
+           indicator) %>% 
+  summarise_at(vars(score), 
+               list(avg_score = mean)) %>% 
+  mutate(avg_score = round(avg_score, 2))
+
+
+
+wbl_indicators_avg$tooltip <- 
+  glue_data(wbl_indicators_avg,
+            "Region: {region}",
+            "\nYear: {report_year}",
+            "\nAverage score: {avg_score}")
+
+
+# plot it
+ggplotly(
+  
+wbl_indicators_avg %>% 
+  ggplot(aes(x = report_year,
+             y = avg_score,
+             group = region,
+             color = region)) +
+  geom_line(aes(text = tooltip),
+            size = 0.4) +
+  geom_point(aes(text = tooltip),
+             size = 0.05) +
+  facet_wrap(vars(indicator),
+             ncol = 4) +
+  scale_color_brewer(palette = "Paired") +
+  scale_x_continuous(breaks = seq(1971, 2021, by =10)) +
+  theme(axis.text.x = element_text(angle = 90, size = 6),
+        axis.text.y = element_text(size = 6),
+        # axis.line = element_line(colour = "black"),
+        # strip.text = element_text(size = 8,
+        #                           face = "bold",
+        #                           colour = "black"),
+        # strip.background = element_rect(fill ="white", colour = "white"),
+        legend.text = element_text(size = 6)
+        # panel.grid.major.x = element_blank()) +
+        # panel.border = element_blank()
+        ) +
+  labs(x = NULL,
+       y = "Score",
+       title = "Average score of WBL indicators by region and year",
+       color = NULL),
+  tooltip = "text"
+  
+) %>% 
+  layout(annotations = list(x = 0.1, 
+                            y = -0.3, 
+                            text = "Source: World Bank",
+                            showarrow = FALSE, 
+                            xref = "paper", 
+                            yref = "paper",
+                            xanchor = "right", 
+                            yanchor = "auto", 
+                            xshift = 0, 
+                            yshift = 0,
+                            font = list(size = 8)),
+         legend = list(orientation = "h") 
+         ) 
+# %>% 
+#   config(displayModeBar = FALSE,
+#          displaylogo = FALSE) 
+  
+```
+
+</div>
+
+
+```{r, eval=FALSE}
+wbl_df %>% 
+  select(economy,
+         region,
+         report_year,
+         mobility,
+         workplace,
+         pay,
+         marriage,
+         parenthood,
+         entrepreneurship,
+         assets,
+         pension) %>% 
+  filter(report_year %in% c(1971, 2022)) %>% 
+  pivot_longer(4:11,
+               names_to = "indicator",
+               values_to = "score"
+               ) %>% 
+  group_by(report_year, indicator) %>% 
+  summarise(average_score = mean(score, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = c(report_year, indicator),
+              values_from = average_score) %>% 
+  ungroup() %>% 
+  mutate(assets_per = (`2022_assets`-`1971_assets`)/`1971_assets`,
+         entre_per = (`2022_entrepreneurship`-`1971_entrepreneurship`)/`1971_entrepreneurship`,
+         marriage_per = (`2022_marriage`-`1971_marriage`)/`1971_marriage`,
+         mobility_per = (`2022_mobility`-`1971_mobility`)/`1971_mobility`,
+         parenthood_per = (`2022_parenthood`-`1971_parenthood`)/`1971_parenthood`,
+         pay_per = (`2022_pay`-`1971_pay`)/`1971_pay`,
+         pension_per = (`2022_pension`-`1971_pension`)/`1971_pension`,
+         workplace_per = (`2022_workplace`-`1971_workplace`)/`1971_workplace`) %>% 
+  select(assets_per,
+         entre_per,
+         marriage_per,
+         mobility_per,
+         parenthood_per,
+         pay_per,
+         pension_per,
+         workplace_per) %>% 
+  pivot_longer(1:8,
+               names_to = "indicator",
+               values_to = "percentage") %>% 
+  ggplot() +
+  geom_col(aes(x = indicator,
+               y = percentage))
+  
+```
+
+
+## Gendered laws and women's empowerment
+
+As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
+
+
+```{r}
+gap$code <- countrycode(gap$country_iso3, origin = "iso3c", destination = "iso2c")
+
+
+# countries with flag
+flag_data <- gap %>% 
+  # countries of interest
+  filter(country_name %in% c("Iceland", "United Kingdom", "United States","Mauritius",
+                               "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                               "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                                "Yemen, Rep.", "Bangladesh", "Qatar"),
+         indicator == "Overall Global Gender Gap Index",
+         subindicator_type == "Index") %>% 
+  select(code,
+         country_name,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = country_name) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(report_year == "2021") %>% 
+  select(code,
+         economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(code = tolower(code)) 
+```
+
+```{r wblgender, fig.cap="The WBL index VS Gender Gap index. Nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders."}
+gap %>% 
+  filter(indicator == "Overall Global Gender Gap Index",
+         subindicator_type == "Index") %>% 
+  select(code,
+         country_name,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = country_name) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(report_year == "2021") %>% 
+  select(code,
+         economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(tooltip = glue_data(gap,
+                             "Country : {economy}",
+                             "\nWBL Index: {wbl_index}",
+                             "\nGender Gap Index: {gender_gap_index}")) %>%  
+  {
+    ggplot(., 
+           aes(x = wbl_index,
+             y = gender_gap_index)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              colour = "#36a7e9") +
+  geom_point(aes(color = region,
+                 shape = region),
+             size = 1.5,
+             alpha = 0.7) +
+  geom_point(data = flag_data,
+             aes(color = region),
+             size = 7,
+             alpha = 0.7,
+             show.legend = FALSE) +
+  geom_flag(data = flag_data,
+            aes(country = code)) +
+  # geom_text(data = flag_data,
+  #           aes(label = economy),
+  #           size = 4,
+  #           hjust = "centre",
+  #           nudge_y = 0.035,
+  #           check_overlap = TRUE) + 
+  geom_label_repel(
+                  aes(label = economy),
+                  data = flag_data,
+                  label.size = NA,
+                  point.padding = 7,
+                  # alpha = 0.5,
+                  fill = "#FFFFFF88",
+                  family = "Body 360info",
+                  fontface = "bold",
+                  colour = "black") +
+      scale_color_brewer(palette = "Paired") +
+      scale_shape_manual(values = c(15:18, 15:17)) +
+      # stat_cor(aes(label = ..r.label..)) + #add R value
+      # theme_minimal() +
+      theme_360() +
+      theme(panel.grid.minor = element_blank(),
+        # axis.line.x = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        # axis.line.y = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
+        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 20, b = 0, l = 10)),
+        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = , l = 0)),
+        legend.position = "top",
+        # legend.position = c(-0.15, 1.05),
+        legend.justification = "left",
+        # legend.box = "horizontal",
+        legend.box.margin = margin(-0.5, 0, 0, -3.8, "cm"), # align legend with title and subtitle
+        legend.text = element_text(size = 12),
+        plot.margin = margin(t = 5.5, r = 18, b = 5.5, l = 28)) + #increase plot margin to allow text placed on y axis outside of plot 
+        # legend.spacing = unit(0.05, 'cm'),
+        # plot.caption = element_text(hjust = 0),
+        # plot.caption.position =  "plot") +
+  # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
+  coord_cartesian(xlim = c(20, 100),
+                  ylim = c(0.4, 0.9),
+                  clip = "off") +
+  # annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
+  # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
+  annotate_360(x = 22, y = 0.318, label = "**More laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 98, y = 0.318, label = "**Less laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 9.5, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
+  annotate_360(x = 9.5, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
+  labs(x = "Women, business and the law index (2021)",
+       # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
+       y = "Overall global gender gap index (2021)",
+       color = NULL,
+       shape = NULL,
+       title = "LAWS AND GENDER EQUALITY",
+       subtitle = "NATIONS WTIH FEWER LAWS TARGETING WOMEN TEND TO HAVE BETTER ACCESS TO \nRESOURCES AND OPPORTUNITIES ACROSS GENDERS",
+       caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
+   } %>%
+
+ save_360plot("figures/gender.png") %>%
+
+ save_360plot("figures/gender.svg")
+
+ knitr::include_graphics("figures/gender.png") #include graphic in my report
+
+```
+
+```{r}
+
+poli <- gap %>% 
+  filter(indicator == "Global Gender Gap Political Empowerment subindex",
+         subindicator_type == "Index") %>% 
+  select(country_name,
+         "2021") %>% 
+  rename(political_empowerment = "2021",
+         economy = country_name) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(report_year == "2021") %>% 
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         political_empowerment)
+
+
+poli$tooltip <- 
+  glue_data(poli,
+            "Country: {economy}",
+            "\nWBL: {wbl_index}",
+            "\nPolitical Empowerment Index: {political_empowerment}")
+
+ggplotly(
+  
+poli %>% 
+  ggplot(aes(x = wbl_index,
+             y = political_empowerment)) +
+  geom_smooth(method = lm, 
+              se = FALSE,
+              color = "#36a7e9") +
+  geom_point(alpha = 0) +
+  geom_point(aes(x = wbl_index,
+                 y = political_empowerment,
+                 text = tooltip,
+                 color = region,
+                 shape = region),
+             alpha = 0.8) +
+  scale_x_continuous(limits = c(25, 100)) +
+  scale_color_brewer(palette = "Paired") +
+  scale_shape_manual(values = c(15:18, 15:17)) +
+  # stat_cor(aes(label = ..r.label..)) +
+  # theme(axis.title.x = element_text(vjust = 0.05)) +
+  labs(x = "WBL index",
+       y = "Gender gap political empowerment subindex",
+       color = NULL,
+       title = "Scatter plot of WBL index and gender gap political empowerment ",
+       subtitle = "Year: 2021"),
+tooltip = "text"
+) %>% 
+    layout(annotations = list(x = 0.1, 
+                            y = -0.3, 
+                            text = "Source: World Bank",
+                            showarrow = FALSE, 
+                            xref = "paper", 
+                            yref = "paper",
+                            xanchor = "right", 
+                            yanchor = "auto", 
+                            xshift = 0, 
+                            yshift = 0,
+                            font = list(size = 8)),
+         legend = list(orientation = "h",
+                       font = list(size = 8)),
+         xaxis = list(title = list(font = list(size = 12),
+                                   standoff = 10))
+    )
+
+         
+```
 
 
 # Conclusion

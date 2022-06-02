@@ -127,7 +127,13 @@ names(gap) <- sub("x", "", names(gap))
 
 ```{r wbl}
 # https://wbl.worldbank.org/en/wbl-data
-wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2) 
+wbl_df <- read_xlsx(here("data/WBL50YearPanelDetailsWeb21Feb2021.xlsx"), sheet = 2)
+
+# downloaded from https://wbl.worldbank.org/en/wbl-data
+# wbl_df <- read_xlsx(here("data/WBL1971-2022 Dataset.xlsx"), sheet = 2) 
+# 
+# # cleaning
+# wbl_df <- clean_names(wbl_df)
 
 # download from https://data.worldbank.org/topic/gender
 ## indicators <- read.csv(here("data/API_17_DS2_en_csv_v2_3371618.csv"), skip = 4) old version
@@ -439,6 +445,88 @@ employment <- wdi %>%
 ## WBL index over time
 
 ```{r}
+wbl_average <- wbl_df %>% 
+  select(region, 
+         reportyr, 
+         wbl_index) %>% 
+  group_by(region,
+           reportyr) %>% 
+  summarise(wbl = mean(wbl_index)) %>% 
+  ungroup() 
+  
+wbl_world <- wbl_df %>% 
+  select(reportyr, 
+         wbl_index) %>% 
+  group_by(reportyr) %>% 
+  summarise(wbl = mean(wbl_index)) %>% 
+  ungroup() 
+  
+
+wbl_average$tooltip <- 
+  glue_data(wbl_average,
+            "Region: {region}",
+            "Year: {reportyr}",
+            "\nWBL index: {round(wbl, 1)}")
+
+wbl_world$tooltip <- 
+  glue_data(wbl_world,
+            "Year: {reportyr}",
+            "\nWBL index: {round(wbl, 1)}")
+
+
+ggplotly(
+  
+wbl_average %>% 
+  ggplot(aes(x = reportyr,
+             y = wbl)) + 
+  geom_line(aes(color = region,
+                group = region,
+                text = tooltip),
+            size = 0.8) +
+  geom_point(aes(color = region,
+                 text = tooltip),
+             size = 1) +
+  geom_line(data = wbl_world,
+            aes(x = reportyr,
+                y = wbl,
+                group = 1,
+                text = tooltip,
+                color = "WBL World"),
+            size = 0.8) +
+  geom_point(data = wbl_world,
+             aes(x = reportyr,
+                 y = wbl,
+                 text = tooltip,
+                 color = "WBL World"),
+             size = 1) +
+  scale_color_viridis_d(option = "plasma") +
+  scale_x_continuous(breaks = seq(1971, 2021, by = 10)) +
+  theme(legend.text = element_text(size = 6)) +
+  labs(x = NULL,
+       y = "WBL index",
+       color = NULL,
+       title = "The Women, Business and the Law score by regions"),
+tooltip = "text"
+
+) %>% 
+    layout(annotations = list(x = 0.1, 
+                              y = -0.3, 
+                              text = "Source: The World Bank",
+                              showarrow = FALSE, 
+                              xref = "paper", 
+                              yref = "paper",
+                              xanchor = "right", 
+                              yanchor = "auto", 
+                              xshift = 0, 
+                              yshift = 0,
+                              font = list(size = 8)),
+           legend = list(orientation = "h")) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) 
+```
+
+
+```{r}
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   select(economy, wbcodev2, reportyr, `WBL INDEX`)
@@ -552,8 +640,39 @@ tooltip = "text"
 
 
 ```{r, eval=FALSE}
-# shiny app for WBL index
+# faceted choropleth map
+# Shiny leaflet map
+wbl_index_map <- wbl_df %>% 
+  select(economy, wbcodev2, reportyr, wbl_index)
 
+
+## get geometry for each country
+data("World")
+
+coords <- World %>% 
+  select("iso_a3",
+         "name",
+         "geometry") %>% 
+  rename(wbcodev2 = "iso_a3")
+
+
+## join spatial df with wbl_df
+wbl_index_map <- wbl_index_map %>% 
+  left_join(coords,
+            by = "wbcodev2") %>% 
+  drop_na() %>% 
+  st_as_sf() 
+
+
+## add tooltip
+wbl_index_map$tooltip <- 
+  glue_data(wbl_index_map,
+            "Country: {economy}",
+            "\nPercentage: {wbl_index}")
+
+
+
+## shiny app
 shinyApp(
   
 ui <- fluidPage(
@@ -578,15 +697,15 @@ server <- function(input, output, session) {
 
 output$wblmap <- renderLeaflet({
   
-  palette <- colorBin(palette = "viridis",
-                      domain = map_years()$`WBL INDEX`,
+  palette <- colorBin(palette = "plasma",
+                      domain = map_years()$wbl_index,
                       bins = 5,
                       na.color ="transparent",
                       reverse = TRUE)
 
   text <- paste("Country:", map_years()$economy, 
               "<br> Year:", map_years()$reportyr, 
-              "<br> WBL index:", map_years()$`WBL INDEX`) %>%
+              "<br> WBL index:", map_years()$wbl_index) %>%
   lapply(htmltools::HTML)
   
   
@@ -595,7 +714,7 @@ output$wblmap <- renderLeaflet({
     setView(lat = 30, lng = 0, zoom = 1) %>%
     addTiles() %>%
     addPolygons(
-      fillColor = ~ palette(map_years()$`WBL INDEX`),
+      fillColor = ~ palette(map_years()$wbl_index),
       weight = 0.5,
       opacity = 1,
       color = "white",
@@ -610,10 +729,11 @@ output$wblmap <- renderLeaflet({
     ) %>%
     addLegend(
       pal = palette,
-      values = map_years()$`WBL INDEX`,
+      values = map_years()$wbl_index,
       opacity = 0.7,
       title = "WBL Index",
       position = "bottomleft"
+      # labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE))
       ) 
 })
 
@@ -621,27 +741,24 @@ output$wblmap <- renderLeaflet({
 
   options = list(height = 500)
 )
-
-# shinyApp(ui, server)
-
 ```
 
 ### Avergae score of WBL indicators by region and year
 
 ```{r}
 wbl_indicators <- wbl_df %>% 
-  select("economy",
-         "Region",
-         "Income group",
-         "reportyr",
-         "MOBILITY",
-         "WORKPLACE",
-         "PAY",
-         "MARRIAGE",
-         "PARENTHOOD",
-         "ENTREPRENEURSHIP",
-         "ASSETS",
-         "PENSION") %>% 
+  select(economy,
+         region,
+         income_group,
+         report_year,
+         mobility,
+         workplace,
+         pay,
+         marriage,
+         parenthood,
+         entrepreneurship,
+         assets,
+         pension) %>% 
          # "Can a woman apply for a passport in the same way as a man?",
          # "Can a woman travel outside the country in the same way as a man?",
          # "Can a woman travel outside her home in the same way as a man?",
@@ -955,7 +1072,7 @@ workplace_long %>%
 
 ```{r}
 # add column code for iso2 country code
-gap$code <- countrycode(gap$`Country ISO3`, origin = "iso3c", destination = "iso2c")
+gap$code <- countrycode(gap$country_iso3, origin = "iso3c", destination = "iso2c")
 
 
 
@@ -1069,14 +1186,16 @@ flag_data <- gap %>%
 ```
 
 ```{r}
+gap$code <- countrycode(gap$country_iso3, origin = "iso3c", destination = "iso2c")
+
 gap %>% 
-  filter(Indicator == "Overall Global Gender Gap Index",
-         `Subindicator Type` == "Index") %>% 
+  filter(indicator == "Overall Global Gender Gap Index",
+         subindicator_type == "Index") %>% 
   select(code,
-         `Country Name`,
+         country_name,
          "2021") %>% 
   rename(gender_gap_index = "2021",
-         economy = `Country Name`) %>% 
+         economy = country_name) %>% 
   right_join(wbl_df,
              by = "economy") %>% 
   filter(reportyr == "2021") %>% 
@@ -1179,25 +1298,6 @@ knitr::include_graphics("figures/gender.png") #include graphic in my report
 
 # nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders
 ```
-
-```{r}
-# 
-# library(tidyverse)
-# library(themes360info)
-# mtcars %>%
-# {
-#   ggplot(.) +
-#   aes(mpg, disp) +
-#   geom_point() +
-#   theme_360() +
-#   annotate_360_lightblue(label = "Oh hello!",
-#     x = Inf,
-#     y = Inf)
-# } %>%
-# save_360plot("test.png")
-
-```
-
 
 ```{r}
 
@@ -1568,11 +1668,12 @@ gap %>%
 
 
 
+
 ## Proportion of seats held by women in national parliaments
 
 ```{r}
 # cleaning
-seats <- indicators %>% 
+seats <- gender %>% 
   filter(Indicator.Name == "Proportion of seats held by women in national parliaments (%)",
          Country.Name %in% c("Africa",
                              "East Asia & Pacific",
@@ -1656,7 +1757,7 @@ dem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 ```{r}
 # extract regions from wbl workbank data
 wbl_region <- wbl_df %>% 
-  select(economy, Region) %>% 
+  select(economy, region) %>% 
   distinct() %>% 
   rename("country_name" = "economy")
 
@@ -1680,18 +1781,18 @@ suffrage %>%
   #             values_from = v2elfemrst) %>% 
   select(country_name,
          year,
-         Region) %>%
+         region) %>%
   rename(Country = country_name,
          Year = year) %>% 
   # filter(!is.na (`No female suffrage`)) %>% 
   arrange(Year) %>% 
   select(Country,
          Year,
-         Region) %>% 
+         region) %>% 
   relocate(Year, .before = Country) %>% 
   gt() %>% 
   cols_width(Country ~ px(80),
-             Region ~ px(250)) %>% 
+             region ~ px(250)) %>% 
   tab_header(title = md("**Countries with no female suffrage**"))
 
 
