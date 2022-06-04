@@ -1,6 +1,6 @@
 ---
 title: |
-  <br>**International Women's Day Special Report - The Journey towards Women's Legal Empowerment**
+  <br>**International Women's Day Report - The Journey towards Women's Legal Empowerment**
 author: |
   | Author: Mengyun Yang 
   | Supervisor: James Goldie at 360info
@@ -297,7 +297,7 @@ wbl_average$tooltip <-
 wbl_world$tooltip <- 
   glue_data(wbl_world,
             "Year: {report_year}",
-            "\nWBL index: {round(wbl, 1)}")
+            "\nGlobal Average WBL index: {round(wbl, 1)}")
 
 
 ggplotly(
@@ -355,7 +355,7 @@ tooltip = "text"
 
 The below shiny application shows how the WBL index for 190 countries changes over the years. Regions like Latin America and Caribbean, Sub-Saharan Africa, South Asia and South-east Asia had very low WBL score in the 70s and 80s, but most of the countries in these regions have made improvements over the years, especially countries like Brazil, Chile, Bolivia, Saudi Arabia, South Africa, Namibia, Zimbabwe stole the spotlight with the greatest improvement and Belgium, Denmark, France, Latvia, Luxembourg and Sweden have a perfect score of 100 in 2021.
 
-```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = FALSE}
+```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = TRUE}
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   filter(report_year < 2022) %>% 
@@ -415,7 +415,7 @@ output$wblmap <- renderLeaflet({
   
   palette <- colorBin(palette = "OrRd",
                       domain = map_years()$wbl_index,
-                      bins = 5,
+                      bins = c(0, 20, 40, 60, 80, 100),
                       na.color ="transparent",
                       reverse = FALSE)
 
@@ -447,6 +447,7 @@ output$wblmap <- renderLeaflet({
       pal = palette,
       values = map_years()$wbl_index,
       opacity = 0.7,
+      # bins = 6,
       title = "WBL Index",
       position = "bottomleft"
       # labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE))
@@ -900,7 +901,7 @@ wbl_df %>%
 
 ## Gendered laws and women's empowerment
 
-### Gender gap 
+### Laws and gender equality
 
 As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
 
@@ -1031,7 +1032,7 @@ gap %>%
 ```
 <br>
 
-### Political empowerment 
+### Laws and women's political empowerment 
 Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
 
 ```{r}
@@ -1068,7 +1069,7 @@ poli$tooltip <-
 ```
 
 <div class = "center">
-```{r poli, fig.cap="Association between WBL index and Political Empowerment index"}
+```{r poli, fig.cap="Association between laws and women's political empowerment"}
 ggplotly(
   poli %>%
     ggplot(aes(x = wbl_index,
@@ -1095,7 +1096,7 @@ ggplotly(
       y = "Political Empowerment index (2021)",
       color = NULL,
       shape = NULL,
-      title = "Association between WBL index and Political Empowerment index"
+      title = "Association between laws and women's political empowerment"
     ),
   tooltip = "text"
 ) %>%
@@ -1465,7 +1466,7 @@ plot_so / plot_ku
 
 ```
 
-### Economic participation
+### Gendered laws and women's economic participation
 
 ```{r}
 # economic participation index
@@ -1499,7 +1500,7 @@ econ$tooltip <-
   )
 ```
 
-```{r}
+```{r econ, fig.cap="Association between laws and women's economic participation"}
 
 ggplotly(
   econ  %>%
@@ -1527,7 +1528,7 @@ ggplotly(
       y = "Economic Participation index (2021)",
       color = NULL,
       shape = NULL,
-      title = "Association between WBL index and Economic Participation index"
+      title = "Association between laws and women's economic participation"
     ),
   tooltip = "text"
 ) %>%
@@ -1608,15 +1609,6 @@ ggplotly(
   )
 
 ```
-
-
-
-
-
-
-
-
-
 
 
 
