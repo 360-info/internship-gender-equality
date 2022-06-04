@@ -43,6 +43,7 @@ library(skimr)
 library(janitor)
 library(glue)
 library(ggplot2); ggplot2::theme_set(theme_minimal())
+library(ggsci)
 library(here)
 library(readxl)
 library(stringr)
@@ -106,6 +107,7 @@ wbl_pension  <- clean_names(wbl_pension)
 ## skip the first 4 rows
 gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) 
 
+gender <- clean_names(gender ) 
 
 ```
 
@@ -211,7 +213,7 @@ read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_e
 
 
 ## The democracy ratings data 
-This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections [@vdem]. Only a indicator  was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem-missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
+This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections from year 1789 to 2020 [@vdem]. Only one indicator was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem-missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
 
 
 ```{r vdem-metadata}
@@ -320,7 +322,7 @@ wbl_average %>%
                  text = tooltip,
                  color = "WBL World"),
              size = 1) +
-  scale_color_brewer(palette = "Paired") +
+  scale_color_npg(alpha = 0.8) +
   scale_x_continuous(breaks = seq(1971, 2021, by =10)) +
   theme(legend.text = element_text(size = 6)) +
   labs(x = NULL,
@@ -459,7 +461,7 @@ output$wblmap <- renderLeaflet({
 
 ## Law reforms enacted by regions
 
-Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asian (see Figure \@ref(fig:reforms)). Furthermore, the drill-down analysis in Figure \@ref(fig:reforms-indi) shows that Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
+Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asian (see Figure \@ref(fig:reforms)). Furthermore, a drill-down analysis in Figure \@ref(fig:reforms-indi) shows the majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents. Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
 
 <br>
 ```{r}
@@ -648,17 +650,17 @@ wbl_mob2 %>%
   mutate(region = fct_reorder(region, total_reforms)) %>% 
   ggplot() +
   geom_col(aes(x = region,
-               y = total_reforms,
-               fill = region)) +
+               y = total_reforms),
+           fill = "#f39b7fff") +
   geom_text(aes(x = region,
                y = total_reforms,
                label = total_reforms, 
                 fill = NULL, 
-                hjust = 0.01),
+                hjust = 1.5),
             size = 3,
-            colour = "black") +
+            colour = "white") +
   coord_flip() +
-  scale_fill_brewer(palette = "Paired") +
+  # scale_fill_brewer(palette = "Paired") +
   theme(legend.position = "bottom",
         legend.text=element_text(size = 6),
         plot.caption = element_text(hjust = 0)) +
@@ -693,10 +695,11 @@ wbl_mob2 %>%
                names_to = "indicator",
                values_to = "count"
                ) %>%
-  mutate(indicator = str_remove(indicator, "\\_count")) %>% 
-  filter(region %in% c("Latin America & Caribbean",
-                       "High income: OECD",
-                       "Sub-Saharan Africa")) %>% 
+  mutate(indicator = str_remove(indicator, "\\_count"),
+         count = replace_na(count, 0)) %>% 
+  # filter(region %in% c("Latin America & Caribbean",
+  #                      "High income: OECD",
+  #                      "Sub-Saharan Africa")) %>% 
   mutate(region = reorder_within(region, count, indicator)) %>% 
   ungroup() %>% 
   ggplot(aes(x = region,
@@ -707,14 +710,14 @@ wbl_mob2 %>%
                 y = count,
                 label = count, 
                 fill = NULL, 
-                hjust = -0.05),
+                hjust = 1.5),
             size = 3,
-            colour = "black") +  
+            colour = "white") +  
   facet_wrap(vars(indicator),
              scale = "free_y") +
   coord_flip() +
   scale_x_reordered() +
-  scale_fill_brewer(palette = "Paired") +
+  scale_fill_npg(alpha = 0.8) +
   theme(legend.position = "none",
         axis.text.y = element_text(size = 8),
         strip.text.x = element_text(size = 14),
@@ -722,14 +725,14 @@ wbl_mob2 %>%
         plot.title = element_text(size = 16)) +
   labs(x = NULL,
        y = "Number of reforms",
-       title = "Total reforms enacted in the top 3 countries between 1971 -2021",
+       title = "Reforms varies across different regions and indicators",
        caption = "Source: The World Bank")
 ```
 
 
 <br>
 
-When looking at the overall score for these 8 indicators, the progress has also been uneven across these domains. The majority of law reforms were made in the areas of workplace and pay protections and regulations affecting working parents, see Figure \@ref(fig:indi-average). One noticeable finding is that, in comparison to other regions, the Middle East and North Africa has made substantially slower progress in enacting reforms in areas such as marriage and mobility. Although Sub-Saharan was the region that has made significant progress in changing their gendered laws over the years, it's overall score is still relatively low compared to other regions, this indicates that it still has a long way to go to achieve gender equality. The following are some approaches that some of the countries have taken to tackle gender inequity [@Melling_2018]:
+When looking at the overall score for these 8 indicators, the progress has also been uneven across these domains, see Figure \@ref(fig:indi-average). One noticeable finding is that, in comparison to other regions, the Middle East and North Africa has made substantially slower progress in enacting reforms in areas such as marriage and mobility. Although Sub-Saharan was the region that has made significant progress in changing their gendered laws over the years, it's overall score is still relatively low compared to other regions, this indicates that it still has a long way to go to achieve gender equality. The following are some approaches that some of the countries have taken to tackle gender inequity [@Melling_2018]:
 
 - **Germany’s Wage Transparency Act**<br>
 "As of January 6, 2018, German law allows workers at companies with more than 200 employees to find out the median remuneration of a colleague of the opposite sex in the same or a comparable role. The median remuneration is based on that of at least six opposite-sex colleagues."
@@ -770,7 +773,6 @@ wbl_indicators <- wbl_df %>%
 <div class = "center">
 ```{r indi-average, fig.cap="Average score of eight WBL indicators by region and year"}
 wbl_indicators_avg <- wbl_indicators  %>% 
-  # filter(report_year %in% c(2000:2021)) %>% 
   group_by(region,
            report_year,
            indicator) %>% 
@@ -785,8 +787,9 @@ wbl_indicators_avg$tooltip <-
             "Region: {region}",
             "\nYear: {report_year}",
             "\nAverage score: {avg_score}")
+```
 
-
+```{r}
 # plot it
 ggplotly(
   
@@ -801,7 +804,7 @@ wbl_indicators_avg %>%
              size = 0.05) +
   facet_wrap(vars(indicator),
              ncol = 4) +
-  scale_color_brewer(palette = "Paired") +
+  scale_color_npg(alpha = 0.8) +
   scale_x_continuous(breaks = seq(1971, 2021, by =10)) +
   theme(axis.text.x = element_text(angle = 90, size = 6),
         axis.text.y = element_text(size = 6),
@@ -816,7 +819,7 @@ wbl_indicators_avg %>%
         ) +
   labs(x = NULL,
        y = "Score",
-       title = "Average score of WBL indicators by region and year",
+       title = "Average score of indicators by region and year",
        color = NULL),
   tooltip = "text"
   
@@ -893,6 +896,8 @@ wbl_df %>%
 
 
 ## Gendered laws and women's empowerment
+
+### Gender gap 
 
 As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
 
@@ -971,12 +976,6 @@ gap %>%
              show.legend = FALSE) +
   geom_flag(data = flag_data,
             aes(country = code)) +
-  # geom_text(data = flag_data,
-  #           aes(label = economy),
-  #           size = 4,
-  #           hjust = "centre",
-  #           nudge_y = 0.035,
-  #           check_overlap = TRUE) + 
   geom_label_repel(
                   aes(label = economy),
                   data = flag_data,
@@ -987,26 +986,17 @@ gap %>%
                   family = "Body 360info",
                   fontface = "bold",
                   colour = "black") +
-      scale_color_brewer(palette = "Paired") +
+      scale_color_npg() +
       scale_shape_manual(values = c(15:18, 15:17)) +
-      # stat_cor(aes(label = ..r.label..)) + #add R value
-      # theme_minimal() +
       theme_360() +
       theme(panel.grid.minor = element_blank(),
-        # axis.line.x = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
-        # axis.line.y = element_blank(arrow = grid::arrow(length = unit(0.15, "cm"), ends = "last", type = "closed")),
         axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 20, b = 0, l = 10)),
         axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = , l = 0)),
         legend.position = "top",
-        # legend.position = c(-0.15, 1.05),
         legend.justification = "left",
-        # legend.box = "horizontal",
         legend.box.margin = margin(-0.5, 0, 0, -3.8, "cm"), # align legend with title and subtitle
         legend.text = element_text(size = 12),
         plot.margin = margin(t = 5.5, r = 18, b = 5.5, l = 28)) + #increase plot margin to allow text placed on y axis outside of plot 
-        # legend.spacing = unit(0.05, 'cm'),
-        # plot.caption = element_text(hjust = 0),
-        # plot.caption.position =  "plot") +
   # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
   coord_cartesian(xlim = c(20, 100),
                   ylim = c(0.4, 0.9),
@@ -1036,20 +1026,28 @@ gap %>%
  knitr::include_graphics("figures/gender.png") #include graphic in my report
 
 ```
+<br>
+
+### Political empowerment 
+Further, Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
+
+
 
 ```{r}
-
-poli <- gap %>% 
-  filter(indicator == "Global Gender Gap Political Empowerment subindex",
-         subindicator_type == "Index") %>% 
+# political empowerment index
+poli <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Political Empowerment subindex",
+    subindicator_type == "Index"
+  ) %>%
   select(country_name,
-         "2021") %>% 
+         "2021") %>%
   rename(political_empowerment = "2021",
-         economy = country_name) %>% 
+         economy = country_name) %>%
   # join wbl_df to get wbl index
   right_join(wbl_df,
-             by = "economy") %>% 
-  filter(report_year == "2021") %>% 
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
   select(economy,
          report_year,
          region,
@@ -1058,41 +1056,246 @@ poli <- gap %>%
          political_empowerment)
 
 
-poli$tooltip <- 
-  glue_data(poli,
-            "Country: {economy}",
-            "\nWBL: {wbl_index}",
-            "\nPolitical Empowerment Index: {political_empowerment}")
+poli$tooltip <-
+  glue_data(
+    poli,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nPolitical Empowerment Index: {political_empowerment}"
+  )
+
+# economic participation index
+econ <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Economic Participation and Opportunity Subindex",
+    subindicator_type == "Index"
+  ) %>%
+  select(country_name,
+         "2021") %>%
+  rename(economic_participation = "2021",
+         economy = country_name) %>%
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         economic_participation)
+
+
+econ$tooltip <-
+  glue_data(
+    econ,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nEconomic Participation Index: {economic_participation}"
+  )
+
+
+# Educational Attainment
+edu <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Educational Attainment Subindex",
+    subindicator_type == "Index"
+  ) %>%
+  select(country_name,
+         "2021") %>%
+  rename(education_attainment = "2021",
+         economy = country_name) %>%
+  filter(!is.na(education_attainment)) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         education_attainment)
+
+
+edu$tooltip <-
+  glue_data(
+    edu,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nEducation Attainment Index: {education_attainment}"
+  )
+
+
+#
+```
+
+<div class = "center">
+```{r poli, fig.cap="Association between WBL index and Political Empowerment index"}
+ggplotly(
+  poli %>%
+    ggplot(aes(x = wbl_index,
+               y = political_empowerment)) +
+    geom_smooth(method = lm,
+                se = FALSE,
+                color = "#36a7e9") +
+    geom_point(alpha = 0) +
+    geom_point(
+      aes(
+        x = wbl_index,
+        y = political_empowerment,
+        text = tooltip,
+        color = region,
+        shape = region
+      ),
+      alpha = 0.8
+    ) +
+    scale_x_continuous(limits = c(25, 100)) +
+    scale_color_npg(alpha = 0.8) +
+    scale_shape_manual(values = c(15:18, 15:17)) +
+    labs(
+      x = "WBL index (2021)",
+      y = "Political Empowerment index (2021)",
+      color = NULL,
+      shape = NULL,
+      title = "Association between WBL index and Political Empowerment index"
+    ),
+  tooltip = "text"
+) %>%
+  layout(
+    annotations = list(
+      list(
+        x = 0.1,
+        y = -0.3,
+        text = "Source: World Bank",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 8)
+      ),
+      list(
+        x = 0.1,
+        y = -0.1,
+        text = "More laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0.98,
+        y = -0.1,
+        text = "Less laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = -0.08,
+        text = "Less<br> equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = 1.05,
+        text = "More<br>equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      )
+    ),
+    legend = list(orientation = "h",
+                  font = list(size = 8)),
+    xaxis = list(title = list(
+      font = list(size = 14),
+      standoff = 10
+    ))
+  )
+
+         
+```
+</div>
+
+```{r}
+# cleaning
+seats <- gender %>% 
+  filter(indicator_name == "Proportion of seats held by women in national parliaments (%)",
+         country_name %in% c("Sub-Saharan Africa (IDA & IBRD countries)",
+                             "East Asia & Pacific (IDA & IBRD countries)",
+                             "Europe & Central Asia (IDA & IBRD countries)",
+                             "Latin America & the Caribbean (IDA & IBRD countries)",
+                             "Middle East & North Africa (IDA & IBRD countries)",
+                             "South Asia (IDA & IBRD)")) %>% 
+  select(-indicator_code) %>% 
+  pivot_longer(cols = 4:65,
+               names_to = "year",
+               values_to = "percentage") %>% 
+  mutate(year = str_remove(year, "x"),
+         year = as.numeric(year),
+         percentage = round(percentage, 2),
+         country_name = str_remove(country_name, "\\(IDA & IBRD countries\\)"),
+         country_name = str_remove(country_name, "\\(IDA & IBRD\\)")) %>% 
+  filter(!is.na(percentage)) %>% 
+  select(-x)
+```
+
+<div class = "center">
+```{r}
+# plot it
+seats$tooltip <- 
+  glue_data(seats,
+            "Region: {country_name}",
+            "\nYear: {year}",
+            "\nPercentage: {paste0(seats$percentage, '%', sep = '')}")
 
 ggplotly(
   
-poli %>% 
-  ggplot(aes(x = wbl_index,
-             y = political_empowerment)) +
-  geom_smooth(method = lm, 
-              se = FALSE,
-              color = "#36a7e9") +
-  geom_point(alpha = 0) +
-  geom_point(aes(x = wbl_index,
-                 y = political_empowerment,
-                 text = tooltip,
-                 color = region,
-                 shape = region),
-             alpha = 0.8) +
-  scale_x_continuous(limits = c(25, 100)) +
-  scale_color_brewer(palette = "Paired") +
-  scale_shape_manual(values = c(15:18, 15:17)) +
-  # stat_cor(aes(label = ..r.label..)) +
-  # theme(axis.title.x = element_text(vjust = 0.05)) +
-  labs(x = "WBL index",
-       y = "Gender gap political empowerment subindex",
-       color = NULL,
-       title = "Scatter plot of WBL index and gender gap political empowerment ",
-       subtitle = "Year: 2021"),
-tooltip = "text"
+  seats %>% 
+  ggplot(aes(x = year,
+             y = percentage,
+             group = country_name,
+             color = country_name)) +
+  geom_line(aes(text = tooltip)) +
+  geom_point(aes(text = tooltip),
+             size = 0.7) +
+  scale_color_npg() +
+  theme_light() +
+  theme(axis.text.x = element_text(size = 8)) +
+  labs(x = NULL,
+       y = "Percentage %",
+       title = "Proportion of seats held by women in national parliaments (%)",
+       color = NULL),
+  tooltip = "text"
+  
 ) %>% 
-    layout(annotations = list(x = 0.1, 
-                            y = -0.3, 
+  layout(annotations = list(x = 0.1,
+                            y = -0.3,
                             text = "Source: World Bank",
                             showarrow = FALSE, 
                             xref = "paper", 
@@ -1102,13 +1305,219 @@ tooltip = "text"
                             xshift = 0, 
                             yshift = 0,
                             font = list(size = 8)),
-         legend = list(orientation = "h",
-                       font = list(size = 8)),
-         xaxis = list(title = list(font = list(size = 12),
-                                   standoff = 10))
-    )
+             legend = list(orientation = "h",
+                  font = list(size = 8))) 
+  
+```
+</div>
 
-         
+
+
+```{r}
+# extract regions from wbl workbank data
+wbl_region <- wbl_df %>% 
+  select(economy, region) %>% 
+  distinct() %>% 
+  rename("country_name" = "economy")
+
+# jonin region data with v-dem data
+suffrage <- dem %>% 
+  select(country_name,
+         year,
+         v2elfemrst) %>% 
+  filter(year %in% c(1971:2020),
+         v2elfemrst == 0) %>% 
+  left_join(wbl_region,
+            by = "country_name") %>% 
+    filter(region == "Sub-Saharan Africa") %>% 
+  group_by(country_name) %>% 
+  arrange(desc(year), .by_group = TRUE) %>% 
+  filter(!is.na(v2elfemrst)) %>% 
+  slice_max(year, n=1)
+
+
+suffrage <- dem %>% 
+  select(country_name,
+         year,
+         v2elfemrst) %>% 
+  filter(year %in% c(1971:2020),
+         v2elfemrst == 2) %>% 
+  left_join(wbl_region,
+            by = "country_name") %>% 
+    filter(region == "Sub-Saharan Africa") %>% 
+  group_by(country_name) %>% 
+  arrange(desc(year), .by_group = TRUE) %>% 
+  filter(!is.na(v2elfemrst)) %>% 
+  slice_max(year, n=1)
+
+
+```
+
+```{r}
+# no suffrage
+suffrage %>% 
+  filter(v2elfemrst == "0") %>% 
+  # pivot_wider(names_from = v2elfemrst,
+  #             values_from = v2elfemrst) %>% 
+  select(country_name,
+         year,
+         region) %>%
+  rename(Country = country_name,
+         Year = year,
+         Region = region) %>% 
+  # filter(!is.na (`No female suffrage`)) %>% 
+  arrange(Year) %>% 
+  select(Country,
+         Year,
+         Region) %>% 
+  relocate(Year, .before = Country) %>% 
+  gt() %>% 
+  cols_width(Country ~ px(80),
+             Region ~ px(250)) %>% 
+  tab_header(title = md("**Countries with no female suffrage**"))
+
+
+
+
+# restricted suffrage 
+suffrage %>% 
+  filter(v2elfemrst == "1") %>% 
+  select(country_name,
+         year,
+         region) %>%
+  rename(Country = country_name,
+         Year = year,
+         Region = region) %>% 
+  # filter(!is.na (`Restricted female suffrage`)) %>% 
+  arrange(Year) %>% 
+  select(Country,
+         Year,
+         Region) %>% 
+  relocate(Year, .before = Country) %>% 
+  gt() %>% 
+  cols_width(Country ~ px(250),
+             Region ~ px(250)) %>% 
+  tab_header(title = md("**Countries with restricted female suffrage**"))
+  
+```
+
+
+### Economic participation
+
+
+
+
+
+
+
+
+```{r}
+ggplotly(
+  econ  %>%
+    ggplot(aes(x = wbl_index,
+               y = economic_participation)) +
+    geom_smooth(method = lm,
+                se = FALSE,
+                color = "#36a7e9") +
+    geom_point(alpha = 0) +
+    geom_point(
+      aes(
+        x = wbl_index,
+        y = economic_participation,
+        text = tooltip,
+        color = region,
+        shape = region
+      ),
+      alpha = 0.8
+    ) +
+    scale_x_continuous(limits = c(25, 100)) +
+    scale_color_npg(alpha = 0.8) +
+    scale_shape_manual(values = c(15:18, 15:17)) +
+    labs(
+      x = "WBL index (2021)",
+      y = "Economic Participation index (2021)",
+      color = NULL,
+      shape = NULL,
+      title = "Association between WBL index and Economic Participation index"
+    ),
+  tooltip = "text"
+) %>%
+  layout(
+    annotations = list(
+      list(
+        x = 0.1,
+        y = -0.3,
+        text = "Source: World Bank",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 8)
+      ),
+      list(
+        x = 0.1,
+        y = -0.1,
+        text = "More laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0.98,
+        y = -0.1,
+        text = "Less laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = -0.08,
+        text = "Less<br> equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = 1.05,
+        text = "More<br>equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      )
+    ),
+    legend = list(orientation = "h",
+                  font = list(size = 8)),
+    xaxis = list(title = list(
+      font = list(size = 14),
+      standoff = 10
+    ))
+  )
+
 ```
 
 
