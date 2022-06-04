@@ -64,7 +64,7 @@ library(themes360info)
 library(grid)
 library(rsvg)
 library(ggrepel)
-library(forcats)
+library(patchwork)
 ```
 
 
@@ -105,9 +105,16 @@ wbl_pension  <- clean_names(wbl_pension)
 ```{r gender}
 # downloaded from https://data.worldbank.org/topic/gender
 ## skip the first 4 rows
-gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4) 
+gender <- read.csv(here("data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv"), skip = 4)
 
-gender <- clean_names(gender ) 
+#cleaning 
+gender <- clean_names(gender) %>% 
+  select(-x)
+
+for (col in 1:ncol(gender)) {
+    colnames(gender)[col] <-  sub("^x", "", colnames(gender)[col])
+}
+  
 
 ```
 
@@ -149,7 +156,7 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 
 The data used in this project consists of 4 separate data set. The women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is also an open data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html).
 
-## The women, business and the law data
+## The women, business and the law index
 The women, business and the law data set contains 10 sheets of data. It assesses the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation, covering eight areas such as mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension. It tracks how laws affect women at different stages in their working lives and focusing on those laws applicable in the main business city [@civilsdaily]. The first two sheets are overall WBL index scores, individual indicator scores go evaluate 35 parts of the law from 190 economies from years 1971 to 2021. The subsequent sheets present answer for the scored questions by 8 indicators. Indicator-level scores are obtained by calculating the unweighed average of the questions within that indicator and scaling the result to 100. Overall scores are then calculated by taking the average of each indicator, with 100 representing the highest possible score, a higher score suggests that there are more laws promoting gender equality [@WBL] (see Table \@ref(tab:wbl-data) for scoring method for WBL data). There are no missing values presented in this data set.
 
 ```{r wbl-data}
@@ -168,7 +175,7 @@ tribble(
 
 ```
 
-## The gender index data
+## The gender index 
 Gender equality is critical to the success of economies and communities. Ensuring the full development and effective deployment of half of the world's entire talent pool has a significant impact on global economic growth, competitiveness, and future-readiness. The Index is more concerned with measuring gaps than with assessing levels. Second, rather than gaps in input data, it captures gaps in outcome variables. Third, rather than focusing on women's empowerment, it rates countries based on gender equality. Economic Participation and Opportunity, Educational Attainment, Health and Survival and Political Empowerment are the four core categories (sub-indexes) that the Global Gender Gap Index covers [@gap]. This data set contains `r length(unique(gap$indicator))` indicators under this four core categories for measuring gender gap across `r length(unique(gap$country_name))` countries from 2006 - 2021, see Table \@ref(tab:gender-index) for explanation of the variable used in this analysis.
 
 ```{r gender-index}
@@ -184,16 +191,12 @@ tribble(
 ```
 
 
-
-
-
-
-## The gender indicator data
+## The gender indicator 
 
 There are `r nrow(gender)` observations and `r ncol(gender)` columns in the gender indicator data set. It contains collection of data on `r nrow(read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_en_csv_v2_4040307.csv")))-1` significant gender issues such as education, employment, health, population etc. for period from 1960 to 2021 (see Table \@ref(tab:gender-metadata) for metadata of the gender indicator). As it can be seen from Table \@ref(tab:gender-data), there are a lot of missing values in this data set, not all the indicators have data for the whole period of 1960 to 2021. However, there were only one indicator used in this analysis for period from 1997 - 2021, therefore, missing values can be omitted.
 
 ```{r gender-data}
-skim(gender %>% select(-X)) %>% 
+skim(gender) %>% 
   kable(caption = "Summary of missing value of gender indicator data frame (scrollable)") %>% 
   kable_styling(full_width = TRUE) %>% 
   scroll_box(height = "200px")
@@ -212,7 +215,7 @@ read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_e
 ```
 
 
-## The democracy ratings data 
+## The democracy ratings 
 This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections from year 1789 to 2020 [@vdem]. Only one indicator was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem-missing) for details of the missing values in the subset and Table \@ref(tab:vdem-metadata) for metadata of the dataset.
 
 
@@ -1029,9 +1032,7 @@ gap %>%
 <br>
 
 ### Political empowerment 
-Further, Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
-
-
+Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
 
 ```{r}
 # political empowerment index
@@ -1064,70 +1065,6 @@ poli$tooltip <-
     "\nPolitical Empowerment Index: {political_empowerment}"
   )
 
-# economic participation index
-econ <- gap %>%
-  filter(
-    indicator == "Global Gender Gap Economic Participation and Opportunity Subindex",
-    subindicator_type == "Index"
-  ) %>%
-  select(country_name,
-         "2021") %>%
-  rename(economic_participation = "2021",
-         economy = country_name) %>%
-  # join wbl_df to get wbl index
-  right_join(wbl_df,
-             by = "economy") %>%
-  filter(report_year == "2021") %>%
-  select(economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         economic_participation)
-
-
-econ$tooltip <-
-  glue_data(
-    econ,
-    "Country: {economy}",
-    "\nWBL: {wbl_index}",
-    "\nEconomic Participation Index: {economic_participation}"
-  )
-
-
-# Educational Attainment
-edu <- gap %>%
-  filter(
-    indicator == "Global Gender Gap Educational Attainment Subindex",
-    subindicator_type == "Index"
-  ) %>%
-  select(country_name,
-         "2021") %>%
-  rename(education_attainment = "2021",
-         economy = country_name) %>%
-  filter(!is.na(education_attainment)) %>% 
-  # join wbl_df to get wbl index
-  right_join(wbl_df,
-             by = "economy") %>%
-  filter(report_year == "2021") %>%
-  select(economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         education_attainment)
-
-
-edu$tooltip <-
-  glue_data(
-    edu,
-    "Country: {economy}",
-    "\nWBL: {wbl_index}",
-    "\nEducation Attainment Index: {education_attainment}"
-  )
-
-
-#
 ```
 
 <div class = "center">
@@ -1242,6 +1179,12 @@ ggplotly(
 ```
 </div>
 
+<br>
+
+Further, Figure \@ref(fig:seats) shows that the proportion of seats held by women in national parliaments in Latin America and Caribbean has been increasing ever since 1971 and it exceeds all other regions. The figure for East Asia and Pacific has not changed much, only a 4.76% increase over the years. Although Middle East and and North Africa has the lowest percentage of seats held by women in national parliaments in 2021, there was a 13.53% increase since 1971.
+
+After analysing the V-dem data, some interesting findings are, there were still countries without female suffrage in 21 century, these countries are Somalia and Kuwait. However, soon after 2006, women in Kuwait now have the rights to vote in national elections. In contrast, women in Somalia used to be able to vote, back in the 80s, but now they are denied the right to vote in the most recent national election in 2017 (see Figure \@ref(fig:suffrage)).
+
 ```{r}
 # cleaning
 seats <- gender %>% 
@@ -1256,162 +1199,308 @@ seats <- gender %>%
   pivot_longer(cols = 4:65,
                names_to = "year",
                values_to = "percentage") %>% 
-  mutate(year = str_remove(year, "x"),
-         year = as.numeric(year),
+  mutate(year = as.numeric(year),
          percentage = round(percentage, 2),
          country_name = str_remove(country_name, "\\(IDA & IBRD countries\\)"),
          country_name = str_remove(country_name, "\\(IDA & IBRD\\)")) %>% 
-  filter(!is.na(percentage)) %>% 
-  select(-x)
+  filter(!is.na(percentage)) 
 ```
+
+
+```{r}
+# # plot it
+# seats$tooltip <- 
+#   glue_data(seats,
+#             "Region: {country_name}",
+#             "\nYear: {year}",
+#             "\nPercentage: {paste0(seats$percentage, '%', sep = '')}")
+# 
+# ggplotly(
+#   
+#   seats %>% 
+#   ggplot(aes(x = year,
+#              y = percentage,
+#              group = country_name,
+#              color = country_name)) +
+#   geom_line(aes(text = tooltip)) +
+#   geom_point(aes(text = tooltip),
+#              size = 0.7) +
+#   scale_color_npg() +
+#   theme_light() +
+#   theme(axis.text.x = element_text(size = 8)) +
+#   labs(x = NULL,
+#        y = "Percentage %",
+#        title = "Proportion of seats held by women in national parliaments (%)",
+#        color = NULL),
+#   tooltip = "text"
+#   
+# ) %>% 
+#   layout(annotations = list(x = 0.1,
+#                             y = -0.3,
+#                             text = "Source: World Bank",
+#                             showarrow = FALSE, 
+#                             xref = "paper", 
+#                             yref = "paper",
+#                             xanchor = "right", 
+#                             yanchor = "auto", 
+#                             xshift = 0, 
+#                             yshift = 0,
+#                             font = list(size = 8)),
+#              legend = list(orientation = "h",
+#                   font = list(size = 8))) 
+
+```
+
 
 <div class = "center">
 ```{r}
-# plot it
-seats$tooltip <- 
-  glue_data(seats,
-            "Region: {country_name}",
-            "\nYear: {year}",
-            "\nPercentage: {paste0(seats$percentage, '%', sep = '')}")
+seats <- gender %>% 
+  filter(indicator_name == "Proportion of seats held by women in national parliaments (%)",
+         country_name %in% c("Sub-Saharan Africa (IDA & IBRD countries)",
+                             "East Asia & Pacific (IDA & IBRD countries)",
+                             "Europe & Central Asia (IDA & IBRD countries)",
+                             "Latin America & the Caribbean (IDA & IBRD countries)",
+                             "Middle East & North Africa (IDA & IBRD countries)",
+                             "South Asia (IDA & IBRD)")) %>% 
+  select(country_name, "1998", "2021") %>% 
+  mutate(`1998` = round(`1998`, 2),
+         `2021` = round(`2021`, 2),
+         country_name = str_remove(country_name, "\\(IDA & IBRD countries\\)"),
+         country_name = str_remove(country_name, "\\(IDA & IBRD\\)"))
 
+
+seats$tooltip1 <-
+  glue_data(seats,
+            "\nPercentage: {paste0(seats$`1998`, '%', sep = '')}")
+
+seats$tooltip2 <-
+  glue_data(seats,
+            "\nPercentage: {paste0(seats$`2021`, '%', sep = '')}")
+```
+
+```{r seats, fig.cap = "Trend of proportion of seats held by women in national parliaments by regions and year"}
 ggplotly(
-  
-  seats %>% 
-  ggplot(aes(x = year,
-             y = percentage,
-             group = country_name,
-             color = country_name)) +
-  geom_line(aes(text = tooltip)) +
-  geom_point(aes(text = tooltip),
-             size = 0.7) +
-  scale_color_npg() +
-  theme_light() +
-  theme(axis.text.x = element_text(size = 8)) +
+seats %>% 
+  ggplot() +
+  geom_segment(
+    aes(x = country_name, 
+        xend = country_name, 
+        y = `1998`, 
+        yend = `2021`), 
+    color="grey"
+    ) +
   labs(x = NULL,
-       y = "Percentage %",
-       title = "Proportion of seats held by women in national parliaments (%)",
-       color = NULL),
-  tooltip = "text"
-  
+       y = "Percentage %") +
+  geom_point(
+    aes(x = country_name, 
+        y = `1998`,
+        color = "1998",
+        text = tooltip1),
+    size = 3,
+    alpha = 0.8
+    ) +
+  geom_point(
+    aes(x = country_name,
+        y = `2021`,
+        color = "2021",
+        text = tooltip2),
+    size = 3,
+    alpha = 0.8
+  ) +
+  coord_flip() +
+  scale_color_manual(values = c("#4dbbd5ff", "#e64b35ff"),
+                     name = "Year") +
+  labs(title = "Proportion of seats held by women in national parliaments (%)"),
+tooltip = "text"
 ) %>% 
-  layout(annotations = list(x = 0.1,
-                            y = -0.3,
+  layout(annotations = list(x = 0,
+                            y = -0.1,
                             text = "Source: World Bank",
-                            showarrow = FALSE, 
-                            xref = "paper", 
+                            showarrow = FALSE,
+                            xref = "paper",
                             yref = "paper",
-                            xanchor = "right", 
-                            yanchor = "auto", 
-                            xshift = 0, 
+                            xanchor = "right",
+                            yanchor = "auto",
+                            xshift = 0,
                             yshift = 0,
-                            font = list(size = 8)),
-             legend = list(orientation = "h",
-                  font = list(size = 8))) 
+                            font = list(size = 8)))
   
 ```
 </div>
 
-
-
 ```{r}
-# extract regions from wbl workbank data
-wbl_region <- wbl_df %>% 
-  select(economy, region) %>% 
-  distinct() %>% 
-  rename("country_name" = "economy")
 
-# jonin region data with v-dem data
-suffrage <- dem %>% 
+# Somalia
+suffrage_so <- vdem %>% 
   select(country_name,
          year,
          v2elfemrst) %>% 
   filter(year %in% c(1971:2020),
-         v2elfemrst == 0) %>% 
-  left_join(wbl_region,
-            by = "country_name") %>% 
-    filter(region == "Sub-Saharan Africa") %>% 
-  group_by(country_name) %>% 
-  arrange(desc(year), .by_group = TRUE) %>% 
-  filter(!is.na(v2elfemrst)) %>% 
-  slice_max(year, n=1)
+         country_name == "Somalia") %>% 
+  mutate(
+    v2elfemrst = case_when(
+      v2elfemrst == 0 ~"No suffrage", 
+      v2elfemrst == 2 ~ "Female suffrage",
+      is.na(v2elfemrst) ~ "No national elections"),
+    position = case_when(
+      v2elfemrst == "No national elections" ~ 0,
+      v2elfemrst == "No suffrage" ~ -1,
+      v2elfemrst == "Female suffrage" ~ 1
+    ),
+    direction = case_when(
+      position == -1 ~ -1,
+      position == 1 ~ 1
+    )
+  ) 
 
 
-suffrage <- dem %>% 
+# Kuwait
+suffrage_ku <- vdem %>% 
   select(country_name,
          year,
          v2elfemrst) %>% 
   filter(year %in% c(1971:2020),
-         v2elfemrst == 2) %>% 
-  left_join(wbl_region,
-            by = "country_name") %>% 
-    filter(region == "Sub-Saharan Africa") %>% 
-  group_by(country_name) %>% 
-  arrange(desc(year), .by_group = TRUE) %>% 
-  filter(!is.na(v2elfemrst)) %>% 
-  slice_max(year, n=1)
-
-
+         country_name == "Kuwait") %>% 
+  mutate(
+    v2elfemrst = case_when(
+      v2elfemrst == 0 ~"No suffrage", 
+      v2elfemrst == 2 ~ "Female suffrage",
+      is.na(v2elfemrst) ~ "No national elections"),
+    position = case_when(
+      v2elfemrst == "No national elections" ~ 0,
+      v2elfemrst == "No suffrage" ~ -1,
+      v2elfemrst == "Female suffrage" ~ 1
+    ),
+    direction = case_when(
+      position == -1 ~ -1,
+      position == 1 ~ 1
+    )
+  ) 
 ```
 
-```{r}
-# no suffrage
-suffrage %>% 
-  filter(v2elfemrst == "0") %>% 
-  # pivot_wider(names_from = v2elfemrst,
-  #             values_from = v2elfemrst) %>% 
-  select(country_name,
-         year,
-         region) %>%
-  rename(Country = country_name,
-         Year = year,
-         Region = region) %>% 
-  # filter(!is.na (`No female suffrage`)) %>% 
-  arrange(Year) %>% 
-  select(Country,
-         Year,
-         Region) %>% 
-  relocate(Year, .before = Country) %>% 
-  gt() %>% 
-  cols_width(Country ~ px(80),
-             Region ~ px(250)) %>% 
-  tab_header(title = md("**Countries with no female suffrage**"))
+```{r suffrage, fig.cap = "Female suffrage in national elections in Somalia adn Kuwait"}
+# Somalia plot
+plot_so <- ggplot(suffrage_so,
+       aes(x = year,
+           y = position, 
+           col = v2elfemrst, 
+           label = year)) +
+  scale_color_npg() +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3) +
+  geom_segment(aes(y = position,
+                   yend = 0,
+                   xend = year),
+               color = "black",
+               size = 0.2) +
+  geom_point(aes(y = position),
+             size = 2,
+             alpha = 0.8) +
+    geom_text(aes(x = year,
+                y = -0.15,
+                lable = year),
+            size = 2,
+            vjust = 0.8,
+            hjust = 0.9,
+            color = "black",
+            angle = 90) +
+  theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x =element_blank(),
+        axis.ticks.x =element_blank(),
+        axis.line.x =element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none"
+) +
+  labs(color = NULL,
+       title = "Timeline of female suffrage in Somalia") 
 
 
+# Kuwait plot
+plot_ku <- ggplot(suffrage_ku,
+       aes(x = year,
+           y = position, 
+           col = v2elfemrst, 
+           label = year)) +
+  scale_color_npg() +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3) +
+  geom_segment(aes(y = position,
+                   yend = 0,
+                   xend = year),
+               color = "black",
+               size = 0.2) +
+  geom_point(aes(y = position),
+             size = 2) +
+    geom_text(aes(x = year,
+                y = -0.15,
+                lable = year),
+            size = 2,
+            vjust = 0.8,
+            hjust = 0.9,
+            color = "black",
+            angle = 90) +
+  theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x =element_blank(),
+        axis.ticks.x =element_blank(),
+        axis.line.x =element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom"
+) +
+  labs(color = NULL,
+       title = "Timeline of female suffrage in Kuwait") 
 
+plot_so / plot_ku
 
-# restricted suffrage 
-suffrage %>% 
-  filter(v2elfemrst == "1") %>% 
-  select(country_name,
-         year,
-         region) %>%
-  rename(Country = country_name,
-         Year = year,
-         Region = region) %>% 
-  # filter(!is.na (`Restricted female suffrage`)) %>% 
-  arrange(Year) %>% 
-  select(Country,
-         Year,
-         Region) %>% 
-  relocate(Year, .before = Country) %>% 
-  gt() %>% 
-  cols_width(Country ~ px(250),
-             Region ~ px(250)) %>% 
-  tab_header(title = md("**Countries with restricted female suffrage**"))
-  
 ```
-
 
 ### Economic participation
 
+```{r}
+# economic participation index
+econ <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Economic Participation and Opportunity Subindex",
+    subindicator_type == "Index"
+  ) %>%
+  select(country_name,
+         "2021") %>%
+  rename(economic_participation = "2021",
+         economy = country_name) %>%
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         economic_participation)
 
 
-
-
-
-
+econ$tooltip <-
+  glue_data(
+    econ,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nEconomic Participation Index: {economic_participation}"
+  )
+```
 
 ```{r}
+
 ggplotly(
   econ  %>%
     ggplot(aes(x = wbl_index,
@@ -1517,6 +1606,300 @@ ggplotly(
       standoff = 10
     ))
   )
+
+```
+
+
+### Educational Attainment and Opportunity 
+
+```{r}
+# Educational Attainment
+edu <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Educational Attainment Subindex",
+    subindicator_type == "Index"
+  ) %>%
+  select(country_name,
+         "2021") %>%
+  rename(education_attainment = "2021",
+         economy = country_name) %>%
+  filter(!is.na(education_attainment)) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         education_attainment)
+
+
+edu$tooltip <-
+  glue_data(
+    edu,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nEducation Attainment Index: {education_attainment}"
+  )
+```
+
+
+```{r}
+ggplotly(
+  edu %>%
+    ggplot(aes(x = wbl_index,
+               y = education_attainment)) +
+    # geom_smooth(method = lm,
+    #             se = FALSE,
+    #             color = "#36a7e9") +
+    geom_point(alpha = 0) +
+    geom_point(
+      aes(
+        x = wbl_index,
+        y = education_attainment,
+        text = tooltip,
+        color = region,
+        shape = region
+      ),
+      alpha = 0.8
+    ) +
+    scale_x_continuous(limits = c(25, 100)) +
+    scale_color_npg(alpha = 0.8) +
+    scale_shape_manual(values = c(15:18, 15:17)) +
+    labs(
+      x = "WBL index (2021)",
+      y = "Education attainment index (2021)",
+      color = NULL,
+      shape = NULL,
+      title = "Association between WBL index and Education attainment index"
+    ),
+  tooltip = "text"
+) %>%
+  layout(
+    annotations = list(
+      list(
+        x = 0.1,
+        y = -0.3,
+        text = "Source: World Bank",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 8)
+      ),
+      list(
+        x = 0.1,
+        y = -0.1,
+        text = "More laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0.98,
+        y = -0.1,
+        text = "Less laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = -0.08,
+        text = "Less<br> equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = 1.05,
+        text = "More<br>equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      )
+    ),
+    legend = list(orientation = "h",
+                  font = list(size = 8)),
+    xaxis = list(title = list(
+      font = list(size = 14),
+      standoff = 10
+    ))
+  )         
+```
+
+
+
+
+
+
+
+###  Health and survival
+
+
+```{r}
+health <- gap %>%
+  filter(
+    indicator == "Global Gender Gap Health and Survival Subindex",
+    subindicator_type == "Index"
+  ) %>%
+  select(country_name,
+         "2021") %>%
+  rename(health_survival = "2021",
+         economy = country_name) %>%
+  filter(!is.na(health_survival)) %>% 
+  # join wbl_df to get wbl index
+  right_join(wbl_df,
+             by = "economy") %>%
+  filter(report_year == "2021") %>%
+  select(economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         health_survival)
+
+health$tooltip <-
+  glue_data(
+    health,
+    "Country: {economy}",
+    "\nWBL: {wbl_index}",
+    "\nEducation Attainment Index: {health_survival}"
+  )
+```
+
+```{r}
+ggplotly(
+  health %>%
+    ggplot(aes(x = wbl_index,
+               y = health_survival)) +
+    geom_smooth(method = lm,
+                se = FALSE,
+                color = "#36a7e9") +
+    geom_point(alpha = 0) +
+    geom_point(
+      aes(
+        x = wbl_index,
+        y = health_survival,
+        text = tooltip,
+        color = region,
+        shape = region
+      ),
+      alpha = 0.8
+    ) +
+    scale_x_continuous(limits = c(25, 100)) +
+    scale_color_npg(alpha = 0.8) +
+    scale_shape_manual(values = c(15:18, 15:17)) +
+    labs(
+      x = "WBL index (2021)",
+      y = "Health survival index (2021)",
+      color = NULL,
+      shape = NULL,
+      title = "Association between WBL index and health survival index"
+    ),
+  tooltip = "text"
+) %>%
+  layout(
+    annotations = list(
+      list(
+        x = 0.1,
+        y = -0.3,
+        text = "Source: World Bank",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 8)
+      ),
+      list(
+        x = 0.1,
+        y = -0.1,
+        text = "More laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0.98,
+        y = -0.1,
+        text = "Less laws",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = -0.08,
+        text = "Less<br> equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      ),
+      list(
+        x = 0,
+        y = 1.05,
+        text = "More<br>equality",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "right",
+        yanchor = "auto",
+        xshift = 0,
+        yshift = 0,
+        font = list(size = 10)
+      )
+    ),
+    legend = list(orientation = "h",
+                  font = list(size = 8)),
+    xaxis = list(title = list(
+      font = list(size = 14),
+      standoff = 10
+    ))
+  )         
 
 ```
 
