@@ -129,7 +129,6 @@ names(gap) <- sub("x", "", names(gap))
 
 ```
 
-
 ```{r vdem}
 # downloaded from https://www.v-dem.net/vdemds.html
 vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
@@ -258,16 +257,6 @@ The Women, Business, and the Law Index assesses global progress towards gender e
 
 <div class = "center">
 ```{r wbl-average, fig.cap="The trend of the global average Women, Business and the Law score for different regions and world average"}
-# 
-# cols <- c("South Asia" = "#f9beb9", 
-#           "Europe & Central Asia" = "#f37046", 
-#           "Middle East & North Africa" = "#2a1212", 
-#           "Sub-Saharan Africa" = "#00b4bb",
-#           "Latin America & Caribbean" = "#057e93",
-#           "High income: OECD" = "#7c3c1c",
-#           "East Asia & Pacific" = "#eb553c",
-#           "WBL World" = "#c4662c")
-
 
 wbl_average <- wbl_df %>% 
   filter(report_year < 2022) %>% 
@@ -1032,155 +1021,495 @@ gap %>%
 ```
 <br>
 
-### Laws and women's political empowerment 
-Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
+
+
+### Laws and women's mobility 
 
 ```{r}
-# political empowerment index
-poli <- gap %>%
-  filter(
-    indicator == "Global Gender Gap Political Empowerment subindex",
-    subindicator_type == "Index"
-  ) %>%
-  select(country_name,
-         "2021") %>%
-  rename(political_empowerment = "2021",
-         economy = country_name) %>%
-  # join wbl_df to get wbl index
-  right_join(wbl_df,
-             by = "economy") %>%
-  filter(report_year == "2021") %>%
-  select(economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         political_empowerment)
+mob_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "mobility",
+         "can_a_woman_apply_for_a_passport_in_the_same_way_as_a_man",
+         "can_a_woman_travel_outside_the_country_in_the_same_way_as_a_man",
+         "can_a_woman_travel_outside_her_home_in_the_same_way_as_a_man",
+         "can_a_woman_choose_where_to_live_in_the_same_way_as_a_man") %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
 
+c_count <- wbl_df %>% 
+  group_by(region) %>% 
+  summarise(count = n_distinct(economy))
+  
+```
 
-poli$tooltip <-
-  glue_data(
-    poli,
-    "Country: {economy}",
-    "\nWBL: {wbl_index}",
-    "\nPolitical Empowerment Index: {political_empowerment}"
-  )
+```{r}
+mob_df %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 40)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws guaranteeing women's \nfreedom of movement")
+```
+### Laws and women in workplace
+
+```{r}
+work_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "workplace",
+         colnames(wbl_df)[14],
+         colnames(wbl_df)[15],
+         colnames(wbl_df)[16],
+         colnames(wbl_df)[17]) %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
 
 ```
 
-<div class = "center">
-```{r poli, fig.cap="Association between laws and women's political empowerment"}
-ggplotly(
-  poli %>%
-    ggplot(aes(x = wbl_index,
-               y = political_empowerment)) +
-    geom_smooth(method = lm,
-                se = FALSE,
-                color = "#36a7e9") +
-    geom_point(alpha = 0) +
-    geom_point(
-      aes(
-        x = wbl_index,
-        y = political_empowerment,
-        text = tooltip,
-        color = region,
-        shape = region
-      ),
-      alpha = 0.8
-    ) +
-    scale_x_continuous(limits = c(25, 100)) +
-    scale_color_npg(alpha = 0.8) +
-    scale_shape_manual(values = c(15:18, 15:17)) +
-    labs(
-      x = "WBL index (2021)",
-      y = "Political Empowerment index (2021)",
-      color = NULL,
-      shape = NULL,
-      title = "Association between laws and women's political empowerment"
-    ),
-  tooltip = "text"
-) %>%
-  layout(
-    annotations = list(
-      list(
-        x = 0.1,
-        y = -0.3,
-        text = "Source: World Bank",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 8)
-      ),
-      list(
-        x = 0.1,
-        y = -0.1,
-        text = "More laws",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0.98,
-        y = -0.1,
-        text = "Less laws",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0,
-        y = -0.08,
-        text = "Less<br> equality",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0,
-        y = 1.05,
-        text = "More<br>equality",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      )
-    ),
-    legend = list(orientation = "h",
-                  font = list(size = 8)),
-    xaxis = list(title = list(
-      font = list(size = 14),
-      standoff = 10
-    ))
-  )
 
-         
+```{r}
+work_df %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 40)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws protecting women in workplace")
 ```
-</div>
 
-<br>
+### Laws and emplyment and pay
+```{R}
+pay_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[19],
+         colnames(wbl_df)[20],
+         colnames(wbl_df)[21],
+         colnames(wbl_df)[22]) %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+
+```
+
+
+```{r}
+pay_df %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 40)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws for employment and pay")
+```
+
+### Laws and women's marriage
+
+```{r}
+marriage_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[24],
+         colnames(wbl_df)[25],
+         colnames(wbl_df)[26],
+         colnames(wbl_df)[27],
+         colnames(wbl_df)[28]) %>%
+  pivot_longer(cols = 6:10,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+```
+
+```{r}
+marriage_df  %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 28)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws protecting women in marriage")
+```
+
+### Laws and parenthood
+
+```{r}
+parenthood_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[30],
+         colnames(wbl_df)[32],
+         colnames(wbl_df)[33],
+         colnames(wbl_df)[35],
+         colnames(wbl_df)[39]) %>%
+  pivot_longer(cols = 6:10,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+```
+
+
+```{r}
+parenthood_df  %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 28)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws addressing parenthood")
+```
+
+### Laws and women's entrepreneurship 
+
+```{r}
+entre_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[41],
+         colnames(wbl_df)[42],
+         colnames(wbl_df)[43],
+         colnames(wbl_df)[44]) %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+```
+
+
+```{r}
+entre_df  %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 35)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws addressing women's \nentrepreneurship")
+```
+
+### Laws and women's property rights
+
+```{r}
+assests_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[46],
+         colnames(wbl_df)[47],
+         colnames(wbl_df)[48],
+         colnames(wbl_df)[49],
+         colnames(wbl_df)[50]) %>%
+  pivot_longer(cols = 6:10,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+```
+
+
+```{r}
+assests_df  %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 25)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws protecting women's \nproperty rights")
+```
+### Laws and women's pension benefits
+
+```{r}
+pension_df <- wbl_df %>%
+  select("economy",
+         "region",
+         "income_group",
+         "report_year",
+         "pay",
+         colnames(wbl_df)[52],
+         colnames(wbl_df)[53],
+         colnames(wbl_df)[54],
+         colnames(wbl_df)[55]) %>%
+  pivot_longer(cols = 6:9,
+               names_to = "question",
+               values_to = "answer") %>% 
+  mutate(question = str_replace_all(question, "[[:punct:]]", " "),
+         question = str_to_sentence(question),
+         question = paste0(question, "?", sep = ""))
+```
+
+
+```{r}
+pension_df %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 40)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws protecting women's pension benefits")
+```
+
+### Laws and women's political empowerment 
+Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
 
 Further, Figure \@ref(fig:seats) shows that the proportion of seats held by women in national parliaments in Latin America and Caribbean has been increasing ever since 1971 and it exceeds all other regions. The figure for East Asia and Pacific has not changed much, only a 4.76% increase over the years. Although Middle East and and North Africa has the lowest percentage of seats held by women in national parliaments in 2021, there was a 13.53% increase since 1971.
 
@@ -1206,52 +1535,6 @@ seats <- gender %>%
          country_name = str_remove(country_name, "\\(IDA & IBRD\\)")) %>% 
   filter(!is.na(percentage)) 
 ```
-
-
-```{r}
-# # plot it
-# seats$tooltip <- 
-#   glue_data(seats,
-#             "Region: {country_name}",
-#             "\nYear: {year}",
-#             "\nPercentage: {paste0(seats$percentage, '%', sep = '')}")
-# 
-# ggplotly(
-#   
-#   seats %>% 
-#   ggplot(aes(x = year,
-#              y = percentage,
-#              group = country_name,
-#              color = country_name)) +
-#   geom_line(aes(text = tooltip)) +
-#   geom_point(aes(text = tooltip),
-#              size = 0.7) +
-#   scale_color_npg() +
-#   theme_light() +
-#   theme(axis.text.x = element_text(size = 8)) +
-#   labs(x = NULL,
-#        y = "Percentage %",
-#        title = "Proportion of seats held by women in national parliaments (%)",
-#        color = NULL),
-#   tooltip = "text"
-#   
-# ) %>% 
-#   layout(annotations = list(x = 0.1,
-#                             y = -0.3,
-#                             text = "Source: World Bank",
-#                             showarrow = FALSE, 
-#                             xref = "paper", 
-#                             yref = "paper",
-#                             xanchor = "right", 
-#                             yanchor = "auto", 
-#                             xshift = 0, 
-#                             yshift = 0,
-#                             font = list(size = 8)),
-#              legend = list(orientation = "h",
-#                   font = list(size = 8))) 
-
-```
-
 
 <div class = "center">
 ```{r}
@@ -1309,7 +1592,7 @@ seats %>%
     alpha = 0.8
   ) +
   coord_flip() +
-  scale_color_manual(values = c("#4dbbd5ff", "#e64b35ff"),
+  scale_color_manual(values = c("#4dbbd5ff", "#f39b7fff"),
                      name = "Year") +
   labs(title = "Proportion of seats held by women in national parliaments (%)"),
 tooltip = "text"
@@ -1465,158 +1748,6 @@ plot_ku <- ggplot(suffrage_ku,
 plot_so / plot_ku
 
 ```
-
-### Gendered laws and women's economic participation
-
-```{r}
-# economic participation index
-econ <- gap %>%
-  filter(
-    indicator == "Global Gender Gap Economic Participation and Opportunity Subindex",
-    subindicator_type == "Index"
-  ) %>%
-  select(country_name,
-         "2021") %>%
-  rename(economic_participation = "2021",
-         economy = country_name) %>%
-  # join wbl_df to get wbl index
-  right_join(wbl_df,
-             by = "economy") %>%
-  filter(report_year == "2021") %>%
-  select(economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         economic_participation)
-
-
-econ$tooltip <-
-  glue_data(
-    econ,
-    "Country: {economy}",
-    "\nWBL: {wbl_index}",
-    "\nEconomic Participation Index: {economic_participation}"
-  )
-```
-
-```{r econ, fig.cap="Association between laws and women's economic participation"}
-
-ggplotly(
-  econ  %>%
-    ggplot(aes(x = wbl_index,
-               y = economic_participation)) +
-    geom_smooth(method = lm,
-                se = FALSE,
-                color = "#36a7e9") +
-    geom_point(alpha = 0) +
-    geom_point(
-      aes(
-        x = wbl_index,
-        y = economic_participation,
-        text = tooltip,
-        color = region,
-        shape = region
-      ),
-      alpha = 0.8
-    ) +
-    scale_x_continuous(limits = c(25, 100)) +
-    scale_color_npg(alpha = 0.8) +
-    scale_shape_manual(values = c(15:18, 15:17)) +
-    labs(
-      x = "WBL index (2021)",
-      y = "Economic Participation index (2021)",
-      color = NULL,
-      shape = NULL,
-      title = "Association between laws and women's economic participation"
-    ),
-  tooltip = "text"
-) %>%
-  layout(
-    annotations = list(
-      list(
-        x = 0.1,
-        y = -0.3,
-        text = "Source: World Bank",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 8)
-      ),
-      list(
-        x = 0.1,
-        y = -0.1,
-        text = "More laws",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0.98,
-        y = -0.1,
-        text = "Less laws",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0,
-        y = -0.08,
-        text = "Less<br> equality",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      ),
-      list(
-        x = 0,
-        y = 1.05,
-        text = "More<br>equality",
-        showarrow = FALSE,
-        xref = "paper",
-        yref = "paper",
-        xanchor = "right",
-        yanchor = "auto",
-        xshift = 0,
-        yshift = 0,
-        font = list(size = 10)
-      )
-    ),
-    legend = list(orientation = "h",
-                  font = list(size = 8)),
-    xaxis = list(title = list(
-      font = list(size = 14),
-      standoff = 10
-    ))
-  )
-
-```
-
-
-
-
-# Conclusion
-
-
-# Reference
 
 
 
