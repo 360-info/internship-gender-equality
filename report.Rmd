@@ -654,9 +654,7 @@ wbl_mob2 %>%
             colour = "white") +
   coord_flip() +
   # scale_fill_brewer(palette = "Paired") +
-  theme(legend.position = "bottom",
-        legend.text=element_text(size = 6),
-        plot.caption = element_text(hjust = 0)) +
+  theme(plot.caption = element_text(hjust = 0)) +
   labs(x = NULL,
        y = "Number of reforms",
        fill = NULL,
@@ -892,7 +890,7 @@ wbl_df %>%
 
 ### Laws and gender equality
 
-As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
+As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score 100 for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
 
 
 ```{r}
@@ -960,12 +958,10 @@ gap %>%
               colour = "#36a7e9") +
   geom_point(aes(color = region,
                  shape = region),
-             size = 1.5,
-             alpha = 0.7) +
+             size = 1.5) +
   geom_point(data = flag_data,
              aes(color = region),
              size = 7,
-             alpha = 0.7,
              show.legend = FALSE) +
   geom_flag(data = flag_data,
             aes(country = code)) +
@@ -1021,9 +1017,12 @@ gap %>%
 ```
 <br>
 
+Moving on, let's look at gendered laws vary across different regions. The below series of 8 bar charts demonstrate the existence of the laws with regards to women's mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension in different regions.
 
 
 ### Laws and women's mobility 
+
+Figure \@ref(fig:mob) shows that most of the regions had made progress or else remained a high percentage and had over 70% of the countries that have laws enacted guaranteeing women's mobility in 2021. Middle Eastern and North Africa making the least progress, only around 50% to 60% of the countries have laws enacted in 2021. South Asia even had less countries, only 75% compared to 1971 when it had 88% of the countries that had existing laws. There are still countries that treat women and men differently when it comes to mobility in 2021, see Table \@ref(tab:mobtab). For example, there are still 33 countries where women can not choose where to live the same way as men. In Saudi Arabia, women cannot apply for a passport or travel outside the country without their male guardian’s approval and in practice, the guardians can seek a court order for a woman to return to the family home [@HRW].
 
 ```{r}
 mob_df <- wbl_df %>%
@@ -1049,7 +1048,7 @@ c_count <- wbl_df %>%
   
 ```
 
-```{r}
+```{r mob, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
 mob_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
@@ -1072,21 +1071,50 @@ mob_df %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 40)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Number of countries (%)",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws guaranteeing women's \nfreedom of movement")
+       caption = "Source: World Bank",
+       title = "Improvement on enacting laws guaranteeing women's freedom of movement \nbetween 1971 and 2021")
 ```
+<br>
+
+```{r mobtab}
+mob_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  kable(caption = "<b>Number of countries do not have laws guaranteeing women's freedom of movement in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+<br>
+
+
 ### Laws and women in workplace
+
+The workplace indicator analyses laws affecting women's decisions to enter and remain in the labor force, as well as protections against discrimination and sexual harassment in the workplace [@workplace]. Figure \@ref(fig:work) clearly shows that in 1971, most of countries did not have laws to women from sexual harassment or gender discrimination in workplace back in 1971 and have made huge progress on law reforms. Almost all the OECD high income countries have enacted different laws to protecting women in the workplace. For example, in 2004 Belgium, enacted legislation protecting women from sexual harassment in employment. It adopted criminal penalties for sexual harassment in employment. It also enacted civil remedies for sexual harassment in employment. In 1999, Denmark prohibited gender discrimination in employment [@Reforms].
+
 
 ```{r}
 work_df <- wbl_df %>%
@@ -1109,7 +1137,7 @@ work_df <- wbl_df %>%
 ```
 
 
-```{r}
+```{r work, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
 work_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
@@ -1132,20 +1160,48 @@ work_df %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 40)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Number of countries (%)",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws protecting women in workplace")
+       caption = "Source: World Bank",
+       title = "Improvement on enacting laws protecting women in the workplace \nbetween 1971 and 2021")
+
+
 ```
+<br>
+
+```{r worktab}
+work_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  kable(caption = "<b>Number of countries do not have laws protecting women in the workplace in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+
+
+
 
 ### Laws and emplyment and pay
 ```{R}
@@ -1194,18 +1250,33 @@ pay_df %>%
              fill =  report_year)) +
   geom_col(position = "dodge",
            alpha = 0.8) +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 40)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Number of countries (%)",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws for employment and pay")
+       caption = "Source: World Bank",
+       title = "Improvement on enacting laws for women's employment and pay \nbetween 1971 and 2021")
 ```
+
+
+
+
+
+
+
 
 ### Laws and women's marriage
 
@@ -1259,7 +1330,9 @@ marriage_df  %>%
              labeller = label_wrap_gen(width = 28)) +
   scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
        y = "Percentage of countries in a region",
@@ -1320,7 +1393,9 @@ parenthood_df  %>%
              labeller = label_wrap_gen(width = 28)) +
   scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
        y = "Percentage of countries in a region",
@@ -1380,7 +1455,9 @@ entre_df  %>%
              labeller = label_wrap_gen(width = 35)) +
   scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
        y = "Percentage of countries in a region",
@@ -1441,13 +1518,16 @@ assests_df  %>%
              labeller = label_wrap_gen(width = 25)) +
   scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
        title = "Percentage of countries in a region that have laws protecting women's \nproperty rights")
 ```
+
 ### Laws and women's pension benefits
 
 ```{r}
@@ -1500,7 +1580,9 @@ pension_df %>%
              labeller = label_wrap_gen(width = 40)) +
   scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
   theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
+    legend.position = "bottom",
+    plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
        y = "Percentage of countries in a region",
@@ -1721,7 +1803,8 @@ plot_ku <- ggplot(suffrage_ku,
                color = "black",
                size = 0.2) +
   geom_point(aes(y = position),
-             size = 2) +
+             size = 2,
+             alpha = 0.8) +
     geom_text(aes(x = year,
                 y = -0.15,
                 lable = year),
