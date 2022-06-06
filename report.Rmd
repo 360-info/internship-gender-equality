@@ -344,7 +344,7 @@ tooltip = "text"
 
 The below shiny application shows how the WBL index for 190 countries changes over the years. Regions like Latin America and Caribbean, Sub-Saharan Africa, South Asia and South-east Asia had very low WBL score in the 70s and 80s, but most of the countries in these regions have made improvements over the years, especially countries like Brazil, Chile, Bolivia, Saudi Arabia, South Africa, Namibia, Zimbabwe stole the spotlight with the greatest improvement and Belgium, Denmark, France, Latvia, Luxembourg and Sweden have a perfect score of 100 in 2021.
 
-```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = TRUE}
+```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = FALSE}
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   filter(report_year < 2022) %>% 
@@ -617,7 +617,7 @@ wbl_pension2 <- wbl_pension1 %>%
 
 ```
 
-```{r reforms, fig.cap="Total reforms recorded between 1971 and 2021 by region. Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most"}
+```{r reforms, fig.cap="Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most"}
 # join all indicators' reforms count and plot it
 wbl_mob2 %>% 
   left_join(wbl_work2, 
@@ -1203,8 +1203,9 @@ work_df %>%
 
 
 
-### Laws and emplyment and pay
-```{R}
+### Laws and employment and pay
+
+```{r}
 pay_df <- wbl_df %>%
   select("economy",
          "region",
@@ -1225,7 +1226,7 @@ pay_df <- wbl_df %>%
 ```
 
 
-```{r}
+```{r pay, fig.cap = "Y axis is the percentage of countries in a region.", fig.height=6}
 pay_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
@@ -1272,6 +1273,44 @@ pay_df %>%
 ```
 
 
+```{r}
+pay_df %>%
+  filter(report_year %in% c(1971, 2021),
+         answer == "Yes") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(region,
+           report_year,
+           question) %>%
+  summarise(count = n()) %>%
+  mutate(
+    percentage = case_when(
+      region == "East Asia & Pacific" ~count/25,
+      region == "Europe & Central Asia" ~count/23,
+      region == "High income: OECD" ~count/34,
+      region == "Latin America & Caribbean" ~count/32,
+      region == "Middle East & North Africa" ~count/20,
+      region == "South Asia" ~count/8,
+      region == "Sub-Saharan Africa" ~count/48
+    )
+  ) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = region,
+             y = percentage,
+             fill =  report_year)) +
+  geom_col(position = "dodge",
+           alpha = 0.8) +
+  facet_wrap(vars(question),
+             scales = "free_y",
+             labeller = label_wrap_gen(width = 40)) +
+  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  theme(
+    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
+  ) +
+  labs(x = NULL,
+       y = "Percentage of countries in a region",
+       fill = "Year",
+       title = "Percentage of countries in a region that have laws for employment and pay")
+```
 
 
 
