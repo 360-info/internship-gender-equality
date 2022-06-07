@@ -135,7 +135,7 @@ vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 ```
 
-
+<!-- ![Source: The World Bank](image/WBL.jpeg) -->
 # Abstract
 
 Despite the fact that women's economic participation has increased significantly in recent decades, women continue to be underrepresented in many areas. This project analyses whether gender differences are reflected in gendered laws that affect women's access to resources, their activities, and the constraints they face. Data used for this project are from open data sources World Bank and V-Dem. To investigating the relationship between gendred laws and women's economic participation between 1997 to 2021, firstly, an overview of the women, business and law index was conducted to give a clear picature of the progress was made in terms of reforms to a achieve more gender equal laws across 8 indicators, different regions and at country level. Although the improvement is noticeble, there is still room to imporve. Next, analysis was done on the number of law reforms enacted across regions over the years. Most reforms were made in areas of workplace, pay protections and regulations affecting working parents and regions like Sub-Saharan Africa enacted more laws in addressing women's rights over the years. Furthermore, by combining the women, business and the law index and the gender gap index and modeling with a regression model, it shows a positive associatioin between laws and gender equality. Nations with fewer laws targeting women (more gender equal laws) tend to also have better access to resources and opportunities across genders. Finally, a drill-down analysis on the 8 indicators, mobility, workplace, pay, marriage, parenthood, entrepreneuship, assets and pension by exploring the improvement made on the laws that target these specifc areas shows that there are still countries that have unjustifiable lasw that are holding women back in every aspect of their life.
@@ -622,7 +622,7 @@ wbl_pension2 <- wbl_pension1 %>%
 
 ```{r reforms, fig.cap="Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most"}
 # join all indicators' reforms count and plot it
-wbl_mob2 %>% 
+wbl_mob2_plot <- wbl_mob2 %>% 
   left_join(wbl_work2, 
             by = "region") %>% 
   left_join(wbl_pay2,
@@ -643,15 +643,18 @@ wbl_mob2 %>%
                ) %>%
   group_by(region) %>% 
   summarise(total_reforms = sum(count, na.rm = TRUE)) %>% 
-  mutate(region = fct_reorder(region, total_reforms)) %>% 
+  mutate(region = fct_reorder(region, total_reforms))
+
+
+wbl_mob2_plot %>% 
   ggplot() +
   geom_col(aes(x = region,
                y = total_reforms),
            fill = "#f39b7fff") +
   geom_text(aes(x = region,
                y = total_reforms,
-               label = total_reforms, 
-                fill = NULL, 
+               label = total_reforms,
+                fill = NULL,
                 hjust = 1.5),
             size = 3,
             colour = "white") +
