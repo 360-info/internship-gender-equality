@@ -1,6 +1,6 @@
 ---
 title: |
-  <br>**International Women's Day report - The journey towards women's legal empowerment**
+  <br>**International Women's Day Report: The Journey towards Women's Legal Empowerment**
 author: |
   | Author: Mengyun Yang 
   | Supervisor: James Goldie at 360info
@@ -1107,6 +1107,8 @@ mob_df %>%
   mutate(report_year = as.character(report_year)) %>% 
   group_by(question) %>%
   summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
   kable(caption = "<b>Number of countries do not have laws guaranteeing women's freedom of movement in 2021<b>",
         col.names = c("Question",
                       "Number of countries")) %>% 
@@ -1198,6 +1200,8 @@ work_df %>%
   mutate(report_year = as.character(report_year)) %>% 
   group_by(question) %>%
   summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
   kable(caption = "<b>Number of countries do not have laws protecting women in the workplace in 2021<b>",
         col.names = c("Question",
                       "Number of countries")) %>% 
@@ -1210,6 +1214,8 @@ work_df %>%
 
 
 ### Laws and employment and pay
+
+The pay indicator measures the laws and regulations affecting occupational segregation and the gender wage gap [@pay]. As it can be seen from \@ref(fig:pay) all the regions have made significant progress on equal remuneration at workplace as there were no laws back in 1971 except for some countries in the OECD high income region. Middle East and North Africa still falls behind other regions in enacting laws for all areas for employment and pay. The data also suggests that there is undoubtedly room for improvement as half of the countries around the world that do not have laws for equal remuneration and 72 countries that don not have laws addressing equal rights for women who work in the industrial (see Table \@ref(tab:paytab)).
 
 ```{r}
 pay_df <- wbl_df %>%
@@ -1255,8 +1261,7 @@ pay_df %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
   geom_text(aes(label = round(percentage, 2)), 
             position = position_dodge(width = .9),
             vjust = 1.5,
@@ -1278,52 +1283,27 @@ pay_df %>%
        title = "Improvement on enacting laws for women's employment and pay \nbetween 1971 and 2021")
 ```
 
-
-```{r}
+```{r paytab}
 pay_df %>%
-  filter(report_year %in% c(1971, 2021),
-         answer == "Yes") %>% 
+  filter(report_year == 2021,
+         answer == "No") %>% 
   mutate(report_year = as.character(report_year)) %>% 
-  group_by(region,
-           report_year,
-           question) %>%
+  group_by(question) %>%
   summarise(count = n()) %>%
-  mutate(
-    percentage = case_when(
-      region == "East Asia & Pacific" ~count/25,
-      region == "Europe & Central Asia" ~count/23,
-      region == "High income: OECD" ~count/34,
-      region == "Latin America & Caribbean" ~count/32,
-      region == "Middle East & North Africa" ~count/20,
-      region == "South Asia" ~count/8,
-      region == "Sub-Saharan Africa" ~count/48
-    )
-  ) %>% 
+  arrange(desc(count)) %>% 
   ungroup() %>% 
-  ggplot(aes(x = region,
-             y = percentage,
-             fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
-  facet_wrap(vars(question),
-             scales = "free_y",
-             labeller = label_wrap_gen(width = 40)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
-  theme(
-    axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1)
-  ) +
-  labs(x = NULL,
-       y = "Percentage of countries in a region",
-       fill = "Year",
-       title = "Percentage of countries in a region that have laws for employment and pay")
+  kable(caption = "<b>Number of countries do not have laws for women's employment and pay in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 
 
-
-
-
 ### Laws and women's marriage
+
+The marriage indicator measures legal constraints related to marriage and divorce [@pay]. Although Figure \@ref(fig:marriage) shows that laws that targets domestic violence have been enacted around the globe, domestic violence is still prevalent around the world, according to WHO estimates, one in every three (30%) women has been victim to physical and/or sexual intimate partner violence or non-partner sexual violence at some point in their lives and violence can negatively affect women’s physical, mental, sexual, and reproductive health, and may increase the risk of acquiring HIV in some settings [@WTO]. And surprisingly, there are 32 countries do not have any laws to protect women from domestic violence (see Table \@(tab:marriagetab)), and Russia is the most surprising and notable countries on the list [@Kraut_2019]. Besides, in the Middle East and North Africa, legal issues concerning women's marriage status are often substantially different from those in the West, as it can be seen from Figure \@ref(fig:marriage), some of the countries in these regions still recognised religious matrimonial laws which is a significant impediment to improve women's rights.
 
 ```{r}
 marriage_df <- wbl_df %>%
@@ -1345,8 +1325,8 @@ marriage_df <- wbl_df %>%
          question = paste0(question, "?", sep = ""))
 ```
 
-```{r}
-marriage_df  %>%
+```{r marriage, fig.cap = "Y axis is the percentage of countries in a region.", fig.height=6}
+marriage_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
   mutate(report_year = as.character(report_year)) %>% 
@@ -1368,12 +1348,16 @@ marriage_df  %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 1.5,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 28)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
     axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
     legend.position = "bottom",
@@ -1382,10 +1366,34 @@ marriage_df  %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws protecting women in marriage")
+       title = "Improvement on enacting laws for rotecting women in marriage \nbetween 1971 and 2021")
 ```
 
+```{r marriagetab}
+marriage_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
+  kable(caption = "<b>Number of countries do not have laws rotecting women in marriage in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+
+
+
+
+
+
 ### Laws and parenthood
+
+The parenthood indicator examines the laws affecting women’s work after having children [@parenthood]. As mentioned previously, the laws addressing this areas have been improved a lot by countries around the globe, also can be seen from the below Figure \@ref(fig:parenthood), except from Europe and Central Asia that has cut back the maternity leave benefits compared to 1971. However, there is still long way to go to reduce the discrimination, such as reduced wages, minimal parental benefits for women when they become parent, see Table \@ref(tab:parenthoodtab), 144 out of 190 countries that do no have laws that on paid parental leave and there are also significant number of countries that do not have laws addressing other areas of the parenthood.
 
 ```{r}
 parenthood_df <- wbl_df %>%
@@ -1408,8 +1416,8 @@ parenthood_df <- wbl_df %>%
 ```
 
 
-```{r}
-parenthood_df  %>%
+```{r parenthood, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
+parenthood_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
   mutate(report_year = as.character(report_year)) %>% 
@@ -1431,12 +1439,16 @@ parenthood_df  %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 28)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
     axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
     legend.position = "bottom",
@@ -1445,8 +1457,28 @@ parenthood_df  %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws addressing parenthood")
+       title = "Improvement on enacting laws for addressing parenthood \nbetween 1971 and 2021")
 ```
+
+
+
+```{r parenthoodtab}
+parenthood_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
+  kable(caption = "<b>Number of countries do not have laws addressing parenthood in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+
 
 ### Laws and women's entrepreneurship 
 
