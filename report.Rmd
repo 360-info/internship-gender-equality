@@ -1303,7 +1303,7 @@ pay_df %>%
 
 ### Laws and women's marriage
 
-The marriage indicator measures legal constraints related to marriage and divorce [@pay]. Although Figure \@ref(fig:marriage) shows that laws that targets domestic violence have been enacted around the globe, domestic violence is still prevalent around the world, according to WHO estimates, one in every three (30%) women has been victim to physical and/or sexual intimate partner violence or non-partner sexual violence at some point in their lives and violence can negatively affect women’s physical, mental, sexual, and reproductive health, and may increase the risk of acquiring HIV in some settings [@WTO]. And surprisingly, there are 32 countries do not have any laws to protect women from domestic violence (see Table \@(tab:marriagetab)), and Russia is the most surprising and notable countries on the list [@Kraut_2019]. Besides, in the Middle East and North Africa, legal issues concerning women's marriage status are often substantially different from those in the West, as it can be seen from Figure \@ref(fig:marriage), some of the countries in these regions still recognised religious matrimonial laws which is a significant impediment to improve women's rights.
+The marriage indicator measures legal constraints related to marriage and divorce [@pay]. Although Figure \@ref(fig:marriage) shows that laws that targets domestic violence have been enacted around the globe, domestic violence is still prevalent around the world, according to WHO estimates, one in every three (30%) women has been victim to physical and/or sexual intimate partner violence or non-partner sexual violence at some point in their lives and violence can negatively affect women’s physical, mental, sexual, and reproductive health, and may increase the risk of acquiring HIV in some settings [@WHO]. And surprisingly, there are 32 countries do not have any laws to protect women from domestic violence (see Table \@ref(tab:marriagetab)), and Russia is the most surprising and notable countries on the list [@Kraut_2019]. Besides, in the Middle East and North Africa, legal issues concerning women's marriage status are often substantially different from those in the West, as it can be seen from Figure \@ref(fig:marriage), some of the countries in these regions still recognised religious matrimonial laws which is a significant impediment to improve women's rights.
 
 ```{r}
 marriage_df <- wbl_df %>%
@@ -1443,7 +1443,7 @@ parenthood_df %>%
   geom_text(aes(label = round(percentage, 2)), 
             position = position_dodge(width = .9),
             vjust = 1.5,
-            size = 2,
+            size = 1.3,
             colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
@@ -1482,6 +1482,8 @@ parenthood_df %>%
 
 ### Laws and women's entrepreneurship 
 
+The entrepreneurship assesses constraints to women's ability to start and run a business [@entrep]. Most of the countries in their regions have laws that address women's entrepreneurship in opening a bank account, signing a contract or registering a business. Not much countries have laws prohibit discrimination in access credit. OECD high income region has the most countries that have enacted these laws. Table \@ref(tab:entretab) shows that there are still 107 out of 190 countries do no have these laws enacted in 2021. According to @Andrés_Gimeno_Cabo_2021, "one potential bias is that, when seeking financing, women-led small businesses might experience greater difficulties than their men-led counterparts. This could be due to stereotypes portraying female entrepreneurs as less skilled and efficient (taste-based discrimination); to information-related frictions that ground the credit decision on the average characteristics of the group (statistical discrimination); or to the presence of unconscious biases (implicit discrimination / double standards)". Without a doubt, women-led enterprises would face more difficult financing access in all of these scenarios, which would have disastrous effects for business growth, employment, and the economy.
+
 ```{r}
 entre_df <- wbl_df %>%
   select("economy",
@@ -1502,8 +1504,8 @@ entre_df <- wbl_df %>%
 ```
 
 
-```{r}
-entre_df  %>%
+```{r entre, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
+entre_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
   mutate(report_year = as.character(report_year)) %>% 
@@ -1525,12 +1527,16 @@ entre_df  %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
-             labeller = label_wrap_gen(width = 35)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+             labeller = label_wrap_gen(width = 28)) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
     axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
     legend.position = "bottom",
@@ -1539,13 +1545,33 @@ entre_df  %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws addressing women's \nentrepreneurship")
+       title = "Improvement on enacting laws addressing women's \nentrepreneurship \nbetween 1971 and 2021")
 ```
+```{r entretab}
+entre_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
+  kable(caption = "<b>Number of countries do not have laws addressing women's \nentrepreneurship in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+<br>
+
 
 ### Laws and women's property rights
 
+The assets indicator analyses gender differences in property and inheritance law [@assets]. Figure \@ref(fig:assets) shows that Middle East and North Africa and South Asia are the two regions that have the least countries have law reforms for protecting women's rights in inhering assets from spouse and parents and for non-monetary contributions. or example, sons and daughters do not have equal inheritance rights in Afghanistan, Bangladesh, Pakistan, Nepal, and the Maldives. Except for Malta, this is true in every country in the Middle East and North Africa [@Almodóvar-Reteguis_2019]. One third of the countries around the globe still need to improve the laws and regulations relevant to gender equality in non-monetary contributions (Table \@ref(tab:assetstab))
+
 ```{r}
-assests_df <- wbl_df %>%
+assets_df <- wbl_df %>%
   select("economy",
          "region",
          "income_group",
@@ -1565,8 +1591,8 @@ assests_df <- wbl_df %>%
 ```
 
 
-```{r}
-assests_df  %>%
+```{r assets, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
+assets_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
   mutate(report_year = as.character(report_year)) %>% 
@@ -1588,12 +1614,16 @@ assests_df  %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
-             labeller = label_wrap_gen(width = 25)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+             labeller = label_wrap_gen(width = 28)) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
     axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
     legend.position = "bottom",
@@ -1602,10 +1632,31 @@ assests_df  %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws protecting women's \nproperty rights")
+       title = "Improvement on enacting laws protecting women's \nproperty rights \nbetween 1971 and 2021")
+```
+```{r assetstab}
+assets_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
+  kable(caption = "<b>Number of countries do not have laws protecting women's \nproperty rights in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
+
 ```
 
+<br>
+
+
 ### Laws and women's pension benefits
+
+The last indicator, pension assesses laws affecting the size of a woman's pension [@pension]. The gender gap in pension benefits is associated with the gender inequality in pay, according to @Franklin_2021, in reality, it's well known that women earn only 77 cents for every $1 earned by men around the world. The pension disparity between men and women is less well-known, and it is partly a result of that income gap. In particular, the inequalities in pension benefits are presented in areas like absent due to childcare and age at which women can access full pension benefits (see Table \@ref(tab:pensiontab)) and regions like East Asia and Pacific, South Africa, Europe and Central Asia and Middle East and North Africa are making slow progress in reducing imparity (see Figure \@ref(fig:pension)).
 
 ```{r}
 pension_df <- wbl_df %>%
@@ -1627,7 +1678,7 @@ pension_df <- wbl_df %>%
 ```
 
 
-```{r}
+```{r pension, fig.cap="Y axis is the percentage of countries in a region.", fig.height=6}
 pension_df %>%
   filter(report_year %in% c(1971, 2021),
          answer == "Yes") %>% 
@@ -1650,12 +1701,16 @@ pension_df %>%
   ggplot(aes(x = region,
              y = percentage,
              fill =  report_year)) +
-  geom_col(position = "dodge",
-           alpha = 0.8) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = round(percentage, 2)), 
+            position = position_dodge(width = .9),
+            vjust = 1.5,
+            size = 2,
+            colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
-             labeller = label_wrap_gen(width = 40)) +
-  scale_fill_manual(values = c("4dbbd5ff", "#f39b7fff")) +
+             labeller = label_wrap_gen(width = 28)) +
+  scale_fill_manual(values = c("#4dbbd5ff", "#f39b7fff")) +
   theme(
     axis.text.x = element_text(angle = 75, size = 6, hjust = 1, vjust = 1),
     legend.position = "bottom",
@@ -1664,36 +1719,31 @@ pension_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Percentage of countries in a region that have laws protecting women's pension benefits")
+       title = "Improvement on enacting laws protecting women's pension benefits \nbetween 1971 and 2021")
+```
+
+
+```{r pensiontab}
+pension_df %>%
+  filter(report_year == 2021,
+         answer == "No") %>% 
+  mutate(report_year = as.character(report_year)) %>% 
+  group_by(question) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>% 
+  ungroup() %>% 
+  kable(caption = "<b>Number of countries do not have laws protecting women's pension benefits in 2021<b>",
+        col.names = c("Question",
+                      "Number of countries")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 ### Laws and women's political empowerment 
-Figure \@ref(fig:poli) reveals that less gendered laws (greater the equality between women and men in the law), the higher women's political participation. Again, all the OECD High Income countries have achieved greater equality in both laws and political participation with most of the Middle East and North Africa countries are sitting at the lower end. The apparent outlier is Bangladesh, although it has a low WBL score, it has a relatively high score for political empowerment. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021].
 
-Further, Figure \@ref(fig:seats) shows that the proportion of seats held by women in national parliaments in Latin America and Caribbean has been increasing ever since 1971 and it exceeds all other regions. The figure for East Asia and Pacific has not changed much, only a 4.76% increase over the years. Although Middle East and and North Africa has the lowest percentage of seats held by women in national parliaments in 2021, there was a 13.53% increase since 1971.
+Figure \@ref(fig:seats) shows that the proportion of seats held by women in national parliaments in Latin America and Caribbean has been increasing ever since 1971 and it exceeds all other regions. The figure for East Asia and Pacific has not changed much, only a 4.76% increase over the years, but one country is ahead of the rest countries in Asia in women leadership and it is Bangladesh. Bangladesh has had a female prime minister for over 27 year since it returned to democracy in 1991 and Sheikh Hasina continuing to lead Bangladesh since 2008. In modern history, no country has experienced a longer period of nearly uninterrupted female rule. In addition, an elaborate system of reserved seats for women maintains basic numerical representation in Bangladesh's national parliament and local governing bodies and women are guaranteed positions in a number of sub-national governing bodies [@Haque_2021]. Furthermore, although Middle East and and North Africa has the lowest percentage of seats held by women in national parliaments in 2021, there was a 13.53% increase since 1971.
 
 After analysing the V-dem data, some interesting findings are, there were still countries without female suffrage in 21 century, these countries are Somalia and Kuwait. However, soon after 2006, women in Kuwait now have the rights to vote in national elections. In contrast, women in Somalia used to be able to vote, back in the 80s, but now they are denied the right to vote in the most recent national election in 2017 (see Figure \@ref(fig:suffrage)).
-
-```{r}
-# cleaning
-seats <- gender %>% 
-  filter(indicator_name == "Proportion of seats held by women in national parliaments (%)",
-         country_name %in% c("Sub-Saharan Africa (IDA & IBRD countries)",
-                             "East Asia & Pacific (IDA & IBRD countries)",
-                             "Europe & Central Asia (IDA & IBRD countries)",
-                             "Latin America & the Caribbean (IDA & IBRD countries)",
-                             "Middle East & North Africa (IDA & IBRD countries)",
-                             "South Asia (IDA & IBRD)")) %>% 
-  select(-indicator_code) %>% 
-  pivot_longer(cols = 4:65,
-               names_to = "year",
-               values_to = "percentage") %>% 
-  mutate(year = as.numeric(year),
-         percentage = round(percentage, 2),
-         country_name = str_remove(country_name, "\\(IDA & IBRD countries\\)"),
-         country_name = str_remove(country_name, "\\(IDA & IBRD\\)")) %>% 
-  filter(!is.na(percentage)) 
-```
 
 <div class = "center">
 ```{r}
@@ -1753,7 +1803,7 @@ seats %>%
   coord_flip() +
   scale_color_manual(values = c("#4dbbd5ff", "#f39b7fff"),
                      name = "Year") +
-  labs(title = "Proportion of seats held by women in national parliaments (%)"),
+  labs(title = "Proportion of seats held by women in \nnational parliaments (%)"),
 tooltip = "text"
 ) %>% 
   layout(annotations = list(x = 0,
@@ -1909,5 +1959,6 @@ plot_so / plot_ku
 
 ```
 
+<br>
 
-
+# Reference
