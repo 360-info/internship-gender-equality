@@ -138,16 +138,22 @@ vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 <!-- ![Source: The World Bank](image/WBL.jpeg) -->
 # Abstract
 
-Despite the fact that women's economic participation has increased significantly in recent decades, women continue to be underrepresented in many areas. This project analyses whether gender differences are reflected in gendered laws that affect women's access to resources, their activities, and the constraints they face. Data used for this project are from open data sources World Bank and V-Dem. To investigating the relationship between gendred laws and women's economic participation between 1997 to 2021, firstly, an overview of the women, business and law index was conducted to give a clear picature of the progress was made in terms of reforms to a achieve more gender equal laws across 8 indicators, different regions and at country level. Although the improvement is noticeble, there is still room to imporve. Next, analysis was done on the number of law reforms enacted across regions over the years. Most reforms were made in areas of workplace, pay protections and regulations affecting working parents and regions like Sub-Saharan Africa enacted more laws in addressing women's rights over the years. Furthermore, by combining the women, business and the law index and the gender gap index and modeling with a regression model, it shows a positive associatioin between laws and gender equality. Nations with fewer laws targeting women (more gender equal laws) tend to also have better access to resources and opportunities across genders. Finally, a drill-down analysis on the 8 indicators, mobility, workplace, pay, marriage, parenthood, entrepreneuship, assets and pension by exploring the improvement made on the laws that target these specifc areas shows that there are still countries that have unjustifiable lasw that are holding women back in every aspect of their life.
+Despite the fact that women's economic participation has increased significantly in recent decades, women continue to be under-represented in many areas. This project analyses whether gender differences are reflected in gendered laws that affect women's access to resources, their activities, and the constraints they face. Data used for this project are from open data sources World Bank and V-Dem. To investigating the relationship between gendered laws and women's economic participation between 1997 to 2021, firstly, an overview of the women, business and law index was conducted to give a clear picture of the progress was made in terms of reforms to a achieve more gender equal laws across 8 indicators, different regions and at country level. Although the improvement is noticeable, there is still room to improve. Next, analysis was done on the number of law reforms enacted across regions over the years. Most reforms were made in areas of workplace, pay protections and regulations affecting working parents and regions like Sub-Saharan Africa enacted more laws in addressing women's rights over the years. Furthermore, by combining the women, business and the law index and the gender gap index and modelling with a regression model, it shows a positive association between laws and gender equality. Nations with fewer laws targeting women (more gender equal laws) tend to also have better access to resources and opportunities across genders. Finally, a drill-down analysis on the 8 indicators, mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension by exploring the improvement made on the laws that target these specific areas shows that there are still countries that have unjustifiable laws that are holding women back in every aspect of their life.
 
 
 
 # Background
-For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress [@UnitedNations]. This analysis aims to identify the bias in the creation of laws which can disadvantage women - both socially and economically.
+For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress [@UnitedNations]. 
 
 
-# Objectives 
+# Objectives and significance
+This analysis aims to identify the bias in the creation of laws which can disadvantage women - both socially and economically. The objective of the project is divided into three parts: to have a general understanding of the Women, Business and the law index; investigate the total number of law reforms enacted around the world and the trend of the score for individual law between 1971 to 2021; and to analyse the progress of each region on achieving legal quality in 9 different areas. The objective are achieved through:
 
+1. Analysing the trend of the Women, Business and the Law index by region and at a country level between 1971 to 2021 and the association between the Women, Business and the Law index and the gender gap index.
+
+2. Aggregating the response for each law measured by the WBL index to investigate the total number of law reforms across region and different indicators; analysing the trend of the score for each indicator by region and year.
+
+3. Comparing the percentage of countries in each region that had laws to addressing women's freedom of movement, rights at workplace, pay, marriage, parenthood entrepreneurship, property rights, pension benefits in 1971 and 2021; the proportion of seats held by women in parliament in 1998 and 2021; the timeline of female suffrage in Somalia and Kuwait.
 
 
 # Methodology
@@ -253,9 +259,11 @@ vdem %>%
 
 # Result and discussion
 
-## Overview of The Women, Business and the Law index
+## Overview of The Women, Business and the Law index (WBL index)
 
-The Women, Business, and the Law Index assesses global progress towards gender equality in 190 economies by identifying laws and regulations that limit and encourage women's economic participation [@WBL]. As it can be seen from Figure \@ref(fig:wbl-average), there has been continuous progress being made on the laws that help improve women's legal rights. Over the 5 decades, the global average WBL index has increased substantially, from 45.6 to 76. However, the progress has varied across regions. Europe and Central Asia, OECD High income and Latin America and Caribbean are the three regions than above the global average. Middle East and North Africa made the least progress. Another noteworthy finding is that high-income and Sub-Saharan Africa areas have made the most progress on reforming the laws towards women. Despite these gains, there is still room for improvement. Women are still far from being equal with men and many challenges remain, such as discriminatory laws and social norms remain pervasive, women continue to be underrepresented at all levels of political leadership, 1 in 5 women and girls between the ages of 15 and 49 report experiencing physical or sexual violence by an intimate partner within a 12-month period or underpaid compared to males in part-time occupations or informal labour sector with minimal security and limited rights [@UnitedNations2]. 
+### The WBL index by region and country
+
+The Women, Business, and the Law Index assesses global progress towards gender equality in 190 economies by identifying laws and regulations that limit and encourage women's economic participation [@WBL]. As it can be seen from Figure \@ref(fig:wbl-average), there has been continuous progress being made on the laws that help improve women's legal rights. Over the 5 decades, the global average WBL index has increased substantially, from 45.6 to 76. However, the progress has varied across regions. Europe and Central Asia, OECD High income and Latin America and Caribbean are the three regions than above the global average. Middle East and North Africa made the least progress. Another noteworthy finding is that high-income and Sub-Saharan Africa areas have made the most progress on reforming the laws towards women. Despite these gains, there is still room for improvement. Women are still far from being equal with men and many challenges remain, such as discriminatory laws and social norms remain pervasive, women continue to be under-represented at all levels of political leadership, 1 in 5 women and girls between the ages of 15 and 49 report experiencing physical or sexual violence by an intimate partner within a 12-month period or underpaid compared to males in part-time occupations or informal labour sector with minimal security and limited rights [@UnitedNations2]. 
 
 
 <div class = "center">
@@ -451,6 +459,140 @@ output$wblmap <- renderLeaflet({
   options = list(height = 500)
 )
 ```
+
+### The WBL index and gender equality
+
+As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score 100 for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
+
+
+```{r}
+gap$code <- countrycode(gap$country_iso3, origin = "iso3c", destination = "iso2c")
+
+
+# countries with flag
+flag_data <- gap %>% 
+  # countries of interest
+  filter(country_name %in% c("Iceland", "United Kingdom", "United States","Mauritius",
+                               "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
+                               "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
+                                "Yemen, Rep.", "Bangladesh", "Qatar"),
+         indicator == "Overall Global Gender Gap Index",
+         subindicator_type == "Index") %>% 
+  select(code,
+         country_name,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = country_name) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(report_year == "2021") %>% 
+  select(code,
+         economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(code = tolower(code)) 
+```
+
+```{r wblgender, fig.cap="The WBL index VS Gender Gap index. Nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders."}
+gap %>% 
+  filter(indicator == "Overall Global Gender Gap Index",
+         subindicator_type == "Index") %>% 
+  select(code,
+         country_name,
+         "2021") %>% 
+  rename(gender_gap_index = "2021",
+         economy = country_name) %>% 
+  right_join(wbl_df,
+             by = "economy") %>% 
+  filter(report_year == "2021") %>% 
+  select(code,
+         economy,
+         report_year,
+         region,
+         income_group,
+         wbl_index,
+         gender_gap_index) %>% 
+  filter(!is.na(gender_gap_index)) %>% 
+  mutate(tooltip = glue_data(gap,
+                             "Country : {economy}",
+                             "\nWBL Index: {wbl_index}",
+                             "\nGender Gap Index: {gender_gap_index}")) %>%  
+  {
+    ggplot(., 
+           aes(x = wbl_index,
+             y = gender_gap_index)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              colour = "#36a7e9") +
+  geom_point(aes(color = region,
+                 shape = region),
+             size = 1.5) +
+  geom_point(data = flag_data,
+             aes(color = region),
+             size = 7,
+             show.legend = FALSE) +
+  geom_flag(data = flag_data,
+            aes(country = code)) +
+  geom_label_repel(
+                  aes(label = economy),
+                  data = flag_data,
+                  label.size = NA,
+                  point.padding = 7,
+                  # alpha = 0.5,
+                  fill = "#FFFFFF88",
+                  family = "Body 360info",
+                  fontface = "bold",
+                  colour = "black") +
+      scale_color_npg() +
+      scale_shape_manual(values = c(15:18, 15:17)) +
+      theme_360() +
+      theme(panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 20, b = 0, l = 10)),
+        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = , l = 0)),
+        legend.position = "top",
+        legend.justification = "left",
+        legend.box.margin = margin(-0.5, 0, 0, -3.8, "cm"), # align legend with title and subtitle
+        legend.text = element_text(size = 12),
+        plot.margin = margin(t = 5.5, r = 18, b = 5.5, l = 28)) + #increase plot margin to allow text placed on y axis outside of plot 
+  # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
+  coord_cartesian(xlim = c(20, 100),
+                  ylim = c(0.4, 0.9),
+                  clip = "off") +
+  # annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
+  # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
+  # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
+  annotate_360(x = 22, y = 0.318, label = "**More laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 98, y = 0.318, label = "**Less laws**", size = 4, text_colour = "blue") +
+  annotate_360(x = 9.5, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
+  annotate_360(x = 9.5, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
+  labs(x = "Women, business and the law index (2021)",
+       # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
+       y = "Overall global gender gap index (2021)",
+       color = NULL,
+       shape = NULL,
+       title = "LAWS AND GENDER EQUALITY",
+       subtitle = "NATIONS WTIH FEWER LAWS TARGETING WOMEN TEND TO HAVE BETTER ACCESS TO \nRESOURCES AND OPPORTUNITIES ACROSS GENDERS",
+       caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
+   } %>%
+
+ save_360plot("figures/gender.png") %>%
+
+ save_360plot("figures/gender.svg")
+
+ knitr::include_graphics("figures/gender.png") #include graphic in my report
+
+```
+<br>
+
+
+
+
+
 
 
 <br>
@@ -894,134 +1036,6 @@ wbl_df %>%
 
 ## Gendered laws and women's empowerment
 
-### Laws and gender equality
-
-As it can be observed from Figure \@ref(fig:wblgender) that published by 360info, nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders. Iceland has a perfect score 100 for WBL and a near perfect score for gender gap index and most of the OECD high income countries have less laws against women and they are the leaders in gender equality. Two of the countries from Sub-Saharan Africa also have made incredible progress in narrowing the gender gap by having less gendered laws, they are Namibia and Rwanda. Countries that sit at the lower end of the WBL and Gender indexes are from Middle East and North Africa region, such as Iraq, Yemen Republic and Qatar. Afghanistan is the only country from South Asia that has very low score in both indexes, especially in Gender Gap index.
-
-
-```{r}
-gap$code <- countrycode(gap$country_iso3, origin = "iso3c", destination = "iso2c")
-
-
-# countries with flag
-flag_data <- gap %>% 
-  # countries of interest
-  filter(country_name %in% c("Iceland", "United Kingdom", "United States","Mauritius",
-                               "Serbia", "Nepal", "China", "Namibia", "Rwanda", "Turkey",
-                               "Malaysia", "Vanuata", "Pakistan", "Afghanistan", "Iraq",
-                                "Yemen, Rep.", "Bangladesh", "Qatar"),
-         indicator == "Overall Global Gender Gap Index",
-         subindicator_type == "Index") %>% 
-  select(code,
-         country_name,
-         "2021") %>% 
-  rename(gender_gap_index = "2021",
-         economy = country_name) %>% 
-  right_join(wbl_df,
-             by = "economy") %>% 
-  filter(report_year == "2021") %>% 
-  select(code,
-         economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         gender_gap_index) %>% 
-  filter(!is.na(gender_gap_index)) %>% 
-  mutate(code = tolower(code)) 
-```
-
-```{r wblgender, fig.cap="The WBL index VS Gender Gap index. Nations with fewer laws targeting women tend to also have better access to resources and opportunities across genders."}
-gap %>% 
-  filter(indicator == "Overall Global Gender Gap Index",
-         subindicator_type == "Index") %>% 
-  select(code,
-         country_name,
-         "2021") %>% 
-  rename(gender_gap_index = "2021",
-         economy = country_name) %>% 
-  right_join(wbl_df,
-             by = "economy") %>% 
-  filter(report_year == "2021") %>% 
-  select(code,
-         economy,
-         report_year,
-         region,
-         income_group,
-         wbl_index,
-         gender_gap_index) %>% 
-  filter(!is.na(gender_gap_index)) %>% 
-  mutate(tooltip = glue_data(gap,
-                             "Country : {economy}",
-                             "\nWBL Index: {wbl_index}",
-                             "\nGender Gap Index: {gender_gap_index}")) %>%  
-  {
-    ggplot(., 
-           aes(x = wbl_index,
-             y = gender_gap_index)) +
-  geom_smooth(method = lm,
-              se = FALSE,
-              colour = "#36a7e9") +
-  geom_point(aes(color = region,
-                 shape = region),
-             size = 1.5) +
-  geom_point(data = flag_data,
-             aes(color = region),
-             size = 7,
-             show.legend = FALSE) +
-  geom_flag(data = flag_data,
-            aes(country = code)) +
-  geom_label_repel(
-                  aes(label = economy),
-                  data = flag_data,
-                  label.size = NA,
-                  point.padding = 7,
-                  # alpha = 0.5,
-                  fill = "#FFFFFF88",
-                  family = "Body 360info",
-                  fontface = "bold",
-                  colour = "black") +
-      scale_color_npg() +
-      scale_shape_manual(values = c(15:18, 15:17)) +
-      theme_360() +
-      theme(panel.grid.minor = element_blank(),
-        axis.title.y = element_text(size = 12, face = "plain", margin = margin(t = 0, r = 20, b = 0, l = 10)),
-        axis.title.x = element_text(size = 12, face = "plain", margin = margin(t = 15, r = 0, b = , l = 0)),
-        legend.position = "top",
-        legend.justification = "left",
-        legend.box.margin = margin(-0.5, 0, 0, -3.8, "cm"), # align legend with title and subtitle
-        legend.text = element_text(size = 12),
-        plot.margin = margin(t = 5.5, r = 18, b = 5.5, l = 28)) + #increase plot margin to allow text placed on y axis outside of plot 
-  # This focuses the y-axis on the range of interest, so annotations can be added outside of the plot!
-  coord_cartesian(xlim = c(20, 100),
-                  ylim = c(0.4, 0.9),
-                  clip = "off") +
-  # annotate(geom = "text", x = 25, y = 0.32, label = "More", size = 3) +
-  # annotate(geom = "text", x = 98, y = 0.32, label = "Less", size = 3) +
-  # annotate(geom = "text", x = 20, y = 0.85, label = "More", size = 3) +
-  # annotate(geom = "text", x = 20, y = 0.38, label = "Less", size = 3) +
-  annotate_360(x = 22, y = 0.318, label = "**More laws**", size = 4, text_colour = "blue") +
-  annotate_360(x = 98, y = 0.318, label = "**Less laws**", size = 4, text_colour = "blue") +
-  annotate_360(x = 9.5, y = 0.88, label = "**More<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
-  annotate_360(x = 9.5, y = 0.42, label = "**Less<br>equality**", size = 4, text_colour = "blue", hjust = "right") +
-  labs(x = "Women, business and the law index (2021)",
-       # y = "More \n\n\n\n\n\n Gender equality \n Access to resources \n and opportunities \n\n\n\n\n Less",
-       y = "Overall global gender gap index (2021)",
-       color = NULL,
-       shape = NULL,
-       title = "LAWS AND GENDER EQUALITY",
-       subtitle = "NATIONS WTIH FEWER LAWS TARGETING WOMEN TEND TO HAVE BETTER ACCESS TO \nRESOURCES AND OPPORTUNITIES ACROSS GENDERS",
-       caption = "**CHART**: Mengyun Yang & James Goldie, 360info<br>**DATA**: World Bank") 
-   } %>%
-
- save_360plot("figures/gender.png") %>%
-
- save_360plot("figures/gender.svg")
-
- knitr::include_graphics("figures/gender.png") #include graphic in my report
-
-```
-<br>
 
 Moving on, let's look at gendered laws vary across different regions. The below series of 8 bar charts demonstrate the existence of the laws with regards to women's mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension in different regions.
 
