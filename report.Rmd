@@ -147,13 +147,18 @@ For the past 47 years, International Women's Day has been celebrated worldwide o
 
 
 # Objectives and significance
-This analysis aims to identify the bias in the creation of laws which can disadvantage women - both socially and economically. The objective of the project is divided into three parts: to have a general understanding of the Women, Business and the law index; investigate the total number of law reforms enacted around the world and the trend of the score for individual law between 1971 to 2021; and to analyse the progress of each region on achieving legal quality in 9 different areas. The objective are achieved through:
 
-1. Analysing the trend of the Women, Business and the Law index by region and at a country level between 1971 to 2021 and the association between the Women, Business and the Law index and the gender gap index.
+This analysis aims to identify the progress made on reducing bias in the creation of laws which can disadvantage women - both socially and economically between 1971 to 2021. Therefore, the objective of the project is divided into three parts: to have a general understanding of the Women, Business and the law index; investigate the total number of law reforms enacted around the world to achieve legal equality and the trend of the score for individual law between 1971 to 2021; and to further analyse the progress of each region on achieving legal quality in 9 different areas. The objectives are achieved through:
 
-2. Aggregating the response for each law measured by the WBL index to investigate the total number of law reforms across region and different indicators; analysing the trend of the score for each indicator by region and year.
+1.Part 1: analysing the trend of the Women, Business and the Law index that tracks how laws affect women's economic empowerment by region and at a country level between 1971 to 2021 and investigating the the relationship between the Women, Business and the Law index and the global gender gap index
 
-3. Comparing the percentage of countries in each region that had laws to addressing women's freedom of movement, rights at workplace, pay, marriage, parenthood entrepreneurship, property rights, pension benefits in 1971 and 2021; the proportion of seats held by women in parliament in 1998 and 2021; the timeline of female suffrage in Somalia and Kuwait.
+2. Part 2: Aggregating the binary response (yes / no) for each law measured by the WBL index to investigate the total number of law reforms across region and different indicators between 1971 and 2021; analysing the trend of the score for each indicator by region and year.
+
+3. Part 3: Comparing the percentage of countries in each region that had laws addressing women's freedom of movement, rights at workplace, pay, marriage, parenthood entrepreneurship, property rights, pension benefits in 1971 and 2021 to assess the progress made in each region; the number of countries that still do not have laws enacted in these topic in 2021; assessing women's legal empowerment by analysing the proportion of seats held by women in parliament in 1998 and 2021; analysing two special cases of female suffrage in Somalia and Kuwait.
+
+This study will provide light on how each region and country went about establishing legal equality. The audience will learn that there is still a long way to go to achieve legal equality and strengthen women's economic involvement through this project, and that it will need a collaborative effort from all countries, regions, and individuals. Furthermore, the initiative will provide useful data for future research that will delve deeper into the various gendered legislation around the world.
+
+
 
 
 # Methodology
@@ -1974,5 +1979,7 @@ plot_so / plot_ku
 ```
 
 <br>
+
+# Conclusion
 
 # Reference
