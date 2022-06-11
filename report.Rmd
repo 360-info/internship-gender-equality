@@ -157,7 +157,7 @@ This analysis aims to identify the progress made on reducing bias in the creatio
 
 3. Part 3: Comparing the percentage of countries in each region that had laws addressing women's freedom of movement, rights at workplace, pay, marriage, parenthood entrepreneurship, property rights, pension benefits in 1971 and 2021 to assess the progress made in each region; the number of countries that still do not have laws enacted in these topic in 2021; assessing women's legal empowerment by analysing the proportion of seats held by women in parliament in 1998 and 2021; analysing two special cases of female suffrage in Somalia and Kuwait.
 
-This study will provide light on how each region and country went about establishing legal equality. The audience will learn that there is still a long way to go to achieve legal equality and strengthen women's economic involvement through this project, and that it will need a collaborative effort from all countries, regions, and individuals. Furthermore, the initiative will provide useful data for future research that will delve deeper into the various gendered legislation around the world.
+This study will provide light on how each region and country went about establishing legal equality. There is still a long way to go to achieve legal equality and strengthen women's economic involvement through this project, and that it will need a collaborative effort from all countries, regions, and individuals. Furthermore, the initiative will provide useful data for future research that will delve deeper into the various gendered legislation around the world to help policy makers understand why discriminatory laws exist and to support research on how to improve women's economic inclusion.
 
 <br>
 
@@ -1830,16 +1830,14 @@ seats %>%
         y = `1998`,
         color = "1998",
         text = tooltip1),
-    size = 3,
-    alpha = 0.8
+    size = 3
     ) +
   geom_point(
     aes(x = country_name,
         y = `2021`,
         color = "2021",
         text = tooltip2),
-    size = 3,
-    alpha = 0.8
+    size = 3
   ) +
   coord_flip() +
   scale_color_manual(values = c("#4dbbd5ff", "#f39b7fff"),
@@ -2021,8 +2019,12 @@ plot_so / plot_ku
 
 # Conclusion
 
+The project leverages 4 different data, the WBL index, gender gap index, a gender indicator and women suffrage data to reveal that across eight WBL indicators, different regions, and at the country level, there is a clear picture of the progress made in terms of legislation reforms to attain more gender-equal laws. Although there has been progress, there is still opportunity for development. The association between laws and gender equality is positive. Nations with less regulations aimed at women (more gender equality laws) have better access to resources and opportunities for both men and women. In terms of the number of reforms happened between 1971 and 2021, the majority of reforms were undertaken in the workplace, including pay safeguards and rules that affect working parents, while places such as Sub-Saharan Africa enacted more laws addressing women's rights over time.Finally, a drill-down study of the eight variables, mobility, workplace, wage, marriage, motherhood, entrepreneurship, assets, and pension, reveals that there are still countries with indefensible policies that keep women back in every aspect of their lives. Although women's political participation strengthened over the years, there are still women in some country like Somalia that do not have electoral rights in national election.
 
+It is acknowledged that there are a number of limitations with this study. Our world is driven by data more than ever before, and missing data frequently leads to difficulties. The limitation of the data on discriminatory laws poses a challenge to better understand how gendered laws affect every aspect of a women's life. The WBL index only covers 8 topic, there are gendered laws in other areas such access to education, health and safety that affecting women's rights. Furthermore, most of the data for individual indicator in the WBL data set are categorical data, although the number of observations are large enough, the analysis is most likely low sensitivity, such as yes/no or good/bad. It is also very challenging to do quantitative analysis, only limited arithmetic operations can be performed.
 
+Despite these limitations, the project provides evidence of the progress made towards women's legal rights. Despite advances on legal reform, the judicial system still not fully bringing justice to all women. Women's rights are human rights, women and girls have fewer access to resources and opportunities, are under-represented in decision-making at all levels, and lack economic participation. Legal reform, gender-based protection for women are all effective initiatives that should be scaled up. It will need out joint effort from all countries, regions, and individuals to 
+shape women;s lives.
 <br>
 
 
