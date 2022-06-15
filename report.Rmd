@@ -623,7 +623,7 @@ gap %>%
 
  save_360plot("figures/gender.svg")
 
- knitr::include_graphics("figures/gender.png") #include graphic in my report
+ knitr::include_graphics("figures/gender.png")
 
 ```
 
