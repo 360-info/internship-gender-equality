@@ -50,7 +50,7 @@ library(stringr)
 library(scales)
 library(forcats)
 library(plotly)
-# library(tmap)
+library(tmap)
 library(sf)
 library(leaflet)
 library(shiny)
@@ -163,7 +163,7 @@ This study will provide light on how each region and country went about establis
 
 <br>
 
-# Data and Methodology
+# Data and methodology
 
 ## Data sources
 The data used in this project consists of 4 separate data set. The women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is also an open-sourced data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html). Data cleaning processes involved are light, including, cleaning column names, remove unnecessary text strings. Some of the missing values are meaningful as described in the following paragraphs.
@@ -1979,8 +1979,7 @@ plot_so <- ggplot(suffrage_so,
                color = "black",
                size = 0.2) +
   geom_point(aes(y = position),
-             size = 2,
-             alpha = 0.8) +
+             size = 2) +
     geom_text(aes(x = year,
                 y = -0.15,
                 lable = year),
@@ -2021,8 +2020,7 @@ plot_ku <- ggplot(suffrage_ku,
                color = "black",
                size = 0.2) +
   geom_point(aes(y = position),
-             size = 2,
-             alpha = 0.8) +
+             size = 2) +
     geom_text(aes(x = year,
                 y = -0.15,
                 lable = year),
@@ -2088,6 +2086,7 @@ shape women;s lives.
 @rsvg
 @ggrepel
 @patchwork
+@tmap
 
 
 
