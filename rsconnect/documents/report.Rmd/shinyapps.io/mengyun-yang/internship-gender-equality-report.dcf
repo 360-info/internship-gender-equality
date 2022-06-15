@@ -1,0 +1,14 @@
+name: internship-gender-equality-report
+title: internship-gender-equality-report
+username:
+account: mengyun-yang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6492758
+bundleId: 6009280
+url: https://mengyun-yang.shinyapps.io/internship-gender-equality-report/
+when: 1655279893.76566
+lastSyncTime: 1655279893.76568
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: women.html|references.bib|style.css|data/WBL1971-2022 Dataset.xlsx|data/API_17_DS2_en_csv_v2_4040307/API_17_DS2_en_csv_v2_4040307.csv|data/gender_gap_index.csv|data/V-Dem-CY-Full+Others-v11.1.rds|data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_en_csv_v2_4040307.csv|figures/gender.png|figures/gender.svg

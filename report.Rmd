@@ -144,7 +144,7 @@ Despite the fact that women's economic participation has increased significantly
 <br>
 
 # Background
-For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress. Women's rights are human rights, despite the fact that the Convention on the Elimination of All Forms of Discrimination Against Women was adopted 40 years ago, discrimination is still prevalent in law and practise, women and girls have fewer access to resources and opportunities and are under-represented in decision-making at all levels, and lack economic participation. Over the last decades, 131 countries have added 274 gender-related reforms to their laws and regulations, yet it is projected that more than 2.5 billion women and girls live in countries with at least on discriminatory stature [@UnitedNations]. It is the purpose of this project to examine the journey towards women's legal empowerment.
+For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress. Women's rights are human rights, the Convention on the Elimination of All Forms of Discrimination Against Women was adopted 40 years ago, however, discrimination is still prevalent in law and practise, women and girls have fewer access to resources and opportunities and are under-represented in decision-making at all levels. Over the last decades, 131 countries have added 274 gender-related reforms to their laws and regulations, yet it is projected that more than 2.5 billion women and girls live in countries with at least on discriminatory stature [@UnitedNations]. It is the purpose of this project to examine the journey towards women's legal empowerment.
 
 
 
@@ -167,7 +167,7 @@ This study will provide light on how each region and country went about establis
 # Data and methodology
 
 ## Data sources
-The data used in this project consists of 4 separate data set. The women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is also an open-sourced data that sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html). Data cleaning processes involved are light, including, cleaning column names, remove unnecessary text strings. Some of the missing values are meaningful as described in the following paragraphs.
+Data used in this project consist of 4 separate data set, the women, business and the law data, gender gap index data and gender indicator data were all obtained from open data source The World Bank Data's [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data), [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021) and [Gender Portal](https://data.worldbank.org/topic/gender) respectively. The democracy ratings data is sourced from [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html). Data cleaning processes involved are light, including, cleaning column names, remove unnecessary text strings. Some of the missing values are meaningful as described in the following paragraphs.
 
 
 ### The Women, Business and the Law index (WBL index)
@@ -388,6 +388,8 @@ tooltip = "text"
 ```
 </div>
 
+<br>
+
 The below shiny application shows how the WBL index for 190 countries changes over the years. Regions like Latin America and Caribbean, Sub-Saharan Africa, South Asia and South-east Asia had very low WBL score in the 70s and 80s, but most of the countries in these regions have made improvements over the years, especially countries like Brazil, Chile, Bolivia, Saudi Arabia, South Africa, Namibia, Zimbabwe stole the spotlight with the greatest improvement and Belgium, Denmark, France, Latvia, Luxembourg and Sweden have a perfect score of 100 in 2021.
 
 ```{r wbl-shiny, fig.cap="The WBL index by countries and year"}
@@ -494,6 +496,8 @@ output$wblmap <- renderLeaflet({
   options = list(height = 500)
 )
 ```
+
+<br>
 
 ### The WBL index and gender equality
 
