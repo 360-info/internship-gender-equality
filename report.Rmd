@@ -143,7 +143,9 @@ Despite the fact that women's economic participation has increased significantly
 <br>
 
 # Background
-For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress [@UnitedNations]. 
+For the past 47 years, International Women's Day has been celebrated worldwide on the 8th of March. It honours women's social, economic, cultural, and political achievements. The day also serves as a rallying cry for greater gender equality. Although the past decades have been significant progress for women's and girls' rights. Overall, though, progress has been uneven and slow. The worldwide gender gap will not close for another 100 years at the current rate of progress. Women's rights are human rights, despite the fact that the Convention on the Elimination of All Forms of Discrimination Against Women was adopted 40 years ago, discrimination is still prevalent in law and practise, women and girls have fewer access to resources and opportunities and are under-represented in decision-making at all levels, and lack economic participation. Over the last decades, 131 countries have added 274 gender-related reforms to their laws and regulations, yet it is projected that more than 2.5 billion women and girls live in countries with at least on discriminatory stature [@UnitedNations]. It is the purpose of this project to examine the journey towards women's legal empowerment.
+
+
 
 <br>
 
@@ -211,7 +213,8 @@ There are `r nrow(gender)` observations and `r ncol(gender)` columns in the gend
 skim(gender) %>% 
   kable(caption = "Summary of missing value of gender indicator data frame (scrollable)") %>% 
   kable_styling(full_width = TRUE) %>% 
-  scroll_box(height = "200px")
+  scroll_box(height = "200px") 
+
 ```
 <br>
 
@@ -280,7 +283,7 @@ To investigate the total number of law reforms enacted by region and each indica
 ### Laws and women's empowerment 
 This section compares laws addressing women's freedom of movement, rights at workplace, pay, marriage, parenthood entrepreneurship, property rights, pension benefits, political empowerment and suffrage in 1971 and 2021 at a regional and country level.
 
-The WBL indicator data were utilised to conduct a study of each region's progress in relation to the specific legislation in each indicator. Because each law has a binary response (yes or no), to examine the progress made, the proportion of countries in a region that have a specific law safeguarding women's rights in 1971 and 2021 can be compared to see how things have changed. In order to calculate the proportion of countries in a region between 1971 and 2021, the responses were filtered to "Yes," which means "have laws," and the number of "Yes" was counted by grouping the region, year, and specific law (presented as a question in the data set) to get the total number of countries that have enacted the laws. Finally, the percentage is calculated by dividing the count by the total number of countries in a region. A table of the number of countries that still do not have laws enacted for each indicator in 2021 also provided to give insights on how things can be improved at a country level. The number of countries were calculated by filtering the answer to "No" then count the numbers by each question.
+The WBL indicator data were utilised to conduct a study of each region's progress in relation to the specific legislation in each indicator. Because each law has a binary response (yes or no), to examine the progress made, the proportion of countries in a region that have a specific law safeguarding women's rights in 1971 and 2021 can be compared to see how things have changed. In order to calculate the proportion of countries in a region between 1971 and 2021, the responses were filtered to "Yes," which means "have laws," and the number of "Yes" was counted by grouping the region, year, and specific law (presented as a question in the data set) to get the total number of countries that have enacted the laws. However, the number of countries can not be compared directly as each region has different number of countries. Therefore, the percentage is calculated by dividing the count of the total number of countries in a region. A table of the number of countries that still do not have laws enacted for each indicator in 2021 also provided to give insights on how things can be improved at a country level. The number of countries were calculated by filtering the answer to "No" then count the numbers by each question.
 
 In addition to the 8 indicators provided by the WBL data set, the proportion of seats held by women in national parliament and women's suffrage in Somalia and Kuwait were also analysed. The World Bank's gender indicator data was used to visualise the increase in percentage from 1971 and 2021 in each region. The data were filtered to include the same regions as the World Banks' for coherence. The V-dem data was used to investigate the women suffrage in Somalia and Kuwait. The reason why these two countries were chosen is that they are the only countries that without female suffrage in the 21st century and this was achieved filtering the response to "0" (no suffrage) then arrange the year by descending order by country and extract the first value which is the most national election, as each country has different timeline for their national election. It is hard to compare the women suffrage in each country as the timeline for the national election is different, for example, a country may have their national election every 6 years while another country's national election happens every 4 years.
 A timeline was created to visualise the changes in women suffrage in Somalia and Kuwait. All categorical responses, "0," "2," and "NA," were utilised to demonstrate how women's suffrage has changed over time in each national election.
@@ -386,7 +389,7 @@ tooltip = "text"
 
 The below shiny application shows how the WBL index for 190 countries changes over the years. Regions like Latin America and Caribbean, Sub-Saharan Africa, South Asia and South-east Asia had very low WBL score in the 70s and 80s, but most of the countries in these regions have made improvements over the years, especially countries like Brazil, Chile, Bolivia, Saudi Arabia, South Africa, Namibia, Zimbabwe stole the spotlight with the greatest improvement and Belgium, Denmark, France, Latvia, Luxembourg and Sweden have a perfect score of 100 in 2021.
 
-```{r wbl-shiny, fig.cap="The WBL index by countries and year", eval = FALSE}
+```{r wbl-shiny, fig.cap="The WBL index by countries and year"}
 # faceted choropleth map
 wbl_index_map <- wbl_df %>% 
   filter(report_year < 2022) %>% 
@@ -1138,7 +1141,7 @@ mob_df %>%
        y = "Number of countries (%)",
        fill = "Year",
        caption = "Source: World Bank",
-       title = "Improvement on enacting laws guaranteeing women's freedom of movement \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws guaranteeing women's freedom of movement \nbetween 1971 and 2021")
 ```
 <br>
 
@@ -1155,7 +1158,10 @@ mob_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
 <br>
@@ -1229,7 +1235,7 @@ work_df %>%
        y = "Number of countries (%)",
        fill = "Year",
        caption = "Source: World Bank",
-       title = "Improvement on enacting laws protecting women in the workplace \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws protecting women in the workplace \nbetween 1971 and 2021")
 
 
 ```
@@ -1248,11 +1254,14 @@ work_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
 
-
+<br>
 
 
 ### Laws and employment and pay
@@ -1322,7 +1331,7 @@ pay_df %>%
        y = "Number of countries (%)",
        fill = "Year",
        caption = "Source: World Bank",
-       title = "Improvement on enacting laws for women's employment and pay \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws for women's employment and pay \nbetween 1971 and 2021")
 ```
 
 ```{r paytab}
@@ -1338,10 +1347,13 @@ pay_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
-
+<br>
 
 ### Laws and women's marriage
 
@@ -1408,7 +1420,7 @@ marriage_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Improvement on enacting laws for rotecting women in marriage \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws for rotecting women in marriage \nbetween 1971 and 2021")
 ```
 
 ```{r marriagetab}
@@ -1424,11 +1436,14 @@ marriage_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
 
-
+<br>
 
 
 
@@ -1499,7 +1514,7 @@ parenthood_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Improvement on enacting laws for addressing parenthood \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws for addressing parenthood \nbetween 1971 and 2021")
 ```
 
 
@@ -1517,10 +1532,13 @@ parenthood_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
-
+<br>
 
 ### Laws and women's entrepreneurship 
 
@@ -1587,8 +1605,10 @@ entre_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Improvement on enacting laws addressing women's \nentrepreneurship \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws addressing women's \nentrepreneurship \nbetween 1971 and 2021")
 ```
+
+
 ```{r entretab}
 entre_df %>%
   filter(report_year == 2021,
@@ -1602,7 +1622,10 @@ entre_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
 
 <br>
@@ -1660,7 +1683,7 @@ assets_df %>%
   geom_text(aes(label = round(percentage, 2)), 
             position = position_dodge(width = .9),
             vjust = 1.5,
-            size = 2,
+            size = 0.8,
             colour = "white") +
   facet_wrap(vars(question),
              scales = "free_y",
@@ -1674,8 +1697,10 @@ assets_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Improvement on enacting laws protecting women's \nproperty rights \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws protecting women's property rights \nbetween 1971 and 2021")
 ```
+
+
 ```{r assetstab}
 assets_df %>%
   filter(report_year == 2021,
@@ -1689,7 +1714,10 @@ assets_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 
 ```
 
@@ -1761,7 +1789,7 @@ pension_df %>%
   labs(x = NULL,
        y = "Percentage of countries in a region",
        fill = "Year",
-       title = "Improvement on enacting laws protecting women's pension benefits \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws protecting women's pension benefits \nbetween 1971 and 2021")
 ```
 
 
@@ -1778,8 +1806,14 @@ pension_df %>%
         col.names = c("Question",
                       "Number of countries")) %>% 
   kable_styling(full_width = FALSE,
-                bootstrap_options = c("striped", "hover", "condensed"))
+                bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  footnote(general = "World Bank",
+           general_title = "Source:",
+           footnote_as_chunk = TRUE)
 ```
+
+
+<br>
 
 ### Laws and women's political empowerment 
 
@@ -2007,10 +2041,11 @@ plot_ku <- ggplot(suffrage_ku,
         axis.line.x =element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.position = "bottom"
-) +
+        legend.position = "bottom",
+        plot.caption = element_text(hjust = 0)) +
   labs(color = NULL,
-       title = "Timeline of female suffrage in Kuwait") 
+       title = "Timeline of female suffrage in Kuwait",
+       caption = "Souce: World Bank") 
 
 plot_so / plot_ku
 
