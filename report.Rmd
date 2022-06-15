@@ -189,6 +189,7 @@ tribble(
 
 ```
 
+<br>
 
 ### The gender index 
 Gender equality is critical to the success of economies and communities. Ensuring the full development and effective deployment of half of the world's entire talent pool has a significant impact on global economic growth, competitiveness, and future-readiness. The Index is more concerned with measuring gaps than with assessing levels. Second, rather than gaps in input data, it captures gaps in outcome variables. Third, rather than focusing on women's empowerment, it rates countries based on gender equality. Economic Participation and Opportunity, Educational Attainment, Health and Survival and Political Empowerment are the four core categories (sub-indexes) that the Global Gender Gap Index covers [@gap]. This data set contains `r length(unique(gap$indicator))` indicators under this four core categories for measuring gender gap across `r length(unique(gap$country_name))` countries from 2006 - 2021, see Table \@ref(tab:gender-index) for explanation of the variable used in this analysis.
@@ -205,6 +206,7 @@ tribble(
            footnote_as_chunk = TRUE)
 ```
 
+<br>
 
 ### The gender indicator 
 
@@ -231,6 +233,7 @@ read_csv(here("data/API_17_DS2_en_csv_v2_4040307/Metadata_Indicator_API_17_DS2_e
           footnote_as_chunk = TRUE)
 ```
 
+<br>
 
 ### The democracy ratings 
 This data set contains 483 V-Dam indicator and indices and 59 others indicators from other data sources that measure the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections from year 1789 to 2020 [@vdem]. Only one indicator was used in this analysis for assessing women's suffrage. There are missing values in this indicator which represent the no direct national elections, see Table \@ref(tab:vdem-metadata) for metadata of the variable used and Table \@ref(tab:vdem-missing) for details of the missing values in the variable. As stated in Table \@ref(tab:vdem-metadata), the missing value in a specific year simply means no national election.
@@ -366,7 +369,7 @@ wbl_average %>%
   labs(x = NULL,
        y = "WBL index",
        color = NULL,
-       title = "The Women, Business and the Law score by regions"),
+       title = "The Women, Business and the Law score by region"),
 tooltip = "text"
 
 ) %>% 
@@ -632,7 +635,7 @@ gap %>%
 
 
 
-## Law reforms enacted by regions
+## Law reforms enacted by region
 
 Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asian (see Figure \@ref(fig:reforms)). Furthermore, a drill-down analysis in Figure \@ref(fig:reforms-indi) shows the majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents. Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
 
@@ -1143,10 +1146,10 @@ mob_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Number of countries (%)",
+       y = "Percentage %",
        fill = "Year",
        caption = "Source: World Bank",
-       title = "Percentage of countries have laws guaranteeing women's freedom of movement \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws guaranteeing women's freedom of \nmovement between 1971 and 2021")
 ```
 <br>
 
@@ -1237,7 +1240,7 @@ work_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Number of countries (%)",
+       y = "Percentage %",
        fill = "Year",
        caption = "Source: World Bank",
        title = "Percentage of countries have laws protecting women in the workplace \nbetween 1971 and 2021")
@@ -1333,7 +1336,7 @@ pay_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Number of countries (%)",
+       y = "Percentage %",
        fill = "Year",
        caption = "Source: World Bank",
        title = "Percentage of countries have laws for women's employment and pay \nbetween 1971 and 2021")
@@ -1423,9 +1426,9 @@ marriage_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Percentage %",
        fill = "Year",
-       title = "Percentage of countries have laws for rotecting women in marriage \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws protecting women's marriage \nbetween 1971 and 2021")
 ```
 
 ```{r marriagetab}
@@ -1517,9 +1520,9 @@ parenthood_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Percentage %",
        fill = "Year",
-       title = "Percentage of countries have laws for addressing parenthood \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws addressing parenthood \nbetween 1971 and 2021")
 ```
 
 
@@ -1608,9 +1611,9 @@ entre_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Percentage %",
        fill = "Year",
-       title = "Percentage of countries have laws addressing women's \nentrepreneurship \nbetween 1971 and 2021")
+       title = "Percentage of countries have laws addressing women's entrepreneurship \nbetween 1971 and 2021")
 ```
 
 
@@ -1700,7 +1703,7 @@ assets_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Percentage %",
        fill = "Year",
        title = "Percentage of countries have laws protecting women's property rights \nbetween 1971 and 2021")
 ```
@@ -1792,7 +1795,7 @@ pension_df %>%
     plot.caption = element_text(hjust = 0)
   ) +
   labs(x = NULL,
-       y = "Percentage of countries in a region",
+       y = "Percentage %",
        fill = "Year",
        title = "Percentage of countries have laws protecting women's pension benefits \nbetween 1971 and 2021")
 ```
@@ -1899,6 +1902,8 @@ tooltip = "text"
   
 ```
 </div>
+
+<br>
 
 ```{r}
 # exploring data
