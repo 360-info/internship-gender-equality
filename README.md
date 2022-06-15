@@ -15,7 +15,12 @@ These charts, as well as the analyses that underpin them, are available under a 
 
 Data in these charts comes from:
 
-* Data sources here (with links!)
+* World Bank 
+  * [Women, Business and the Law Data Portal](https://wbl.worldbank.org/en/wbl-data)
+  * [Overall Global Gender Gap Index Portal](https://tcdata360.worldbank.org/indicators/af52ebe9?country=BRA&indicator=27959&viz=line_chart&years=2006,2021)
+  * [Gender Portal](https://data.worldbank.org/topic/gender)
+* [V-Dem (Varieties of Democracy by University of Gothenburg)](https://www.v-dem.net/vdemds.html)
+  
 
 **Please attribute 360info and the data sources when you use and remix these visualisations.**
 
