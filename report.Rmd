@@ -10,7 +10,7 @@ output:
   bookdown::html_document2:
     css: "style.css"
     includes:
-      before_body: women.html #https://www.commonwealthclub.org/events/2020-05-21/empowering-women-climate-solution-we-dont-talk-about
+      before_body: image/women.html #https://www.commonwealthclub.org/events/2020-05-21/empowering-women-climate-solution-we-dont-talk-about
     toc: yes
     toc_depth: 1
     toc_float:
@@ -1073,7 +1073,7 @@ wbl_indicators_avg %>%
 ## Laws and Women's empowerment 
 
 
-Moving on, let's look at gendered laws vary across different regions. The below series of 8 bar charts demonstrate the existence of the laws with regards to women's mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension in different regions.
+Moving on, let's look at gendered laws vary across different regions. The below 8 bar charts and tables demonstrate the existence of the laws with regards to women's mobility, workplace, pay, marriage, parenthood, entrepreneurship, assets and pension in different regions.
 
 
 ### Laws and women's mobility 
@@ -1687,9 +1687,9 @@ assets_df %>%
   geom_col(position = "dodge") +
   geom_text(aes(label = round(percentage, 2)), 
             position = position_dodge(width = .9),
-            vjust = 1.5,
-            size = 0.8,
-            colour = "white") +
+            vjust = -0.05,
+            size = 1.5,
+            colour = "black") +
   facet_wrap(vars(question),
              scales = "free_y",
              labeller = label_wrap_gen(width = 28)) +
