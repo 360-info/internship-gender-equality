@@ -5,6 +5,7 @@ author: |
   | Author: Mengyun Yang 
   | Supervisor: James Goldie at 360info
 date: "16/12/2021"
+output_dir: "docs"
 output: 
   bookdown::html_document2:
     css: "style.css"
