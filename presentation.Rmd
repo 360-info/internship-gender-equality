@@ -20,10 +20,6 @@ options(htmltools.dir.version = FALSE,
         digits = 4,
         scipen=999)
 knitr::opts_chunk$set(
-  # fig.width=9, 
-  # fig.height=3.5, 
-  # fig.retina=3,
-  out.width = "100%",
   cache = FALSE,
   echo = FALSE,
   message = FALSE, 
@@ -56,7 +52,7 @@ background-position: right
 
 .title {
   font-family: 'Josefin Sans', sans-serif;
-  font-size:60px;
+  font-size:50px;
   line-height: 1.3;
   padding: 15px 0;
   font-weight: 800;
@@ -64,12 +60,22 @@ background-position: right
   color: #1b5869
 }
 
+
+
 .title2 {
   font-family: 'Josefin Sans', sans-serif;
   font-size:100px;
   font-weight: 800;
   color: #fcd7cb
 }
+
+
+.title3 {
+  font-size:20px;
+  color: #1b5869;
+  font-weight: bold
+}
+
 
 .bottom {
   font-family: 'Josefin Sans';
@@ -85,6 +91,19 @@ color: #f8a79b;
 font-weight:bold
 }
 
+.text-blue{
+color: #36a7e9;
+font-weight: bold;
+font-size: 50px;
+font-family: "Roboto", "Helvetica Neue", Arial, sans-serif
+}
+
+
+<!-- .underline { -->
+<!--   text-decoration: underline; -->
+<!--   text-decoration-color: #fcd7cb; -->
+<!-- } -->
+
 a, a > code {
 color: #f8a79b;
 font-weight:bold
@@ -93,7 +112,7 @@ font-weight:bold
 .box-peach {
   width: 100%;
   border-radius: 25px;
-  padding: 1px 1px 1px 1px;
+  padding: 5px 10px 5px 10px;
   margin: 0;
   background-color: #fcd7cb;
 }
@@ -117,6 +136,11 @@ ul {
 .footnote {
   font-size: 10px;
   bottom: 2em;
+}
+
+.pull-right {
+    float: right;
+    width: 50%;
 }
 ```
 
@@ -229,11 +253,15 @@ vdem <- readRDS(here("data/V-Dem-CY-Full+Others-v11.1.rds"))
 
 
 
-.title[The Journey <br>towards Women's <br><span style="background-color: #fcd7cb">Legal</span> <br> <span style="background-color: #fcd7cb">Empowerment</span>]
+.title[
+The Journey <br>towards Women's <br><span style="background-color: #fcd7cb">Legal</span> <br> <span style="background-color: #fcd7cb">Empowerment</span>
+]
 
 
 .bottom[
-Presented by: Mengyun Yang
+Presented by: Mengyun Yang<br>
+Host company: 360info<br>
+Supervisor: James Goldie
 ]
 
 ???
@@ -246,30 +274,29 @@ class: animated, rotateInDownLeft
 
 # Agenda
 
-#### Introduction
+.box-peach[.title3[Introduction]]
 
-.box-peach[
 - Background
 - Data sources
-]
 
-#### Discussion
 
-.box-peach[
-- xxxxxx
-- xxxxxx
-- xxxxxx
+.box-peach[.title3[Discussion]]
 
-]
+- Overview of the Women, Business and the Law index
+- Law reforms enacted by region
+- Women's political empowerment
 
-#### Conclusion
 
-.box-peach[
-- xxxxxxxx
-- xxxxxx
-- xxxxxx
-]
+.box-peach[.title3[Conclusion]] <br><br>
+.box-peach[.title3[Questions]]
 
+
+---
+
+class: inverse, middle, center, animated, fadeIn
+layout: false
+
+.title2[Introduction]
 
 
 
@@ -321,7 +348,7 @@ layout: false
 
 class: animated, rotateInDownLeft
 
-## Overview of The Women, Business and the Law index
+# Overview of The Women, Business and the Law index
 
 
 .footnote[Source: World Bank]
@@ -416,7 +443,6 @@ tooltip = "text",
 ]
   ]
 
-
   .panel[.panel-name[Laws and gender equality]
   
   .pull-left[
@@ -446,21 +472,20 @@ knitr::include_graphics("figures/gender.png")
 ---
 class: animated, rotateInDownLeft
 
-## Law reforms enacted by region
+# Law reforms enacted by region
 
 .footnote[Source: World Bank]
 
-.panelset[
-
-  .panel[.panel-name[Total reforms recorded between 1971 and 2021]
-
 .pull-left[
+💡 Reforms varies across different regions and indicators.
+
 💡 Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most.
 
-💡 Only 40 reforms were made in South Asia.
+💡 Majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents.
 ]
 
 .pull-right[
+
 ```{r}
 ## calculate total reforms for each indicator by region
 # mobility reforms
@@ -621,72 +646,9 @@ wbl_pension2 <- wbl_pension1 %>%
 
 ```
 
-```{r, fig.width=10, fig.height = 8}
-# join all indicators' reforms count and plot it
-wbl_mob2_plot <- wbl_mob2 %>% 
-  left_join(wbl_work2, 
-            by = "region") %>% 
-  left_join(wbl_pay2,
-            by = "region") %>% 
-  left_join(wbl_marriage2,
-            by = "region") %>% 
-  left_join(wbl_parenth2,
-            by = "region") %>% 
-  left_join(wbl_entrep2,
-            by = "region") %>% 
-  left_join(wbl_assets2,
-            by = "region") %>% 
-  left_join(wbl_pension2,
-            by = "region") %>% 
-  pivot_longer(2:9,
-               names_to = "indicator",
-               values_to = "count"
-               ) %>%
-  group_by(region) %>% 
-  summarise(total_reforms = sum(count, na.rm = TRUE)) %>% 
-  mutate(region = fct_reorder(region, total_reforms))
 
 
-wbl_mob2_plot %>% 
-  ggplot() +
-  geom_col(aes(x = region,
-               y = total_reforms),
-           fill = "#f39b7fff") +
-  geom_text(aes(x = region,
-               y = total_reforms,
-               label = total_reforms,
-                fill = NULL,
-                hjust = 1.5),
-            size = 3,
-            colour = "white") +
-  coord_flip() +
-  # scale_fill_brewer(palette = "Paired") +
-  theme(plot.caption = element_text(hjust = 0)) +
-  labs(x = NULL,
-       y = "Number of reforms",
-       fill = NULL)
-  
-  
-  
-```
-
-]
-  ]
-
-
-  .panel[.panel-name[Total reforms by indicators]
-  
-  .pull-left[
-💡 Reforms varies across different regions and indicators.
-
-💡 Majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents.
-
-💡 Sub-Saharan had the most reforms in most of the areas, except for parenthood and pay.
-]
-
-.pull-right[
-
-```{r, fig.width=10, fig.height = 8}
+```{r, dpi=300, fig.width=10, fig.height = 8}
 wbl_mob2 %>% 
   left_join(wbl_work2,
             by = "region") %>% 
@@ -735,75 +697,311 @@ wbl_mob2 %>%
         plot.caption = element_text(hjust = 0),
         plot.title = element_text(size = 16)) +
   labs(x = NULL,
-       y = "Number of reforms")
+       y = "Number of reforms",
+       title = "Reforms across different regions and indicators")
+
 ```
  ] 
   
 
-  ]
-
-]
-
-
-
-
-
-
-
-
-
-
-
 
 ---
-class: animated, bounceInDown
 
-# 📌 Conclusion
+class: animated, rotateInDownLeft
 
-- xxxxxx
-
-- xxxxxxxx
-
-- xxxxxxx
+# Women's political empowerment 
 
 
----
-class: animated, fadeIn
+.footnote[Source: World Bank]
 
-<center><img src="https://retailpharmacymagazine.com.au/wp-content/uploads/2020/05/Rb-health-thanks-pharmacist-retail-pharmacy-696x392.jpg" height="300px" /></center>
+.panelset[
 
+  .panel[.panel-name[Women in national parliaments]
 
 .pull-left[
-#### Slides are created using the following R packages:
+💡 Latin America and Caribbean had the largest increase between 1971 and 2021.
 
-[xaringan](https://github.com/yihui/xaringan)<br>
-[gadenbuie/xaringanthemer](https://github.com/gadenbuie/xaringanthemer)<br>
-[xaringanExtra](https://github.com/gadenbuie/xaringanExtra/)<br>
-[tidyverse](https://www.tidyverse.org/)<br>
-[plotly](https://www.rdocumentation.org/packages/plotly/versions/4.5.2)<br>
-[hrbrthemes](http://github.com/hrbrmstr/hrbrthemes)<br>
-[sf](https://www.rdocumentation.org/packages/sf/versions/0.1-1)<br>
-[scales](https://CRAN.R-project.org/package=scales)<br>
-[leaflet](https://CRAN.R-project.org/package=leaflet)
+💡 Only a 4.76% increase in East Asia and Pacific over the years.
+
+💡 Although Middle East and and North Africa has the lowest percentage in 2021, there was a 13.53% increase since 1971.
 
 ]
 
 .pull-right[
+```{r}
+seats <- gender %>% 
+  filter(indicator_name == "Proportion of seats held by women in national parliaments (%)",
+         country_name %in% c("Sub-Saharan Africa (IDA & IBRD countries)",
+                             "East Asia & Pacific (IDA & IBRD countries)",
+                             "Europe & Central Asia (IDA & IBRD countries)",
+                             "Latin America & the Caribbean (IDA & IBRD countries)",
+                             "Middle East & North Africa (IDA & IBRD countries)",
+                             "South Asia (IDA & IBRD)")) %>% 
+  select(country_name, "1998", "2021") %>% 
+  mutate(`1998` = round(`1998`, 2),
+         `2021` = round(`2021`, 2),
+         country_name = str_remove(country_name, "\\(IDA & IBRD countries\\)"),
+         country_name = str_remove(country_name, "\\(IDA & IBRD\\)"))
 
-#### Data sources: 
 
-[Victorian COVID-19 data](https://www.coronavirus.vic.gov.au/victorian-coronavirus-covid-19-data) <br> 
-[Local Government Area Boundaries (Road) (polygon) - Vicmap Admin](https://datashare.maps.vic.gov.au/search?q=bc822a9c-3766-57ac-a034-bcad3fb66d86)<br>
-[Australian COVID-19 data](https://github.com/M3IT/COVID-19_Data) <br>
-[Victoria unknown cases data](https://www.covid19data.com.au/)<br>
-[Australia COVID-19 data - GitHub](https://github.com/M3IT/COVID-19_Data)<br>
-[Weekly COVID-19 vaccine data](https://www.coronavirus.vic.gov.au/weekly-covid-19-vaccine-data)
+seats$tooltip1 <-
+  glue_data(seats,
+            "\nPercentage: {paste0(seats$`1998`, '%', sep = '')}")
+
+seats$tooltip2 <-
+  glue_data(seats,
+            "\nPercentage: {paste0(seats$`2021`, '%', sep = '')}")
+```
+
+```{r}
+ggplotly(
+seats %>% 
+  ggplot() +
+  geom_segment(
+    aes(x = country_name, 
+        xend = country_name, 
+        y = `1998`, 
+        yend = `2021`), 
+    color="grey"
+    ) +
+  labs(x = NULL,
+       y = NULL) +
+  geom_point(
+    aes(x = country_name, 
+        y = `1998`,
+        color = "1998",
+        text = tooltip1),
+    size = 3
+    ) +
+  geom_point(
+    aes(x = country_name,
+        y = `2021`,
+        color = "2021",
+        text = tooltip2),
+    size = 3
+  ) +
+  coord_flip() +
+  scale_color_manual(values = c("#4dbbd5ff", "#f39b7fff"),
+                     name = "Year") +
+  theme(axis.text.y = element_text(size = 6)) +
+  labs(title = "Proportion of seats held by women in \nnational parliaments (%)"),
+tooltip = "text",
+         width = 550,
+         height = 430
+) %>% 
+  config(displayModeBar = FALSE,
+         displaylogo = FALSE) %>% 
+    layout(legend = list(orientation = "h")) 
+```
 
 ]
+  ]
+
+  .panel[.panel-name[Women's suffrage]
+  
+ .pull-left[
+💡 Women in Somalia and Kuwait were still have no rights to vote in the 21st century.
+
+💡 Women in Somalia used to be able to vote back in the 80s, but are denied the right to vote in the most recent national election in 2017.
+
+💡 Women in Kuwait are granted the rights to vote in national elections since 2006.
+
+] 
+
+
+.pull-right[
+```{r}
+
+# Somalia
+suffrage_so <- vdem %>% 
+  select(country_name,
+         year,
+         v2elfemrst) %>% 
+  filter(year %in% c(1971:2020),
+         country_name == "Somalia") %>% 
+  mutate(
+    v2elfemrst = case_when(
+      v2elfemrst == 0 ~"No suffrage", 
+      v2elfemrst == 2 ~ "Female suffrage",
+      is.na(v2elfemrst) ~ "No national elections"),
+    position = case_when(
+      v2elfemrst == "No national elections" ~ 0,
+      v2elfemrst == "No suffrage" ~ -1,
+      v2elfemrst == "Female suffrage" ~ 1
+    ),
+    direction = case_when(
+      position == -1 ~ -1,
+      position == 1 ~ 1
+    )
+  ) 
+
+
+# Kuwait
+suffrage_ku <- vdem %>% 
+  select(country_name,
+         year,
+         v2elfemrst) %>% 
+  filter(year %in% c(1971:2020),
+         country_name == "Kuwait") %>% 
+  mutate(
+    v2elfemrst = case_when(
+      v2elfemrst == 0 ~"No suffrage", 
+      v2elfemrst == 2 ~ "Female suffrage",
+      is.na(v2elfemrst) ~ "No national elections"),
+    position = case_when(
+      v2elfemrst == "No national elections" ~ 0,
+      v2elfemrst == "No suffrage" ~ -1,
+      v2elfemrst == "Female suffrage" ~ 1
+    ),
+    direction = case_when(
+      position == -1 ~ -1,
+      position == 1 ~ 1
+    )
+  ) 
+```
+
+```{r}
+# Somalia plot
+plot_so <- ggplot(suffrage_so,
+       aes(x = year,
+           y = position, 
+           col = v2elfemrst, 
+           label = year)) +
+  scale_color_npg() +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3) +
+  geom_segment(aes(y = position,
+                   yend = 0,
+                   xend = year),
+               color = "black",
+               size = 0.2) +
+  geom_point(aes(y = position),
+             size = 2) +
+    geom_text(aes(x = year,
+                y = -0.15,
+                lable = year),
+            size = 3,
+            vjust = 0.8,
+            hjust = 0.9,
+            color = "black",
+            angle = 90) +
+  theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x =element_blank(),
+        axis.ticks.x =element_blank(),
+        axis.line.x =element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none"
+) +
+  labs(color = NULL,
+       title = "Timeline of female suffrage in Somalia") 
+
+
+# Kuwait plot
+plot_ku <- ggplot(suffrage_ku,
+       aes(x = year,
+           y = position, 
+           col = v2elfemrst, 
+           label = year)) +
+  scale_color_npg() +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3) +
+  geom_segment(aes(y = position,
+                   yend = 0,
+                   xend = year),
+               color = "black",
+               size = 0.2) +
+  geom_point(aes(y = position),
+             size = 2) +
+    geom_text(aes(x = year,
+                y = -0.15,
+                lable = year),
+            size = 3,
+            vjust = 0.8,
+            hjust = 0.9,
+            color = "black",
+            angle = 90) +
+  theme(axis.line.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x =element_blank(),
+        axis.ticks.x =element_blank(),
+        axis.line.x =element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        plot.caption = element_text(hjust = 0)) +
+  labs(color = NULL,
+       title = "Timeline of female suffrage in Kuwait") 
+
+#plot_so/plot_ku
+
+```
+
+```{r, dpi=300, fig.height=5}
+plot_so/plot_ku
+```
+
+]
+  ]
+
+ ]
 
 
 ---
-class: middle, animated, rotateInDownLeft
 
-<center><img src="https://memegenerator.net/img/instances/80187761.jpg" height="500px" /></center>
+class: inverse, middle, center, animated, fadeIn
+layout: false
 
+.title2[Conclusion]
+
+
+---
+
+# Conclusion
+
+- Limitation of the data.
+
+- Clear evidence of the progress made towards women's legal rights.
+
+- The judicial system still not fully bringing justice to all women.
+
+- Step up our joint effort to shape women's lives.
+
+--
+
+# Special thanks to my host company
+
+--
+
+.animated.bounceIn[
+<center>
+.text-blue[360info]
+<br><br>
+<img src="image/360info_logo.png"/>
+</center>
+]
+
+
+
+
+---
+
+class: inverse, middle, center, animated, fadeIn
+layout: false
+
+.title2[Any questions?]
+
+---
+class: inverse, middle, center, animated, fadeIn
+layout: false
+
+.title2[Thank you!]
