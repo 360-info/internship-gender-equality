@@ -637,7 +637,7 @@ gap %>%
 
 ## Law reforms enacted by region
 
-Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asian (see Figure \@ref(fig:reforms)). Furthermore, a drill-down analysis in Figure \@ref(fig:reforms-indi) shows the majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents. Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
+Sub-Saharan Africa, OECD High Income and Latin America and Caribbean are the top three regions that reforms the most between 1971 to 2021, with 215 reforms made in Sub-Saharan Africa, 206 reforms made in OECD High Income countries, and 180 reforms made in Latin America and Caribbean. However, only 40 reforms were made in South Asia (see Figure \@ref(fig:reforms)). Furthermore, a drill-down analysis in Figure \@ref(fig:reforms-indi) shows the majority of law reforms were made in the areas of workplace, pay protections and regulations affecting working parents. Sub-Saharan had the most reforms for gender equality in most of the areas, except for parenthood and pay where OECD High Income countries had the most law reforms.
 
 <br>
 ```{r}
@@ -852,7 +852,7 @@ wbl_mob2_plot %>%
 ```
 <br>
 
-```{r reforms-indi, fig.width=12, fig.cap="Total reforms enacted in the top 3 countries by indicators" }
+```{r reforms-indi, fig.width=12, fig.cap="Total reforms enacted by indicators" }
 wbl_mob2 %>% 
   left_join(wbl_work2,
             by = "region") %>% 
