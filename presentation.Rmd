@@ -42,8 +42,8 @@ style_duo_accent(
 ```
 
 background-image: url("image/collage.png")
-background-size: background
-background-position: right
+background-size: contain
+
 
 
 ```{css}
@@ -118,6 +118,7 @@ font-weight:bold
 }
 
 h1 {
+  font-size: 40px;
   color: #1b5869;
 }
 
@@ -125,16 +126,16 @@ h4 {
   color: #1b5869;
 }
 
-ul {
-  margin: 20px;
-}
+<!-- ul { -->
+<!--   margin: 20px; -->
+<!-- } -->
 
 .remark-slide-number {
   display: none;
 }
 
 .footnote {
-  font-size: 10px;
+  font-size: 8px;
   bottom: 2em;
 }
 
@@ -270,7 +271,7 @@ Image credit: [FineActs](https://fineacts.co/theammo/womens-rights/empowerment)
 
 
 ---
-class: animated, rotateInDownLeft
+class: animated, fadeIn
 
 # Agenda
 
@@ -283,7 +284,7 @@ class: animated, rotateInDownLeft
 
 .box-peach[.title3[Discussion]]
 
-- Overview of the Women, Business and the Law index
+- Overview of the Women, Business and the Law index (WBL index)
 
 - Law reforms enacted by region
 
@@ -292,7 +293,7 @@ class: animated, rotateInDownLeft
 
 .box-peach[.title3[Conclusion]] <br><br>
 
-.box-peach[.title3[Questions]]
+.box-peach[.title3[Q & A]]
 
 
 ---
@@ -305,7 +306,7 @@ layout: false
 
 
 ---
-class: animated, rotateInDownLeft
+class: animated, fadeIn
 
 # Introduction
 
@@ -314,15 +315,13 @@ class: animated, rotateInDownLeft
   .panel[.panel-name[Background]
 - Progress on women's rights has been .text-pink[uneven] and .text-pink[slow].
 
-- Worldwide gender gap will not close for another 100 years.
-
 - Women have fewer access to resources and opportunities and are under-represented in decision-making at all levels.
+
+- Worldwide gender gap will not close for another 100 years.
 
 - Over the last decades, .text-pink[131] countries have added .text-pink[274] gender-related reforms to their laws and regulations.
 
-- More than .text-pink[2.5 billion] women and girls are still live in countries with at least on discriminatory stature.
-
-- This project uses descriptive analysis to identify the progress made on reducing bias in the creation of laws which can disadvantage women between 1971 to 2021.
+- More than .text-pink[2.5 billion] women and girls are still live in countries with at least one discriminatory law.
 
   ]
 
@@ -350,12 +349,12 @@ layout: false
 
 ---
 
-class: animated, rotateInDownLeft
+class: animated, fadeIn
 
 # Overview of The WBL index
 
 
-.footnote[Source: World Bank]
+.footnote[Source: World Bank<br>1. WBL index assess the economic empowerment of women. It is based on the countries' formal laws and regulations that have a bearing on women's economic participation. The higher the scores, the less gendered laws in a country.]
 
 .panelset[
 
@@ -364,7 +363,7 @@ class: animated, rotateInDownLeft
 .pull-left[
 💡 Overall, there has been continuous progress being made on the laws that help improve women's legal rights.
 
-💡 Over the 5 decades, the global average WBL index has increased substantially, from 45.6 to 76.
+<p>💡 Over the 5 decades, the global average WBL index<sup>1</sup> has increased from 45.6 to 76.</p>
 
 💡 However, the progress has varied across regions.
 
@@ -476,7 +475,7 @@ knitr::include_graphics("figures/gender.png")
 
 
 ---
-class: animated, rotateInDownLeft
+class: animated, fadeIn
 
 # Law reforms enacted by region
 
@@ -703,7 +702,7 @@ wbl_mob2 %>%
         plot.caption = element_text(hjust = 0),
         plot.title = element_text(size = 16)) +
   labs(x = NULL,
-       y = "Number of reforms",
+       y = "Number of reforms (1971 - 2021)",
        title = "Reforms across different regions and indicators")
 
 ```
@@ -713,12 +712,12 @@ wbl_mob2 %>%
 
 ---
 
-class: animated, rotateInDownLeft
+class: animated, fadeIn
 
 # Women's political empowerment 
 
 
-.footnote[Source: World Bank]
+.footnote[Source: World Bank & V-Dem]
 
 .panelset[
 
@@ -729,7 +728,7 @@ class: animated, rotateInDownLeft
 
 💡 Only a 4.76% increase in East Asia and Pacific over the years.
 
-💡 Although Middle East and and North Africa has the lowest percentage in 2021, there was a 13.53% increase since 1971.
+💡 Although Middle East and and North Africa have the lowest percentage in 2021, there was a 13.53% increase since 1971.
 
 ]
 
@@ -808,9 +807,9 @@ tooltip = "text",
  .pull-left[
 💡 Women in Somalia and Kuwait were still have no rights to vote in the 21st century.
 
-💡 Women in Somalia used to be able to vote back in the 80s, but are denied the right to vote in the most recent national election in 2017.
+💡 Women in Somalia used to be able to vote back in the 80s, but were denied the right to vote in the most recent national election in 2017.
 
-💡 Women in Kuwait are granted the rights to vote in national elections since 2006.
+💡 Women in Kuwait were granted the rights to vote in national elections in 2006.
 
 ] 
 
