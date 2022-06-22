@@ -277,17 +277,21 @@ class: animated, rotateInDownLeft
 .box-peach[.title3[Introduction]]
 
 - Background
-- Data sources
 
+- Data sources
+<br>
 
 .box-peach[.title3[Discussion]]
 
 - Overview of the Women, Business and the Law index
-- Law reforms enacted by region
-- Women's political empowerment
 
+- Law reforms enacted by region
+
+- Women's political empowerment
+<br>
 
 .box-peach[.title3[Conclusion]] <br><br>
+
 .box-peach[.title3[Questions]]
 
 
@@ -348,7 +352,7 @@ layout: false
 
 class: animated, rotateInDownLeft
 
-# Overview of The Women, Business and the Law index
+# Overview of The WBL index
 
 
 .footnote[Source: World Bank]
@@ -363,6 +367,8 @@ class: animated, rotateInDownLeft
 💡 Over the 5 decades, the global average WBL index has increased substantially, from 45.6 to 76.
 
 💡 However, the progress has varied across regions.
+
+💡 See changes over time across countries in Shiny app.
 ]
 
 .pull-right[
