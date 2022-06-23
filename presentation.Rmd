@@ -763,11 +763,11 @@ class: animated, fadeIn
   .panel[.panel-name[Women in national parliaments]
 
 .pull-left[
-💡 Latin America and Caribbean had the largest increase between 1971 and 2021.
+💡 Latin America and Caribbean had the largest increase of 18.62% between 1998 and 2021.
 
 💡 Only a 4.76% increase in East Asia and Pacific over the years.
 
-💡 Although Middle East and North Africa had the lowest percentage in 2021, there was a 13.53% increase since 1971.
+💡 Although Middle East and North Africa had the lowest percentage in 2021, there was a 13.53% increase since 1998.
 
 ]
 
