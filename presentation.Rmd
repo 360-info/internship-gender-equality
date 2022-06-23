@@ -521,7 +521,7 @@ class: animated, fadeIn
 .footnote[Source: World Bank]
 
 .pull-left[
-💡 Reforms varies across different regions and indicators.
+💡 Reforms vary across different regions and indicators.
 
 💡 Sub-Saharan Africa, OECD High-income countries and Latin America and Caribbean reformed the most.
 
@@ -767,7 +767,7 @@ class: animated, fadeIn
 
 💡 Only a 4.76% increase in East Asia and Pacific over the years.
 
-💡 Although Middle East and and North Africa have the lowest percentage in 2021, there was a 13.53% increase since 1971.
+💡 Although Middle East and North Africa had the lowest percentage in 2021, there was a 13.53% increase since 1971.
 
 ]
 
@@ -844,12 +844,11 @@ tooltip = "text",
   .panel[.panel-name[Women's suffrage]
   
  .pull-left[
-💡 Women in Somalia and Kuwait were still have no rights to vote in the 21st century.
+💡 Women in Somalia and Kuwait still had no right to vote in the 21st century.
 
-💡 Women in Somalia used to be able to vote back in the 80s, but were denied the right to vote in the most recent national election in 2017.
+💡 Women in Somalia used to be able to vote back in the 80s but were denied the right to vote in the most recent national election in 2017.
 
-💡 Women in Kuwait were granted the rights to vote in national elections in 2006.
-
+💡 Women in Kuwait were granted the right to vote in 2006.
 ] 
 
 
