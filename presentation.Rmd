@@ -396,7 +396,7 @@ class: animated, fadeIn
 
 .panelset[
 
-  .panel[.panel-name[The trend of WBL index]
+  .panel[.panel-name[The WBL index trends]
 
 .pull-left[
 💡 Overall, there has been continuous progress being made on the laws that help improve women's legal rights.
@@ -472,7 +472,8 @@ wbl_average %>%
   theme(legend.text = element_text(size = 6)) +
   labs(x = NULL,
        y = "WBL index",
-       color = NULL),
+       color = NULL,
+       title = "Trends in the WBL index by region, 1971 - 2021"),
 tooltip = "text",
          width = 550,
          height = 430
@@ -1017,7 +1018,7 @@ layout: false
 
 - The judicial system still not fully bringing justice to all women.
 
-- Step up our joint effort to shape women's lives.
+- We need to step up our joint effort to shape women's lives.
 
 --
 
